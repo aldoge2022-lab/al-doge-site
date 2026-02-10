@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>AL DOGE – Pizzeria a Farla di Majano | Forno a legna</title>
-<meta name="description" content="AL DOGE – Pizzeria a Farla di Majano (UD). Pizza cotta nel forno a legna. Chiama 0432 1840683.">
+<meta name="description" content="AL DOGE – Dove la pizza prende vita nel forno a legna. Chiama 0432 1840683.">
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
@@ -42,7 +42,7 @@ body{
   content:"";
   position:absolute;
   inset:0;
-  background:linear-gradient(to bottom,rgba(0,0,0,.35),rgba(0,0,0,.85));
+  background:linear-gradient(to bottom,rgba(0,0,0,.45),rgba(0,0,0,.85));
 }
 
 .hero-content{
@@ -93,7 +93,7 @@ section{
   font-family:'Playfair Display',serif;
   font-size:2.4rem;
   color:var(--accent);
-  margin-bottom:60px;
+  margin-bottom:50px;
 }
 
 /* CARDS */
@@ -134,6 +134,16 @@ section{
   font-weight:600;
 }
 
+/* AI */
+textarea{
+  width:100%;
+  min-height:90px;
+  border-radius:14px;
+  padding:14px;
+  border:none;
+  font-family:Inter;
+}
+
 /* GALLERY */
 .gallery{
   display:grid;
@@ -149,11 +159,6 @@ section{
 /* CONTATTI */
 .contact{
   text-align:center;
-}
-
-.contact p{
-  margin:10px 0;
-  font-size:1.1rem;
 }
 
 /* FOOTER */
@@ -174,9 +179,7 @@ footer{
     <video class="logo-animato" src="logo-animato.mp4" autoplay muted loop playsinline></video>
 
     <h1>AL DOGE</h1>
-
     <p>Dove la pizza prende vita,<br>nel forno a legna</p>
-
     <a class="btn" href="tel:+3904321840683">Chiama per ordinare</a>
   </div>
 </header>
@@ -201,12 +204,29 @@ footer{
   </div>
 </section>
 
+<!-- AI CONSIGLI INTELLIGENTE -->
+<section>
+  <h2 class="section-title">Non sai cosa scegliere?</h2>
+
+  <div class="card" style="max-width:700px;margin:0 auto;text-align:center">
+    <p style="color:var(--muted);margin-bottom:20px">
+      Dimmi come ti senti oggi e ti consiglio io cosa mangiare 🍕
+    </p>
+
+    <textarea id="aiInput" placeholder="Esempio: ho fame ma non voglio qualcosa di pesante"></textarea>
+    <br><br>
+    <button class="btn" onclick="chiediConsiglio()">Consigliami</button>
+
+    <div id="aiRisposta" style="margin-top:30px"></div>
+  </div>
+</section>
+
 <section>
   <h2 class="section-title">AL DOGE in foto</h2>
   <div class="gallery">
-    <img src="dehors-serale-luci-al-doge-majano.jpg" alt="">
-    <img src="forno-a-legna-pizze-al-doge-majano.jpg" alt="">
-    <img src="tagliere-salumi-misti-al-doge-farla-majano.jpg" alt="">
+    <img src="dehors-serale-luci-al-doge-majano.jpg">
+    <img src="forno-a-legna-pizze-al-doge-majano.jpg">
+    <img src="tagliere-salumi-misti-al-doge-farla-majano.jpg">
   </div>
 </section>
 
@@ -219,6 +239,39 @@ footer{
 <footer>
   © 2026 AL DOGE Pizzeria – Forno a legna
 </footer>
+
+<script>
+async function chiediConsiglio(){
+  const input = document.getElementById("aiInput").value;
+  const risposta = document.getElementById("aiRisposta");
+
+  if(!input){
+    risposta.innerHTML = "<p>Scrivi qualcosa 😉</p>";
+    return;
+  }
+
+  risposta.innerHTML = "<p>Sto pensando… 🍕</p>";
+
+  try{
+    const res = await fetch("/.netlify/functions/ai-consigli",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({ richiesta: input })
+    });
+
+    const data = await res.json();
+
+    risposta.innerHTML = `
+      <div style="background:#151311;padding:20px;border-radius:14px">
+        <strong>${data.nome}</strong>
+        <p style="margin-top:10px">${data.motivo}</p>
+      </div>
+    `;
+  }catch(e){
+    risposta.innerHTML = "<p>Errore, riprova più tardi.</p>";
+  }
+}
+</script>
 
 </body>
 </html>
