@@ -1,48 +1,164 @@
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <title>Pizzeria AL DOGE – Majano (UD)</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <meta name="description" content="Pizzeria AL DOGE a Majano (Udine). Pizza da asporto e consumo sul posto. Tradizione e qualità.">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AL DOGE – Pizzeria a Farla di Majano | Forno a legna</title>
+<meta name="description" content="AL DOGE – Pizzeria a Farla di Majano (UD). Pizza cotta nel forno a legna, ingredienti selezionati. Chiama 0432 1840683.">
+<link rel="canonical" href="https://zingy-frangipane-b5810c.netlify.app">
 
-  <link rel="canonical" href="https://elaborate-cendol-81501f.netlify.app">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#0b0a08;
+  --panel:#151311;
+  --text:#f5f0e8;
+  --muted:#d4c9b0;
+  --accent:#c9a96e;
+  --accent2:#b24a2f;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  font-family:Inter,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+}
+
+header{
+  background:linear-gradient(to bottom,rgba(0,0,0,.4),rgba(0,0,0,.9)),
+  url('forno-a-legna-pizze-al-doge-majano.jpg') center/cover;
+  padding:120px 20px;
+  text-align:center;
+}
+
+header h1{
+  font-family:'Playfair Display',serif;
+  font-size:3rem;
+  color:var(--accent);
+}
+
+header p{
+  margin-top:20px;
+  color:var(--muted);
+  font-size:1.2rem;
+}
+
+section{
+  padding:80px 20px;
+  max-width:1100px;
+  margin:auto;
+}
+
+.section-title{
+  font-family:'Playfair Display',serif;
+  color:var(--accent);
+  font-size:2.2rem;
+  margin-bottom:40px;
+  text-align:center;
+}
+
+.menu-item{
+  background:var(--panel);
+  padding:20px;
+  border:1px solid rgba(201,169,110,.2);
+  margin-bottom:20px;
+  border-radius:12px;
+}
+
+.menu-item h3{
+  color:var(--accent);
+}
+
+.menu-item p{
+  color:var(--muted);
+}
+
+.price{
+  float:right;
+  color:var(--accent);
+  font-weight:600;
+}
+
+.gallery{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:20px;
+}
+
+.gallery img{
+  width:100%;
+  border-radius:12px;
+}
+
+.contact{
+  text-align:center;
+}
+
+.contact a{
+  color:var(--accent);
+  text-decoration:none;
+  font-size:1.3rem;
+}
+
+footer{
+  background:#050403;
+  padding:40px 20px;
+  text-align:center;
+  color:var(--muted);
+}
+</style>
 </head>
 
 <body>
 
-  <h1>Pizzeria AL DOGE</h1>
+<header>
+  <h1>AL DOGE</h1>
+  <p>Pizza cotta nel forno a legna – Tradizione friulana</p>
+</header>
 
-  <p>
-    La <strong>Pizzeria AL DOGE</strong> si trova a <strong>Majano (UD)</strong> ed è specializzata in pizza da asporto e consumo sul posto.
-    Tradizione, qualità e ingredienti selezionati ogni giorno.
-  </p>
+<section>
+  <h2 class="section-title">Le nostre pizze</h2>
 
-  <h2>Menù</h2>
-  <ul>
-    <li>Margherita</li>
-    <li>Diavola</li>
-    <li>Prosciutto</li>
-    <li>Prosciutto e funghi</li>
-    <li>Quattro formaggi</li>
-  </ul>
+  <div class="menu-item">
+    <h3>Margherita <span class="price">€ 6,50</span></h3>
+    <p>Pomodoro, mozzarella, origano</p>
+  </div>
 
-  <h2>Orari</h2>
-  <p>
-    Martedì – Domenica<br>
-    18:00 – 22:30
-  </p>
+  <div class="menu-item">
+    <h3>Friulana <span class="price">€ 9,00</span></h3>
+    <p>Pomodoro, mozzarella, patate al forno, salame dolce, cipolla</p>
+  </div>
 
-  <h2>Dove siamo</h2>
-  <p>
-    Majano, provincia di Udine – Friuli Venezia Giulia
-  </p>
+  <div class="menu-item">
+    <h3>Doge <span class="price">€ 10,00</span></h3>
+    <p>Pomodoro, mozzarella, tonno, cipolla, salsiccia, salamino piccante</p>
+  </div>
+</section>
 
-  <h2>Contatti</h2>
-  <p>
-    Telefono: <strong>INSERISCI NUMERO</strong>
-  </p>
+<section>
+  <h2 class="section-title">AL DOGE in foto</h2>
+  <div class="gallery">
+    <img src="pizza-cotta-forno-legna-al-doge-majano.jpg" alt="">
+    <img src="forno-a-legna-pizze-al-doge-majano.jpg" alt="">
+    <img src="dehors-serale-luci-al-doge-majano.jpg" alt="">
+  </div>
+</section>
+
+<section class="contact">
+  <h2 class="section-title">Contatti</h2>
+  <p>Via S. Daniele 3 – Farla di Majano (UD)</p>
+  <p><a href="tel:+3904321840683">0432 1840683</a></p>
+</section>
+
+<footer>
+  © 2026 AL DOGE Pizzeria – Forno a legna
+</footer>
 
 </body>
 </html>
