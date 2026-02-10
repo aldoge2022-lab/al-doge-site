@@ -2,11 +2,9 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>AL DOGE – Pizzeria a Farla di Majano | Forno a legna</title>
-<meta name="description" content="AL DOGE – Pizzeria a Farla di Majano (UD). Pizza cotta nel forno a legna, ingredienti selezionati. Chiama 0432 1840683.">
-<link rel="canonical" href="https://al-doge.it">
+<title>AL DOGE – Pizzeria a Farla di Majano</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
@@ -28,130 +26,141 @@ body{
   line-height:1.6;
 }
 
+/* HERO */
 header{
-  background:linear-gradient(to bottom,rgba(0,0,0,.4),rgba(0,0,0,.9)),
-  url('forno-a-legna-pizze-al-doge-majano.jpg') center/cover;
-  padding:120px 20px;
+  min-height:85vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   text-align:center;
+  padding:40px 20px;
+  position:relative;
+  background:
+    linear-gradient(to bottom,rgba(0,0,0,.35),rgba(0,0,0,.85)),
+    url('hero-image.jpg') center/cover no-repeat;
 }
 
-header h1{
+@media(max-width:768px){
+  header::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,.35);
+  }
+}
+
+.hero-content{
+  position:relative;
+  z-index:2;
+}
+
+h1{
   font-family:'Playfair Display',serif;
   font-size:3rem;
   color:var(--accent);
 }
 
-header p{
-  margin-top:20px;
-  color:var(--muted);
+.hero-subtitle{
+  margin-top:18px;
   font-size:1.2rem;
+  color:var(--muted);
 }
 
-header a{
-  display:inline-block;
-  margin-top:30px;
-  padding:14px 32px;
+.hero-subtitle span{
+  color:var(--accent);
+}
+
+.hero-actions{
+  margin-top:32px;
+  display:flex;
+  gap:18px;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+
+.btn-primary{
   background:var(--accent);
   color:#000;
-  text-decoration:none;
+  padding:14px 26px;
   border-radius:999px;
+  text-decoration:none;
   font-weight:600;
 }
 
-section{
-  padding:80px 20px;
-  max-width:1100px;
-  margin:auto;
+.btn-link{
+  color:var(--muted);
+  text-decoration:none;
+  font-size:.95rem;
 }
 
-.section-title{
-  font-family:'Playfair Display',serif;
-  color:var(--accent);
-  font-size:2.2rem;
-  margin-bottom:40px;
+/* SECTIONS */
+section{
+  padding:70px 20px;
+}
+
+.section-box{
+  max-width:720px;
+  margin:auto;
+  background:var(--panel);
+  border:1px solid rgba(201,169,110,.25);
+  border-radius:18px;
+  padding:34px;
   text-align:center;
 }
 
-.menu-item{
-  background:var(--panel);
-  padding:20px;
-  border:1px solid rgba(201,169,110,.2);
-  margin-bottom:20px;
-  border-radius:12px;
-}
-
-.menu-item h3{
+.badge{
+  display:inline-block;
+  margin-bottom:14px;
+  padding:6px 14px;
+  border-radius:999px;
+  background:rgba(201,169,110,.15);
   color:var(--accent);
+  font-size:.85rem;
 }
 
-.menu-item p{
+.section-box h2{
+  font-family:'Playfair Display',serif;
+  color:var(--accent);
+  font-size:2rem;
+}
+
+.section-box h3{
+  margin-top:12px;
+  font-size:1.4rem;
+}
+
+.section-box p{
+  margin-top:12px;
   color:var(--muted);
+}
+
+.footer-row{
+  margin-top:26px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:14px;
 }
 
 .price{
-  float:right;
+  font-size:1.4rem;
   color:var(--accent);
   font-weight:600;
 }
 
-.gallery{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-  gap:20px;
-}
-
-.gallery img{
-  width:100%;
-  border-radius:12px;
-}
-
-.ai-box{
-  background:var(--panel);
-  border:1px solid rgba(201,169,110,.2);
-  border-radius:14px;
-  padding:30px;
-  text-align:center;
-}
-
-.ai-box input{
-  width:100%;
-  max-width:600px;
-  padding:14px;
-  border-radius:10px;
-  border:none;
-  margin-bottom:15px;
-}
-
-.ai-box button{
-  padding:14px 36px;
-  border-radius:999px;
-  border:none;
-  background:var(--accent);
-  font-weight:600;
-  cursor:pointer;
-}
-
-#ai-result{
-  margin-top:25px;
-  display:none;
-  text-align:left;
-}
-
-.contact{
-  text-align:center;
-}
-
-.contact a{
-  color:var(--accent);
+.footer-row a{
   text-decoration:none;
-  font-size:1.3rem;
+  background:var(--accent);
+  color:#000;
+  padding:12px 22px;
+  border-radius:999px;
+  font-weight:600;
 }
 
-footer{
-  background:#050403;
-  padding:40px 20px;
-  text-align:center;
-  color:var(--muted);
+/* DISTINZIONE SETTIMANA */
+.week{
+  background:linear-gradient(to bottom,#0e0d0b,#151311);
 }
 </style>
 </head>
@@ -159,88 +168,49 @@ footer{
 <body>
 
 <header>
-  <h1>AL DOGE</h1>
-  <p>Pizza cotta nel forno a legna – Tradizione friulana</p>
-  <a href="tel:+3904321840683">Chiama per ordinare</a>
+  <div class="hero-content">
+    <h1>AL DOGE</h1>
+    <p class="hero-subtitle">
+      Dove la pizza prende vita,<br>
+      <span>nel forno a legna</span>
+    </p>
+
+    <div class="hero-actions">
+      <a href="tel:+3904321840683" class="btn-primary">Chiama per ordinare</a>
+      <a href="#oggi" class="btn-link">Scopri le pizze</a>
+    </div>
+  </div>
 </header>
 
-<section>
-  <h2 class="section-title">Le nostre pizze</h2>
-
-  <div class="menu-item">
-    <h3>Margherita <span class="price">€ 6,50</span></h3>
-    <p>Pomodoro, mozzarella, origano</p>
-  </div>
-
-  <div class="menu-item">
-    <h3>Friulana <span class="price">€ 9,00</span></h3>
+<!-- PIZZA DEL GIORNO -->
+<section id="oggi">
+  <div class="section-box">
+    <span class="badge">🍕 Oggi</span>
+    <h2>Pizza del Giorno</h2>
+    <h3>La Friulana</h3>
     <p>Pomodoro, mozzarella, patate al forno, salame dolce, cipolla</p>
-  </div>
 
-  <div class="menu-item">
-    <h3>Doge <span class="price">€ 10,00</span></h3>
-    <p>Pomodoro, mozzarella, tonno, cipolla, salsiccia, salamino piccante</p>
-  </div>
-</section>
-
-<section>
-  <h2 class="section-title">Crea la tua pizza con l’AI</h2>
-  <div class="ai-box">
-    <input id="q" placeholder="Es: pizza leggera con verdure">
-    <button onclick="genera()">Crea</button>
-
-    <div id="ai-result">
-      <h3 id="n"></h3>
-      <p id="ing"></p>
-      <p id="cal"></p>
-      <p id="prez"></p>
-      <p id="desc"></p>
+    <div class="footer-row">
+      <span class="price">€ 9,00</span>
+      <a href="tel:+3904321840683">Ordina ora</a>
     </div>
   </div>
 </section>
 
-<section>
-  <h2 class="section-title">AL DOGE in foto</h2>
-  <div class="gallery">
-    <img src="pizza-cotta-forno-legna-al-doge-majano.jpg">
-    <img src="forno-a-legna-pizze-al-doge-majano.jpg">
-    <img src="dehors-serale-luci-al-doge-majano.jpg">
+<!-- PIZZA DELLA SETTIMANA -->
+<section class="week">
+  <div class="section-box">
+    <span class="badge">⭐ Settimana</span>
+    <h2>Pizza della Settimana</h2>
+    <h3>La Doge Special</h3>
+    <p>Pomodoro, mozzarella, speck, gorgonzola, noci</p>
+
+    <div class="footer-row">
+      <span class="price">€ 10,50</span>
+      <a href="tel:+3904321840683">Ordina ora</a>
+    </div>
   </div>
 </section>
-
-<section class="contact">
-  <h2 class="section-title">Contatti</h2>
-  <p>Via S. Daniele 3 – Farla di Majano (UD)</p>
-  <p><a href="tel:+3904321840683">0432 1840683</a></p>
-
-  <iframe
-    src="https://www.google.com/maps?q=Via%20S.%20Daniele%203%20Farla%20di%20Majano&output=embed"
-    width="100%" height="300" style="border:0;border-radius:12px;margin-top:30px;">
-  </iframe>
-</section>
-
-<footer>
-  © 2026 AL DOGE Pizzeria – Forno a legna
-</footer>
-
-<script>
-async function genera(){
-  const q=document.getElementById('q').value.trim();
-  if(!q) return;
-  const r=await fetch('/.netlify/functions/grok',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({query:q})
-  });
-  const j=await r.json();
-  document.getElementById('ai-result').style.display='block';
-  n.textContent=j.nome;
-  ing.textContent='Ingredienti: '+j.ingredienti_da_aggiungere.join(', ');
-  cal.textContent='Calorie stimate: '+j.calorie_stimate;
-  prez.textContent='Prezzo stimato: '+j.prezzo_stimato;
-  desc.textContent=j.descrizione;
-}
-</script>
 
 </body>
 </html>
