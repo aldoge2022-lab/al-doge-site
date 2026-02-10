@@ -2,12 +2,12 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>AL DOGE – Pizzeria a Farla di Majano | Forno a legna</title>
-<meta name="description" content="AL DOGE – Dove la pizza prende vita nel forno a legna. Chiama 0432 1840683.">
+<meta name="description" content="AL DOGE – Pizzeria a Farla di Majano (UD). Pizza cotta nel forno a legna. Chiama 0432 1840683.">
 
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
 :root{
@@ -28,98 +28,122 @@ body{
 }
 
 /* HERO */
-header{
+.hero{
+  position:relative;
   min-height:100vh;
-  background:
-    linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,.85)),
-    url("hero-image.jpg") center/cover no-repeat;
+  background:url("hero-image.jpg") center/cover no-repeat;
   display:flex;
   align-items:center;
   justify-content:center;
   text-align:center;
-  padding:40px 20px;
+}
+
+.hero::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(to bottom,rgba(0,0,0,.35),rgba(0,0,0,.85));
+}
+
+.hero-content{
+  position:relative;
+  z-index:2;
+  max-width:900px;
+  padding:20px;
+}
+
+.logo-animato{
+  width:120px;
+  margin-bottom:25px;
 }
 
 .hero h1{
   font-family:'Playfair Display',serif;
-  font-size:3rem;
+  font-size:clamp(3rem,6vw,4.8rem);
+  letter-spacing:.12em;
   color:var(--accent);
+  margin-bottom:18px;
 }
 
 .hero p{
-  margin-top:18px;
-  font-size:1.2rem;
+  font-size:clamp(1.1rem,2.2vw,1.45rem);
   color:var(--muted);
+  margin-bottom:40px;
 }
 
-.hero a{
+.btn{
   display:inline-block;
-  margin-top:30px;
-  padding:14px 28px;
   background:var(--accent);
   color:#000;
+  padding:14px 34px;
   border-radius:999px;
-  text-decoration:none;
   font-weight:600;
+  text-decoration:none;
 }
 
 /* SEZIONI */
 section{
-  max-width:1100px;
-  margin:auto;
-  padding:80px 20px;
+  max-width:1200px;
+  margin:0 auto;
+  padding:90px 20px;
 }
 
+.section-title{
+  text-align:center;
+  font-family:'Playfair Display',serif;
+  font-size:2.4rem;
+  color:var(--accent);
+  margin-bottom:60px;
+}
+
+/* CARDS */
 .cards{
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
   gap:30px;
 }
 
 .card{
   background:var(--panel);
-  border-radius:16px;
-  padding:30px;
-  border:1px solid rgba(201,169,110,.2);
+  border-radius:18px;
+  padding:28px;
 }
 
 .card h3{
-  font-family:'Playfair Display',serif;
   color:var(--accent);
   margin-bottom:10px;
 }
 
-.card p{
-  color:var(--muted);
+.card strong{
+  font-size:1.2rem;
 }
 
-.card .price{
-  font-weight:600;
+.price{
+  margin:20px 0;
   color:var(--accent);
-  margin-top:16px;
+  font-weight:600;
 }
 
 .card a{
   display:inline-block;
-  margin-top:16px;
-  padding:10px 20px;
   background:var(--accent);
   color:#000;
+  padding:10px 22px;
   border-radius:999px;
   text-decoration:none;
   font-weight:600;
 }
 
-/* FOTO */
+/* GALLERY */
 .gallery{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
   gap:20px;
 }
 
 .gallery img{
   width:100%;
-  border-radius:14px;
+  border-radius:18px;
 }
 
 /* CONTATTI */
@@ -127,16 +151,9 @@ section{
   text-align:center;
 }
 
-.contact h2{
-  font-family:'Playfair Display',serif;
-  color:var(--accent);
-  margin-bottom:20px;
-}
-
-.contact a{
-  color:var(--accent);
-  font-size:1.3rem;
-  text-decoration:none;
+.contact p{
+  margin:10px 0;
+  font-size:1.1rem;
 }
 
 /* FOOTER */
@@ -146,22 +163,21 @@ footer{
   color:var(--muted);
   font-size:.9rem;
 }
-
-/* MOBILE */
-@media(max-width:800px){
-  .cards{grid-template-columns:1fr}
-  .hero h1{font-size:2.4rem}
-}
 </style>
 </head>
 
 <body>
 
-<header>
-  <div class="hero">
+<header class="hero">
+  <div class="hero-content">
+
+    <video class="logo-animato" src="logo-animato.mp4" autoplay muted loop playsinline></video>
+
     <h1>AL DOGE</h1>
-    <p>Dove la pizza prende vita, nel forno a legna</p>
-    <a href="tel:+3904321840683">Chiama per ordinare</a>
+
+    <p>Dove la pizza prende vita,<br>nel forno a legna</p>
+
+    <a class="btn" href="tel:+3904321840683">Chiama per ordinare</a>
   </div>
 </header>
 
@@ -186,10 +202,7 @@ footer{
 </section>
 
 <section>
-  <h2 style="text-align:center;color:var(--accent);font-family:'Playfair Display',serif;margin-bottom:40px;">
-    AL DOGE in foto
-  </h2>
-
+  <h2 class="section-title">AL DOGE in foto</h2>
   <div class="gallery">
     <img src="dehors-serale-luci-al-doge-majano.jpg" alt="">
     <img src="forno-a-legna-pizze-al-doge-majano.jpg" alt="">
@@ -198,7 +211,7 @@ footer{
 </section>
 
 <section class="contact">
-  <h2>Contatti</h2>
+  <h2 class="section-title">Contatti</h2>
   <p>Via S. Daniele 3 – Farla di Majano (UD)</p>
   <p><a href="tel:+3904321840683">0432 1840683</a></p>
 </section>
