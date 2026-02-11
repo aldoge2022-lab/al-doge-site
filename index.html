@@ -162,7 +162,14 @@ color:var(--muted);
 <div class="hero-content">
 <h1>AL DOGE</h1>
 <p>Dove la pizza prende vita nel forno a legna</p>
+
 <a href="tel:04321840683" class="btn">Chiama per ordinare</a>
+
+<!-- ⭐ NUOVO PULSANTE CHATBOT -->
+<a href="chatbot.html" class="btn" style="margin-left:10px; background:#fff; color:#000;">
+  Chatbot AL DOGE
+</a>
+
 </div>
 </div>
 
@@ -187,23 +194,23 @@ color:var(--muted);
 
 <script>
 async function loadMenu(){
-const res = await fetch("menu.json");
-const menu = await res.json();
-const container = document.getElementById("menu-container");
-container.innerHTML="";
+  const res = await fetch("menu.json");
+  const data = await res.json();
+  const container = document.getElementById("menu-container");
+  container.innerHTML = "";
 
-menu.forEach(pizza=>{
-const item=document.createElement("div");
-item.className="menu-item";
-item.innerHTML=`
-<div>
-<h3>${pizza.nome}</h3>
-<div class="menu-desc">${pizza.ingredienti}</div>
-</div>
-<div class="price">${pizza.prezzo}</div>
-`;
-container.appendChild(item);
-});
+  data.pizze.forEach(pizza => {
+    const item = document.createElement("div");
+    item.className = "menu-item";
+    item.innerHTML = `
+      <div>
+        <h3>${pizza.nome}</h3>
+        <div class="menu-desc">${pizza.ingredienti.join(", ")}</div>
+      </div>
+      <div class="price">—</div>
+    `;
+    container.appendChild(item);
+  });
 }
 loadMenu();
 
