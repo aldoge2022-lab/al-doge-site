@@ -1,0 +1,50 @@
+[
+  {
+    "nome": "Margherita",
+    "categoria": "classiche",
+    "ingredienti": "Pomodoro, mozzarella, origano",
+    "prezzo": "6.00"
+  },
+  {
+    "nome": "Capricciosa",
+    "categoria": "classiche",
+    "ingredienti": "Pomodoro, mozzarella, prosciutto cotto, funghi freschi, carciofi",
+    "prezzo": "8.00"
+  },
+  {
+    "nome": "4 Stagioni",
+    "categoria": "classiche",
+    "ingredienti": "Pomodoro, mozzarella, prosciutto cotto, peperoni, funghi, carciofi",
+    "prezzo": "8.50"
+  },
+  {
+    "nome": "Siciliana",
+    "categoria": "mare",
+    "ingredienti": "Pomodoro, mozzarella, acciughe, capperi, olive nere",
+    "prezzo": "8.50"
+  },
+  {
+    "nome": "Tonno e Cipolla",
+    "categoria": "mare",
+    "ingredienti": "Pomodoro, mozzarella, tonno, cipolla",
+    "prezzo": "7.50"
+  },
+  {
+    "nome": "Estate",
+    "categoria": "verdure",
+    "ingredienti": "Pomodoro, mozzarella, rucola, pomodorini, mozzarelline",
+    "prezzo": "8.50"
+  },
+  {
+    "nome": "4 Formaggi",
+    "categoria": "bianche",
+    "ingredienti": "Mozzarella, gorgonzola, formaggi misti",
+    "prezzo": "8.50"
+  },
+  {
+    "nome": "San Daniele",
+    "categoria": "classiche",
+    "ingredienti": "Pomodoro, mozzarella, prosciutto crudo San Daniele",
+    "prezzo": "9.00"
+  }
+]
