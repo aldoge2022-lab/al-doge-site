@@ -226,24 +226,33 @@
 
 <script>
 async function consiglia(){
-  const input = document.getElementById("aiInput").value;
+  const input = document.getElementById("aiInput").value.trim();
   const box = document.getElementById("aiResult");
-  box.textContent = "Sto pensando al consiglio giusto…";
+
+  if(!input){
+    box.textContent = "Scrivi pizza o panino e ti consigliamo noi.";
+    return;
+  }
+
+  box.textContent = "Ti stiamo preparando un consiglio… 🍕";
 
   try{
-    const res = await fetch("/.netlify/functions/ai-consigli",{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({ richiesta: input })
+    const res = await fetch("/.netlify/functions/ai-consigli", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ richiesta: input })
     });
 
     const data = await res.json();
-    box.textContent = data.consiglio || "Scrivi pizza o panino per ricevere un consiglio.";
-  }catch{
-    box.textContent = "Errore momentaneo. Chiama direttamente e ti consigliamo noi.";
+
+    if(data.risposta){
+      box.textContent = data.risposta;
+    } else {
+      box.textContent = "Non sappiamo cosa consigliarti ora. Chiamaci 😉";
+    }
+  } catch (err) {
+    console.error(err);
+    box.textContent = "Errore di connessione. Prova o chiamaci.";
   }
 }
 </script>
-
-</body>
-</html>
