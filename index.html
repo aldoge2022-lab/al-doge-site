@@ -3,211 +3,182 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AL DOGE – Pizzeria a Farla di Majano</title>
+<title>AL DOGE – Pizzeria Forno a Legna | Farla di Majano</title>
+
+<meta name="description" content="AL DOGE – Pizzeria con forno a legna a Farla di Majano. Menu completo, pizze classiche e speciali, consigli personalizzati.">
+<meta name="keywords" content="pizzeria Majano, pizza forno a legna, AL DOGE, pizza Friuli">
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 
 <style>
+:root{
+--gold:#d4af37;
+--dark:#0b0b0b;
+--soft:#1a1a1a;
+--text:#f5f5f5;
+--muted:#b3b3b3;
+}
+
 body{
-    margin:0;
-    font-family: 'Segoe UI', sans-serif;
-    background:#0b0b0b;
-    color:#fff;
+margin:0;
+background:var(--dark);
+color:var(--text);
+font-family:'Inter',sans-serif;
 }
 
 h1,h2{
-    font-family: Georgia, serif;
-    color:#d4af37;
+font-family:'Playfair Display',serif;
+color:var(--gold);
 }
 
 .hero{
-    height:90vh;
-    background:url("hero-image.jpg") center/cover no-repeat;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    text-align:center;
-    position:relative;
+position:relative;
+height:90vh;
+background:url('hero-image.jpg') center/cover no-repeat;
+display:flex;
+align-items:center;
+justify-content:center;
+text-align:center;
 }
 
-.hero::after{
-    content:"";
-    position:absolute;
-    inset:0;
-    background:rgba(0,0,0,0.6);
+.overlay{
+background:rgba(0,0,0,0.6);
+position:absolute;
+inset:0;
 }
 
 .hero-content{
-    position:relative;
-    z-index:2;
+position:relative;
+z-index:2;
 }
 
 .hero h1{
-    font-size:3.5rem;
-    margin:0;
+font-size:64px;
+margin:0;
 }
 
 .hero p{
-    margin-top:10px;
-    font-size:1.1rem;
+margin-top:15px;
+font-size:18px;
 }
 
-.button{
-    background:#d4af37;
-    color:#000;
-    padding:12px 25px;
-    border-radius:30px;
-    text-decoration:none;
-    font-weight:bold;
-    display:inline-block;
-    margin-top:20px;
+.btn{
+background:var(--gold);
+color:black;
+padding:12px 28px;
+border-radius:30px;
+text-decoration:none;
+display:inline-block;
+margin-top:20px;
+font-weight:500;
 }
 
 .logo-fixed{
-    position:fixed;
-    top:20px;
-    left:20px;
-    z-index:999;
+position:fixed;
+top:20px;
+left:20px;
+z-index:999;
+width:70px;
+border-radius:12px;
+box-shadow:0 0 20px rgba(0,0,0,0.6);
 }
 
-.logo-fixed video{
-    width:70px;
-    border-radius:12px;
-}
-
-.section{
-    padding:80px 20px;
-    text-align:center;
+section{
+padding:80px 20px;
+max-width:900px;
+margin:auto;
 }
 
 .ai-box{
-    max-width:700px;
-    margin:0 auto;
+background:var(--soft);
+padding:30px;
+border-radius:20px;
+text-align:center;
 }
 
-.ai-box input{
-    width:100%;
-    padding:14px;
-    border-radius:8px;
-    border:none;
-    margin-top:15px;
+input{
+width:80%;
+padding:12px;
+border-radius:10px;
+border:none;
+margin-top:15px;
 }
 
-.ai-box button{
-    margin-top:15px;
-    padding:12px 30px;
-    background:#d4af37;
-    border:none;
-    border-radius:30px;
-    font-weight:bold;
-    cursor:pointer;
+button{
+background:var(--gold);
+border:none;
+padding:12px 25px;
+border-radius:20px;
+margin-top:15px;
+cursor:pointer;
+font-weight:500;
 }
 
-.ai-result{
-    margin-top:25px;
-    background:#111;
-    padding:20px;
-    border-radius:12px;
+#ai-result{
+margin-top:20px;
+color:var(--muted);
 }
 
-.menu-section{
-    max-width:900px;
-    margin:0 auto;
-    padding:50px 20px;
+.menu-item{
+padding:20px 0;
+border-bottom:1px solid #333;
+display:flex;
+justify-content:space-between;
+align-items:flex-start;
 }
 
-.menu-row{
-    display:flex;
-    justify-content:space-between;
-    padding:18px 0;
-    border-bottom:1px solid rgba(255,255,255,0.08);
+.menu-item h3{
+margin:0;
+color:var(--gold);
 }
 
-.menu-row strong{
-    color:#d4af37;
+.menu-desc{
+font-size:14px;
+color:var(--muted);
+margin-top:5px;
+}
+
+.price{
+font-weight:600;
+color:white;
 }
 
 footer{
-    text-align:center;
-    padding:40px 20px;
-    opacity:0.6;
+text-align:center;
+padding:40px;
+color:var(--muted);
 }
 </style>
 </head>
 
 <body>
 
-<!-- LOGO ANIMATO -->
-<div class="logo-fixed">
-  <video autoplay muted loop playsinline>
-    <source src="logo-animato.mp4" type="video/mp4">
-  </video>
+<video class="logo-fixed" autoplay loop muted playsinline>
+<source src="logo-animato.mp4" type="video/mp4">
+</video>
+
+<div class="hero">
+<div class="overlay"></div>
+<div class="hero-content">
+<h1>AL DOGE</h1>
+<p>Dove la pizza prende vita nel forno a legna</p>
+<a href="tel:04321840683" class="btn">Chiama per ordinare</a>
+</div>
 </div>
 
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-content">
-    <h1>AL DOGE</h1>
-    <p>Dove la pizza prende vita nel forno a legna</p>
-    <a class="button" href="tel:+3904321840683">Chiama per ordinare</a>
-  </div>
+<section>
+<h2>Pizza o Panino? Scrivi e ti consigliamo noi.</h2>
+<div class="ai-box">
+<input id="ai-input" placeholder="Es: Pizza leggera con verdure">
+<br>
+<button onclick="askAI()">Consigliami</button>
+<div id="ai-result"></div>
+</div>
 </section>
 
-<!-- AI -->
-<section class="section">
-  <h2>Pizza o Panino? Scrivi e ti consigliamo noi.</h2>
-
-  <div class="ai-box">
-    <input id="ai-input" placeholder="Es: Pizza leggera con verdure">
-    <button onclick="askAI()">Consigliami</button>
-
-    <div id="ai-result" class="ai-result" style="display:none;"></div>
-  </div>
-</section>
-
-<!-- MENU -->
-<section class="menu-section">
-<h2 style="text-align:center;">Il Nostro Menu</h2>
-
-<div class="menu-row">
-  <div>
-    <strong>Margherita</strong>
-    <div>Pomodoro, mozzarella, origano</div>
-  </div>
-  <div>€6,00</div>
-</div>
-
-<div class="menu-row">
-  <div>
-    <strong>Capricciosa</strong>
-    <div>Pomodoro, mozzarella, prosciutto cotto, funghi freschi, carciofi</div>
-  </div>
-  <div>€8,00</div>
-</div>
-
-<div class="menu-row">
-  <div>
-    <strong>4 Stagioni</strong>
-    <div>Pomodoro, mozzarella, prosciutto cotto, peperoni, funghi, carciofi</div>
-  </div>
-  <div>€8,50</div>
-</div>
-
-<div class="menu-row">
-  <div>
-    <strong>Siciliana</strong>
-    <div>Pomodoro, mozzarella, acciughe, capperi, olive nere</div>
-  </div>
-  <div>€8,50</div>
-</div>
-
-<div class="menu-row">
-  <div>
-    <strong>San Daniele</strong>
-    <div>Pomodoro, mozzarella, prosciutto crudo San Daniele</div>
-  </div>
-  <div>€9,00</div>
-</div>
-
+<section>
+<h2>Il Nostro Menu</h2>
+<div id="menu-container"></div>
 </section>
 
 <footer>
@@ -215,29 +186,45 @@ footer{
 </footer>
 
 <script>
+async function loadMenu(){
+const res = await fetch("menu.json");
+const menu = await res.json();
+const container = document.getElementById("menu-container");
+container.innerHTML="";
+
+menu.forEach(pizza=>{
+const item=document.createElement("div");
+item.className="menu-item";
+item.innerHTML=`
+<div>
+<h3>${pizza.nome}</h3>
+<div class="menu-desc">${pizza.ingredienti}</div>
+</div>
+<div class="price">${pizza.prezzo}</div>
+`;
+container.appendChild(item);
+});
+}
+loadMenu();
+
 async function askAI(){
-    const input = document.getElementById("ai-input").value;
-    const resultBox = document.getElementById("ai-result");
+const input=document.getElementById("ai-input").value;
+const result=document.getElementById("ai-result");
+if(!input)return;
 
-    if(!input) return;
+result.innerHTML="Sto pensando...";
 
-    resultBox.style.display="block";
-    resultBox.innerHTML="Sto pensando...";
-
-    try{
-        const res = await fetch("/.netlify/functions/grok",{
-            method:"POST",
-            headers:{ "Content-Type":"application/json" },
-            body:JSON.stringify({ richiesta: input })
-        });
-
-        const data = await res.json();
-        resultBox.innerHTML = data.risposta +
-        '<br><br><a class="button" href="tel:+3904321840683">Chiama ora per ordinare</a>';
-
-    }catch(e){
-        resultBox.innerHTML="Non riusciamo a consigliarti ora.";
-    }
+try{
+const res=await fetch("/.netlify/functions/ai-consigli",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({ richiesta: input })
+});
+const data=await res.json();
+result.innerHTML=data.risposta;
+}catch{
+result.innerHTML="Non riusciamo a consigliarti ora.";
+}
 }
 </script>
 
