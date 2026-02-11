@@ -1,92 +1,280 @@
-let ultimiConsigli = [];
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-exports.handler = async function(event) {
-  try {
-    const { richiesta } = JSON.parse(event.body);
+<title>AL DOGE – Pizzeria a Farla di Majano</title>
 
-    const menu = `
-Pizze:
-- La Friulana (850 kcal): pomodoro, mozzarella, patate al forno, salame dolce, cipolla
-- La Doge Special (920 kcal): pomodoro, mozzarella, speck, gorgonzola, noci
-- Margherita (700 kcal): pomodoro, mozzarella
-- Diavola (880 kcal): pomodoro, mozzarella, salame piccante
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-Panini:
-- Prosciutto e Rucola (600 kcal)
-- Speck e Formaggio (720 kcal)
-- Vegetariano (550 kcal)
+<style>
 
-Bevande:
-- Birra artigianale chiara
-- Birra rossa
-- Coca-Cola
-- Acqua naturale
-- Acqua frizzante
-- Vino rosso della casa
-- Vino bianco della casa
-`;
+:root{
+  --bg:#0b0a08;
+  --panel:#151311;
+  --text:#f5f0e8;
+  --muted:#d4c9b0;
+  --accent:#c9a96e;
+}
 
-    const memoria = ultimiConsigli.length > 0 
-      ? `Evita di consigliare: ${ultimiConsigli.join(", ")}`
-      : "Puoi scegliere liberamente.";
+*{box-sizing:border-box;margin:0;padding:0}
 
-    const prompt = `
-Sei il consulente gastronomico premium della pizzeria AL DOGE.
+body{
+  font-family:Inter,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
 
-Menu:
-${menu}
+/* HERO */
 
-Cliente scrive: "${richiesta}"
+header{
+  background:
+  linear-gradient(to bottom, rgba(0,0,0,.5), rgba(0,0,0,.9)),
+  url('hero-image.jpg') center/cover no-repeat;
+  padding:140px 20px;
+  text-align:center;
+}
 
-${memoria}
+header h1{
+  font-family:'Playfair Display',serif;
+  font-size:4rem;
+  color:var(--accent);
+  letter-spacing:2px;
+}
 
-Regole:
-- Consiglia UNA sola proposta principale (pizza o panino)
-- Indica le calorie stimate
-- Suggerisci una bevanda in abbinamento
-- Spiega brevemente il motivo dell'abbinamento
-- Massimo 4 frasi eleganti
-- Tono professionale ma caloroso
-`;
+header p{
+  margin-top:20px;
+  font-size:1.2rem;
+  color:var(--muted);
+}
 
-    const response = await fetch("https://api.x.ai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.GROK_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: "grok-2-latest",
-        messages: [
-          { role: "system", content: "Sei uno chef italiano esperto in abbinamenti gastronomici." },
-          { role: "user", content: prompt }
-        ],
-        temperature: 0.9
-      })
+.cta{
+  margin-top:30px;
+}
+
+.cta a{
+  background:var(--accent);
+  color:#000;
+  padding:14px 28px;
+  border-radius:30px;
+  text-decoration:none;
+  font-weight:600;
+}
+
+/* AI SECTION */
+
+.ai-section{
+  padding:80px 20px;
+  text-align:center;
+  background:#111;
+}
+
+.ai-section h2{
+  font-family:'Playfair Display',serif;
+  font-size:2rem;
+  color:var(--accent);
+  margin-bottom:20px;
+}
+
+.ai-section input{
+  padding:14px;
+  width:90%;
+  max-width:500px;
+  border-radius:8px;
+  border:none;
+  margin-top:20px;
+}
+
+.ai-section button{
+  margin-top:15px;
+  padding:12px 24px;
+  border:none;
+  background:var(--accent);
+  color:#000;
+  border-radius:25px;
+  cursor:pointer;
+}
+
+#ai-result{
+  margin-top:25px;
+  background:#1b1917;
+  padding:20px;
+  border-radius:12px;
+  display:none;
+}
+
+/* MENU */
+
+.menu-section{
+  padding:80px 20px;
+  max-width:1200px;
+  margin:auto;
+}
+
+.menu-title{
+  text-align:center;
+  font-family:'Playfair Display',serif;
+  font-size:2.5rem;
+  color:var(--accent);
+  margin-bottom:40px;
+}
+
+.menu-filters{
+  text-align:center;
+  margin-bottom:40px;
+}
+
+.menu-filters button{
+  background:none;
+  border:1px solid var(--accent);
+  color:var(--accent);
+  padding:8px 18px;
+  margin:5px;
+  border-radius:20px;
+  cursor:pointer;
+}
+
+.menu-filters button.active{
+  background:var(--accent);
+  color:#000;
+}
+
+.menu-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:20px;
+}
+
+.pizza-item{
+  background:var(--panel);
+  padding:18px;
+  border-radius:12px;
+  display:flex;
+  justify-content:space-between;
+}
+
+/* FOOTER */
+
+footer{
+  background:#050403;
+  padding:40px;
+  text-align:center;
+  color:var(--muted);
+  margin-top:60px;
+}
+
+@media(max-width:768px){
+  header h1{font-size:2.5rem;}
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>AL DOGE</h1>
+  <p>Dove la pizza prende vita nel forno a legna</p>
+  <div class="cta">
+    <a href="tel:+3904321840683">Chiama per ordinare</a>
+  </div>
+</header>
+
+<section class="ai-section">
+  <h2>Pizza o Panino? Scrivi e ti consigliamo noi.</h2>
+  <input id="ai-input" placeholder="Es: qualcosa di leggero, vegetariano...">
+  <br>
+  <button onclick="askAI()">Consigliami</button>
+
+  <div id="ai-result"></div>
+</section>
+
+<section class="menu-section">
+
+  <h2 class="menu-title">Il Nostro Menu</h2>
+
+  <div class="menu-filters">
+    <button onclick="filterMenu('tutte')" class="active">Tutte</button>
+    <button onclick="filterMenu('classiche')">Classiche</button>
+    <button onclick="filterMenu('verdure')">Verdure</button>
+    <button onclick="filterMenu('mare')">Mare</button>
+    <button onclick="filterMenu('bianche')">Bianche</button>
+  </div>
+
+  <div class="menu-grid">
+
+    <div class="pizza-item classiche"><strong>Margherita</strong><span>€6,00</span></div>
+    <div class="pizza-item classiche"><strong>Capricciosa</strong><span>€8,00</span></div>
+    <div class="pizza-item classiche"><strong>4 Stagioni</strong><span>€8,50</span></div>
+
+    <div class="pizza-item verdure"><strong>Estate</strong><span>€8,50</span></div>
+    <div class="pizza-item verdure"><strong>Pugliese</strong><span>€6,50</span></div>
+
+    <div class="pizza-item mare"><strong>Siciliana</strong><span>€8,50</span></div>
+    <div class="pizza-item mare"><strong>Tonno e Cipolla</strong><span>€7,50</span></div>
+
+    <div class="pizza-item bianche"><strong>4 Formaggi</strong><span>€8,50</span></div>
+    <div class="pizza-item bianche"><strong>San Daniele</strong><span>€9,00</span></div>
+
+  </div>
+
+</section>
+
+<footer>
+  © 2026 AL DOGE – Via S. Daniele 3, Farla di Majano
+</footer>
+
+<script>
+
+function filterMenu(cat){
+  const items=document.querySelectorAll('.pizza-item');
+  const buttons=document.querySelectorAll('.menu-filters button');
+
+  buttons.forEach(btn=>btn.classList.remove('active'));
+  event.target.classList.add('active');
+
+  items.forEach(item=>{
+    if(cat==='tutte'){
+      item.style.display='flex';
+    }else{
+      item.style.display=item.classList.contains(cat)?'flex':'none';
+    }
+  });
+}
+
+async function askAI(){
+  const input=document.getElementById('ai-input').value.trim();
+  if(!input) return;
+
+  const result=document.getElementById('ai-result');
+  result.style.display='block';
+  result.innerHTML='Sto pensando...';
+
+  try{
+    const res=await fetch('/.netlify/functions/grok',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({query:input})
     });
 
-    const data = await response.json();
-    const testo = data.choices?.[0]?.message?.content || 
-      "Non riusciamo a consigliarti ora. Chiamaci 😉";
+    const data=await res.json();
 
-    // MEMORIA: salva ultimo piatto consigliato
-    const match = testo.match(/La [A-Za-z ]+|Margherita|Diavola|Prosciutto e Rucola|Speck e Formaggio|Vegetariano/);
-    if (match) {
-      ultimiConsigli.push(match[0]);
-      if (ultimiConsigli.length > 3) {
-        ultimiConsigli.shift();
-      }
-    }
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ risposta: testo })
-    };
-
-  } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ risposta: "Errore AI. Chiamaci per un consiglio diretto." })
-    };
+    result.innerHTML=`
+      <h3>${data.nome}</h3>
+      <p><strong>Ingredienti:</strong> ${data.ingredienti_da_aggiungere.join(', ')}</p>
+      <p><strong>Calorie:</strong> ${data.calorie_stimate}</p>
+      <p><strong>Prezzo:</strong> ${data.prezzo_stimato}</p>
+      <p>${data.descrizione}</p>
+      <br>
+      <a href="tel:+3904321840683" style="color:var(--accent);font-weight:bold;">Chiama per ordinare</a>
+    `;
+  }catch(e){
+    result.innerHTML='Non riusciamo a consigliarti ora.';
   }
-};
+}
+
+</script>
+
+</body>
+</html>
