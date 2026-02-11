@@ -4,18 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>AL DOGE – Pizzeria a Farla di Majano | Forno a legna</title>
-<meta name="description" content="AL DOGE – Dove la pizza prende vita nel forno a legna. Chiama 0432 1840683.">
+<title>AL DOGE – Pizzeria a Farla di Majano</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
 :root{
-  --bg:#0b0a08;
+  --bg:#0b0b08;
   --panel:#151311;
   --text:#f5f0e8;
-  --muted:#d4c9b0;
-  --accent:#c9a96e;
+  --muted:#b9b19f;
+  --accent:#d8b26f;
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
@@ -28,132 +27,153 @@ body{
 }
 
 /* HERO */
-.hero{
-  position:relative;
+header{
   min-height:100vh;
-  background:url("hero-image.jpg") center/cover no-repeat;
+  background:
+    linear-gradient(to bottom,rgba(0,0,0,.65),rgba(0,0,0,.85)),
+    url("hero-image.jpg") center/cover no-repeat;
   display:flex;
   align-items:center;
   justify-content:center;
   text-align:center;
+  padding:40px 20px;
 }
 
-.hero::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:linear-gradient(to bottom,rgba(0,0,0,.45),rgba(0,0,0,.85));
-}
-
-.hero-content{
-  position:relative;
-  z-index:2;
-  max-width:900px;
-  padding:20px;
-}
-
-.logo-animato{
-  width:120px;
-  margin-bottom:25px;
+.hero img{
+  width:90px;
+  margin-bottom:20px;
 }
 
 .hero h1{
-  font-family:'Playfair Display',serif;
-  font-size:clamp(3rem,6vw,4.8rem);
-  letter-spacing:.12em;
+  font-family:"Playfair Display",serif;
+  font-size:clamp(3rem,7vw,5rem);
   color:var(--accent);
-  margin-bottom:18px;
 }
 
 .hero p{
-  font-size:clamp(1.1rem,2.2vw,1.45rem);
+  margin-top:12px;
+  font-size:1.15rem;
   color:var(--muted);
-  margin-bottom:40px;
 }
 
-.btn{
+.hero a{
   display:inline-block;
+  margin-top:26px;
+  padding:14px 28px;
   background:var(--accent);
   color:#000;
-  padding:14px 34px;
-  border-radius:999px;
-  font-weight:600;
+  border-radius:30px;
   text-decoration:none;
+  font-weight:600;
 }
 
 /* SEZIONI */
 section{
-  max-width:1200px;
-  margin:0 auto;
-  padding:90px 20px;
+  padding:70px 20px;
+  max-width:1100px;
+  margin:auto;
 }
 
-.section-title{
-  text-align:center;
-  font-family:'Playfair Display',serif;
-  font-size:2.4rem;
-  color:var(--accent);
-  margin-bottom:50px;
-}
-
-/* CARDS */
 .cards{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-  gap:30px;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:24px;
 }
 
 .card{
   background:var(--panel);
-  border-radius:18px;
-  padding:28px;
+  border-radius:16px;
+  padding:24px;
 }
 
 .card h3{
   color:var(--accent);
-  margin-bottom:10px;
-}
-
-.card strong{
-  font-size:1.2rem;
+  margin-bottom:8px;
 }
 
 .price{
-  margin:20px 0;
-  color:var(--accent);
-  font-weight:600;
+  font-weight:700;
+  margin:12px 0;
 }
 
 .card a{
   display:inline-block;
+  margin-top:10px;
+  padding:10px 20px;
   background:var(--accent);
   color:#000;
-  padding:10px 22px;
-  border-radius:999px;
+  border-radius:22px;
   text-decoration:none;
-  font-weight:600;
 }
 
-/* AI */
-textarea{
+/* AI BOX */
+.ai-box{
+  background:var(--panel);
+  border-radius:18px;
+  padding:40px 24px;
+  text-align:center;
+}
+
+.ai-box h2{
+  font-family:"Playfair Display",serif;
+  color:var(--accent);
+  margin-bottom:10px;
+}
+
+.ai-box p{
+  color:var(--muted);
+  margin-bottom:20px;
+}
+
+.ai-box input{
   width:100%;
-  min-height:90px;
-  border-radius:14px;
+  max-width:420px;
   padding:14px;
+  border-radius:10px;
   border:none;
-  font-family:Inter;
+  margin-bottom:16px;
+}
+
+.ai-box button{
+  padding:12px 26px;
+  border:none;
+  border-radius:22px;
+  background:var(--accent);
+  font-weight:600;
+  cursor:pointer;
+}
+
+.ai-result{
+  margin-top:20px;
+  font-weight:500;
+}
+
+.ai-actions{
+  margin-top:24px;
+}
+
+.call-btn{
+  display:inline-block;
+  margin-top:10px;
+  padding:12px 24px;
+  background:var(--accent);
+  color:#000;
+  border-radius:24px;
+  text-decoration:none;
+  font-weight:600;
 }
 
 /* GALLERY */
 .gallery{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-  gap:20px;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:16px;
 }
 
 .gallery img{
   width:100%;
-  border-radius:18px;
+  border-radius:14px;
+  object-fit:cover;
 }
 
 /* CONTATTI */
@@ -161,10 +181,9 @@ textarea{
   text-align:center;
 }
 
-/* FOOTER */
 footer{
   text-align:center;
-  padding:40px 20px;
+  padding:30px 20px;
   color:var(--muted);
   font-size:.9rem;
 }
@@ -173,14 +192,12 @@ footer{
 
 <body>
 
-<header class="hero">
-  <div class="hero-content">
-
-    <video class="logo-animato" src="logo-animato.mp4" autoplay muted loop playsinline></video>
-
+<header>
+  <div class="hero">
+    <img src="logo-animato.mp4" alt="AL DOGE">
     <h1>AL DOGE</h1>
-    <p>Dove la pizza prende vita,<br>nel forno a legna</p>
-    <a class="btn" href="tel:+3904321840683">Chiama per ordinare</a>
+    <p>Dove la pizza prende vita, nel forno a legna</p>
+    <a href="tel:04321840683">Chiama per ordinare</a>
   </div>
 </header>
 
@@ -191,7 +208,7 @@ footer{
       <strong>La Friulana</strong>
       <p>Pomodoro, mozzarella, patate al forno, salame dolce, cipolla</p>
       <div class="price">€ 9,00</div>
-      <a href="tel:+3904321840683">Chiama</a>
+      <a href="tel:04321840683">Chiama</a>
     </div>
 
     <div class="card">
@@ -199,30 +216,28 @@ footer{
       <strong>La Doge Special</strong>
       <p>Pomodoro, mozzarella, speck, gorgonzola, noci</p>
       <div class="price">€ 10,50</div>
-      <a href="tel:+3904321840683">Chiama</a>
+      <a href="tel:04321840683">Chiama</a>
     </div>
   </div>
 </section>
 
-<!-- AI CONSIGLI INTELLIGENTE -->
-<section>
-  <h2 class="section-title">Non sai cosa scegliere?</h2>
+<section class="ai-box">
+  <h2>Non sai cosa scegliere?</h2>
+  <p>Pizza o panino? Scrivi cosa ti va e ti consigliamo noi.</p>
 
-  <div class="card" style="max-width:700px;margin:0 auto;text-align:center">
-    <p style="color:var(--muted);margin-bottom:20px">
-      Dimmi come ti senti oggi e ti consiglio io cosa mangiare 🍕
-    </p>
+  <input id="ai-input" placeholder="Es. qualcosa di leggero">
+  <br>
+  <button id="ai-btn">Consigliami</button>
 
-    <textarea id="aiInput" placeholder="Esempio: ho fame ma non voglio qualcosa di pesante"></textarea>
-    <br><br>
-    <button class="btn" onclick="chiediConsiglio()">Consigliami</button>
+  <div id="ai-result" class="ai-result" style="display:none"></div>
 
-    <div id="aiRisposta" style="margin-top:30px"></div>
+  <div class="ai-actions">
+    <a href="tel:04321840683" class="call-btn">📞 Chiama 0432 1840683</a>
   </div>
 </section>
 
 <section>
-  <h2 class="section-title">AL DOGE in foto</h2>
+  <h2 style="text-align:center;color:var(--accent);margin-bottom:40px">AL DOGE in foto</h2>
   <div class="gallery">
     <img src="dehors-serale-luci-al-doge-majano.jpg">
     <img src="forno-a-legna-pizze-al-doge-majano.jpg">
@@ -231,9 +246,9 @@ footer{
 </section>
 
 <section class="contact">
-  <h2 class="section-title">Contatti</h2>
+  <h2 style="color:var(--accent)">Contatti</h2>
   <p>Via S. Daniele 3 – Farla di Majano (UD)</p>
-  <p><a href="tel:+3904321840683">0432 1840683</a></p>
+  <p><a href="tel:04321840683" style="color:var(--accent)">0432 1840683</a></p>
 </section>
 
 <footer>
@@ -241,36 +256,19 @@ footer{
 </footer>
 
 <script>
-async function chiediConsiglio(){
-  const input = document.getElementById("aiInput").value;
-  const risposta = document.getElementById("aiRisposta");
+const btn=document.getElementById("ai-btn");
+const input=document.getElementById("ai-input");
+const result=document.getElementById("ai-result");
 
-  if(!input){
-    risposta.innerHTML = "<p>Scrivi qualcosa 😉</p>";
+btn.onclick=()=>{
+  const t=input.value.trim();
+  result.style.display="block";
+  if(!t){
+    result.innerHTML="Scrivi due parole e ti consigliamo noi 🍕";
     return;
   }
-
-  risposta.innerHTML = "<p>Sto pensando… 🍕</p>";
-
-  try{
-    const res = await fetch("/.netlify/functions/ai-consigli",{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({ richiesta: input })
-    });
-
-    const data = await res.json();
-
-    risposta.innerHTML = `
-      <div style="background:#151311;padding:20px;border-radius:14px">
-        <strong>${data.nome}</strong>
-        <p style="margin-top:10px">${data.motivo}</p>
-      </div>
-    `;
-  }catch(e){
-    risposta.innerHTML = "<p>Errore, riprova più tardi.</p>";
-  }
-}
+  result.innerHTML="Ti consigliamo qualcosa di perfetto per oggi. Chiamaci 😉";
+};
 </script>
 
 </body>
