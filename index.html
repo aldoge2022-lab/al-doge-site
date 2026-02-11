@@ -3,362 +3,242 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>AL DOGE – Pizzeria a Farla di Majano</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-
 <style>
-
-:root{
-  --bg:#0b0a08;
-  --panel:#151311;
-  --text:#f5f0e8;
-  --muted:#d4c9b0;
-  --accent:#c9a96e;
-}
-
-*{box-sizing:border-box;margin:0;padding:0}
-
 body{
-  font-family:Inter,sans-serif;
-  background:var(--bg);
-  color:var(--text);
+    margin:0;
+    font-family: 'Segoe UI', sans-serif;
+    background:#0b0b0b;
+    color:#fff;
 }
 
-/* HERO */
-
-header{
-  background:
-  linear-gradient(to bottom, rgba(0,0,0,.5), rgba(0,0,0,.9)),
-  url('hero-image.jpg') center/cover no-repeat;
-  padding:140px 20px;
-  text-align:center;
+h1,h2{
+    font-family: Georgia, serif;
+    color:#d4af37;
 }
 
-header h1{
-  font-family:'Playfair Display',serif;
-  font-size:4rem;
-  color:var(--accent);
-  letter-spacing:2px;
+.hero{
+    height:90vh;
+    background:url("hero-image.jpg") center/cover no-repeat;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    position:relative;
 }
 
-header p{
-  margin-top:20px;
-  font-size:1.2rem;
-  color:var(--muted);
+.hero::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,0.6);
 }
 
-.cta{
-  margin-top:30px;
+.hero-content{
+    position:relative;
+    z-index:2;
 }
 
-.cta a{
-  background:var(--accent);
-  color:#000;
-  padding:14px 28px;
-  border-radius:30px;
-  text-decoration:none;
-  font-weight:600;
+.hero h1{
+    font-size:3.5rem;
+    margin:0;
 }
 
-/* AI SECTION */
-
-.ai-section{
-  padding:80px 20px;
-  text-align:center;
-  background:#111;
+.hero p{
+    margin-top:10px;
+    font-size:1.1rem;
 }
 
-.ai-section h2{
-  font-family:'Playfair Display',serif;
-  font-size:2rem;
-  color:var(--accent);
-  margin-bottom:20px;
+.button{
+    background:#d4af37;
+    color:#000;
+    padding:12px 25px;
+    border-radius:30px;
+    text-decoration:none;
+    font-weight:bold;
+    display:inline-block;
+    margin-top:20px;
 }
 
-.ai-section input{
-  padding:14px;
-  width:90%;
-  max-width:500px;
-  border-radius:8px;
-  border:none;
-  margin-top:20px;
+.logo-fixed{
+    position:fixed;
+    top:20px;
+    left:20px;
+    z-index:999;
 }
 
-.ai-section button{
-  margin-top:15px;
-  padding:12px 24px;
-  border:none;
-  background:var(--accent);
-  color:#000;
-  border-radius:25px;
-  cursor:pointer;
+.logo-fixed video{
+    width:70px;
+    border-radius:12px;
 }
 
-#ai-result{
-  margin-top:25px;
-  background:#1b1917;
-  padding:20px;
-  border-radius:12px;
-  display:none;
+.section{
+    padding:80px 20px;
+    text-align:center;
 }
 
-/* MENU */
+.ai-box{
+    max-width:700px;
+    margin:0 auto;
+}
+
+.ai-box input{
+    width:100%;
+    padding:14px;
+    border-radius:8px;
+    border:none;
+    margin-top:15px;
+}
+
+.ai-box button{
+    margin-top:15px;
+    padding:12px 30px;
+    background:#d4af37;
+    border:none;
+    border-radius:30px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.ai-result{
+    margin-top:25px;
+    background:#111;
+    padding:20px;
+    border-radius:12px;
+}
 
 .menu-section{
-  padding:80px 20px;
-  max-width:1200px;
-  margin:auto;
+    max-width:900px;
+    margin:0 auto;
+    padding:50px 20px;
 }
 
-.menu-title{
-  text-align:center;
-  font-family:'Playfair Display',serif;
-  font-size:2.5rem;
-  color:var(--accent);
-  margin-bottom:40px;
+.menu-row{
+    display:flex;
+    justify-content:space-between;
+    padding:18px 0;
+    border-bottom:1px solid rgba(255,255,255,0.08);
 }
 
-.menu-filters{
-  text-align:center;
-  margin-bottom:40px;
+.menu-row strong{
+    color:#d4af37;
 }
-
-.menu-filters button{
-  background:none;
-  border:1px solid var(--accent);
-  color:var(--accent);
-  padding:8px 18px;
-  margin:5px;
-  border-radius:20px;
-  cursor:pointer;
-}
-
-.menu-filters button.active{
-  background:var(--accent);
-  color:#000;
-}
-
-.menu-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:20px;
-}
-
-.pizza-item{
-  background:var(--panel);
-  padding:18px;
-  border-radius:12px;
-  display:flex;
-  justify-content:space-between;
-}
-
-/* FOOTER */
 
 footer{
-  background:#050403;
-  padding:40px;
-  text-align:center;
-  color:var(--muted);
-  margin-top:60px;
+    text-align:center;
+    padding:40px 20px;
+    opacity:0.6;
 }
-
-@media(max-width:768px){
-  header h1{font-size:2.5rem;}
-}
-
 </style>
 </head>
 
 <body>
 
-<header>
-  <h1>AL DOGE</h1>
-  <p>Dove la pizza prende vita nel forno a legna</p>
-  <div class="cta">
-    <a href="tel:+3904321840683">Chiama per ordinare</a>
-  </div>
-</header>
+<!-- LOGO ANIMATO -->
+<div class="logo-fixed">
+  <video autoplay muted loop playsinline>
+    <source src="logo-animato.mp4" type="video/mp4">
+  </video>
+</div>
 
-<section class="ai-section">
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <h1>AL DOGE</h1>
+    <p>Dove la pizza prende vita nel forno a legna</p>
+    <a class="button" href="tel:+3904321840683">Chiama per ordinare</a>
+  </div>
+</section>
+
+<!-- AI -->
+<section class="section">
   <h2>Pizza o Panino? Scrivi e ti consigliamo noi.</h2>
-  <input id="ai-input" placeholder="Es: qualcosa di leggero, vegetariano...">
-  <br>
-  <button onclick="askAI()">Consigliami</button>
 
-  <div id="ai-result"></div>
+  <div class="ai-box">
+    <input id="ai-input" placeholder="Es: Pizza leggera con verdure">
+    <button onclick="askAI()">Consigliami</button>
+
+    <div id="ai-result" class="ai-result" style="display:none;"></div>
+  </div>
 </section>
+
+<!-- MENU -->
 <section class="menu-section">
+<h2 style="text-align:center;">Il Nostro Menu</h2>
 
-  <h2 class="menu-title">Il Nostro Menu</h2>
-
-  <div class="menu-filters">
-    <button onclick="filterMenu('tutte')" class="active">Tutte</button>
-    <button onclick="filterMenu('classiche')">Classiche</button>
-    <button onclick="filterMenu('verdure')">Verdure</button>
-    <button onclick="filterMenu('mare')">Mare</button>
-    <button onclick="filterMenu('bianche')">Bianche</button>
+<div class="menu-row">
+  <div>
+    <strong>Margherita</strong>
+    <div>Pomodoro, mozzarella, origano</div>
   </div>
+  <div>€6,00</div>
+</div>
 
-  <div class="menu-grid">
-
-    <!-- CLASSICHE -->
-    <div class="pizza-item classiche" onclick="toggleDesc(this)">
-      <div>
-        <strong>Margherita</strong>
-        <p class="desc">Pomodoro, mozzarella, origano</p>
-      </div>
-      <span>€6,00</span>
-    </div>
-
-    <div class="pizza-item classiche" onclick="toggleDesc(this)">
-      <div>
-        <strong>Capricciosa</strong>
-        <p class="desc">Pomodoro, mozzarella, prosciutto cotto, funghi freschi, carciofi, origano</p>
-      </div>
-      <span>€8,00</span>
-    </div>
-
-    <div class="pizza-item classiche" onclick="toggleDesc(this)">
-      <div>
-        <strong>4 Stagioni</strong>
-        <p class="desc">Pomodoro, mozzarella, prosciutto cotto, peperoni, funghi, carciofi, origano</p>
-      </div>
-      <span>€8,50</span>
-    </div>
-
-    <!-- VERDURE -->
-    <div class="pizza-item verdure" onclick="toggleDesc(this)">
-      <div>
-        <strong>Estate</strong>
-        <p class="desc">Pomodoro, mozzarella, rucola, pomodorini, mozzarelline, origano</p>
-      </div>
-      <span>€8,50</span>
-    </div>
-
-    <div class="pizza-item verdure" onclick="toggleDesc(this)">
-      <div>
-        <strong>Pugliese</strong>
-        <p class="desc">Pomodoro, mozzarella, cipolla, origano</p>
-      </div>
-      <span>€6,50</span>
-    </div>
-
-    <!-- MARE -->
-    <div class="pizza-item mare" onclick="toggleDesc(this)">
-      <div>
-        <strong>Siciliana</strong>
-        <p class="desc">Pomodoro, mozzarella, acciughe, capperi, olive nere, origano</p>
-      </div>
-      <span>€8,50</span>
-    </div>
-
-    <div class="pizza-item mare" onclick="toggleDesc(this)">
-      <div>
-        <strong>Tonno e Cipolla</strong>
-        <p class="desc">Pomodoro, mozzarella, tonno, cipolla, origano</p>
-      </div>
-      <span>€7,50</span>
-    </div>
-
-    <!-- BIANCHE -->
-    <div class="pizza-item bianche" onclick="toggleDesc(this)">
-      <div>
-        <strong>4 Formaggi</strong>
-        <p class="desc">Mozzarella, gorgonzola, formaggi misti, origano</p>
-      </div>
-      <span>€8,50</span>
-    </div>
-
-    <div class="pizza-item bianche" onclick="toggleDesc(this)">
-      <div>
-        <strong>San Daniele</strong>
-        <p class="desc">Pomodoro, mozzarella, prosciutto crudo San Daniele, origano</p>
-      </div>
-      <span>€9,00</span>
-    </div>
-
+<div class="menu-row">
+  <div>
+    <strong>Capricciosa</strong>
+    <div>Pomodoro, mozzarella, prosciutto cotto, funghi freschi, carciofi</div>
   </div>
+  <div>€8,00</div>
+</div>
+
+<div class="menu-row">
+  <div>
+    <strong>4 Stagioni</strong>
+    <div>Pomodoro, mozzarella, prosciutto cotto, peperoni, funghi, carciofi</div>
+  </div>
+  <div>€8,50</div>
+</div>
+
+<div class="menu-row">
+  <div>
+    <strong>Siciliana</strong>
+    <div>Pomodoro, mozzarella, acciughe, capperi, olive nere</div>
+  </div>
+  <div>€8,50</div>
+</div>
+
+<div class="menu-row">
+  <div>
+    <strong>San Daniele</strong>
+    <div>Pomodoro, mozzarella, prosciutto crudo San Daniele</div>
+  </div>
+  <div>€9,00</div>
+</div>
 
 </section>
-.pizza-item {
-  cursor:pointer;
-  transition:all .3s ease;
-}
 
-.pizza-item:hover {
-  transform:translateY(-3px);
-}
+<footer>
+© 2026 AL DOGE – Via S. Daniele 3, Farla di Majano
+</footer>
 
-.desc{
-  max-height:0;
-  overflow:hidden;
-  font-size:.85rem;
-  color:var(--muted);
-  transition:max-height .4s ease;
-}
-
-.pizza-item.open .desc{
-  max-height:120px;
-  margin-top:6px;
-}<script>
-
-function toggleDesc(el){
-  el.classList.toggle("open");
-}
-
-</script>
-
-
-
-function filterMenu(cat){
-  const items=document.querySelectorAll('.pizza-item');
-  const buttons=document.querySelectorAll('.menu-filters button');
-
-  buttons.forEach(btn=>btn.classList.remove('active'));
-  event.target.classList.add('active');
-
-  items.forEach(item=>{
-    if(cat==='tutte'){
-      item.style.display='flex';
-    }else{
-      item.style.display=item.classList.contains(cat)?'flex':'none';
-    }
-  });
-}
-
+<script>
 async function askAI(){
-  const input=document.getElementById('ai-input').value.trim();
-  if(!input) return;
+    const input = document.getElementById("ai-input").value;
+    const resultBox = document.getElementById("ai-result");
 
-  const result=document.getElementById('ai-result');
-  result.style.display='block';
-  result.innerHTML='Sto pensando...';
+    if(!input) return;
 
-  try{
-    const res=await fetch('/.netlify/functions/grok',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({query:input})
-    });
+    resultBox.style.display="block";
+    resultBox.innerHTML="Sto pensando...";
 
-    const data=await res.json();
+    try{
+        const res = await fetch("/.netlify/functions/grok",{
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            body:JSON.stringify({ richiesta: input })
+        });
 
-    result.innerHTML=`
-      <h3>${data.nome}</h3>
-      <p><strong>Ingredienti:</strong> ${data.ingredienti_da_aggiungere.join(', ')}</p>
-      <p><strong>Calorie:</strong> ${data.calorie_stimate}</p>
-      <p><strong>Prezzo:</strong> ${data.prezzo_stimato}</p>
-      <p>${data.descrizione}</p>
-      <br>
-      <a href="tel:+3904321840683" style="color:var(--accent);font-weight:bold;">Chiama per ordinare</a>
-    `;
-  }catch(e){
-    result.innerHTML='Non riusciamo a consigliarti ora.';
-  }
+        const data = await res.json();
+        resultBox.innerHTML = data.risposta +
+        '<br><br><a class="button" href="tel:+3904321840683">Chiama ora per ordinare</a>';
+
+    }catch(e){
+        resultBox.innerHTML="Non riusciamo a consigliarti ora.";
+    }
 }
-
 </script>
 
 </body>
