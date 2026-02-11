@@ -1,44 +1,59 @@
-export async function handler(event) {
-  const { richiesta } = JSON.parse(event.body);
+export default async (req, context) => {
+  try {
+    const { testo } = await req.json();
 
-  const prompt = `
-Sei il pizzaiolo esperto della pizzeria AL DOGE.
-Consiglia UNA sola pizza usando SOLO queste opzioni reali:
+    const prompt = `
+Sei il consulente gastronomico della pizzeria AL DOGE.
+Devi consigliare in modo SEMPLICE e VELOCE cosa mangiare.
 
-- La Friulana (pomodoro, mozzarella, patate al forno, salame dolce, cipolla)
-- La Doge Special (pomodoro, mozzarella, speck, gorgonzola, noci)
+MENU DISPONIBILE:
+
+PIZZE:
 - Margherita
+- Friulana (pomodoro, mozzarella, patate al forno, salame dolce, cipolla)
+- La Doge Special (pomodoro, mozzarella, speck, gorgonzola, noci)
+
+PANINI:
+- Prosciutto crudo e rucola
+- Speck e formaggio
+- Salame e mozzarella
 
 Regole:
-- NON inventare ingredienti
-- Rispondi in italiano
-- Rispondi SOLO in JSON con:
-{
-  "nome": "...",
-  "motivo": "..."
-}
+- Rispondi in massimo 2 frasi
+- Sii concreto
+- Consiglia UNA cosa sola
+- Non fare domande
 
 Richiesta cliente:
-"${richiesta}"
+"${testo}"
 `;
 
-  const res = await fetch("https://api.x.ai/v1/chat/completions",{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization":"Bearer " + process.env.GROK_API_KEY
-    },
-    body:JSON.stringify({
-      model:"grok-4-latest",
-      messages:[{ role:"user", content: prompt }],
-      temperature:0.6
-    })
-  });
+    const response = await fetch("https://api.x.ai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.GROK_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "grok-2",
+        messages: [
+          { role: "system", content: "Sei un esperto pizzaiolo e paninaro italiano." },
+          { role: "user", content: prompt }
+        ],
+        temperature: 0.4
+      })
+    });
 
-  const data = await res.json();
+    const data = await response.json();
+    const risposta = data.choices[0].message.content;
 
-  return {
-    statusCode:200,
-    body: data.choices[0].message.content
-  };
-}
+    return new Response(JSON.stringify({ risposta }), {
+      headers: { "Content-Type": "application/json" }
+    });
+
+  } catch (error) {
+    return new Response(JSON.stringify({
+      risposta: "Ti consigliamo una delle nostre pizze speciali. Per ordinare chiamaci o passa in pizzeria."
+    }), { status: 200 });
+  }
+};
