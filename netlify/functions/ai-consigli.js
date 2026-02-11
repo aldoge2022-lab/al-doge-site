@@ -1,31 +1,30 @@
-export default async (req, context) => {
+export async function handler(event) {
   try {
-    const { testo } = await req.json();
+    const { richiesta } = JSON.parse(event.body);
 
     const prompt = `
-Sei il consulente gastronomico della pizzeria AL DOGE.
-Devi consigliare in modo SEMPLICE e VELOCE cosa mangiare.
+Sei l’assistente della pizzeria AL DOGE.
+Crea un consiglio personalizzato per il cliente.
 
-MENU DISPONIBILE:
+Puoi usare solo questi ingredienti:
+- Pomodoro
+- Mozzarella
+- Speck
+- Gorgonzola
+- Noci
+- Patate al forno
+- Salame dolce
+- Cipolla
+- Rucola
+- Prosciutto crudo
 
-PIZZE:
-- Margherita
-- Friulana (pomodoro, mozzarella, patate al forno, salame dolce, cipolla)
-- La Doge Special (pomodoro, mozzarella, speck, gorgonzola, noci)
+Il cliente ha scritto: "${richiesta}"
 
-PANINI:
-- Prosciutto crudo e rucola
-- Speck e formaggio
-- Salame e mozzarella
-
-Regole:
-- Rispondi in massimo 2 frasi
-- Sii concreto
-- Consiglia UNA cosa sola
-- Non fare domande
-
-Richiesta cliente:
-"${testo}"
+Rispondi con:
+- Nome creativo della pizza o panino
+- Ingredienti
+- Breve descrizione invitante
+Non scrivere introduzioni.
 `;
 
     const response = await fetch("https://api.x.ai/v1/chat/completions", {
@@ -35,25 +34,30 @@ Richiesta cliente:
         "Authorization": `Bearer ${process.env.GROK_API_KEY}`
       },
       body: JSON.stringify({
-        model: "grok-2",
+        model: "grok-2-latest",
         messages: [
-          { role: "system", content: "Sei un esperto pizzaiolo e paninaro italiano." },
           { role: "user", content: prompt }
         ],
-        temperature: 0.4
+        temperature: 0.8
       })
     });
 
     const data = await response.json();
-    const risposta = data.choices[0].message.content;
 
-    return new Response(JSON.stringify({ risposta }), {
-      headers: { "Content-Type": "application/json" }
-    });
+    const testo = data.choices?.[0]?.message?.content || 
+      "Non riusciamo a consigliarti ora. Chiamaci 😉";
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ risposta: testo })
+    };
 
   } catch (error) {
-    return new Response(JSON.stringify({
-      risposta: "Ti consigliamo una delle nostre pizze speciali. Per ordinare chiamaci o passa in pizzeria."
-    }), { status: 200 });
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        risposta: "Errore AI. Prova o chiamaci direttamente."
+      })
+    };
   }
-};
+}
