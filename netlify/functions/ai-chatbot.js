@@ -1,148 +1,68 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Assistente AL DOGE</title>
+import fetch from "node-fetch";
+import menu from "../../menu.json" assert { type: "json" };
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
+export const handler = async (event) => {
+  try {
+    const { message } = JSON.parse(event.body);
 
-    header {
-      background: #111;
-      color: white;
-      padding: 15px;
-      text-align: center;
-      font-size: 20px;
-      font-weight: bold;
-    }
+    const systemPrompt = `
+Sei l’assistente ufficiale della Pizzeria AL DOGE di Majano.
 
-    #chat-container {
-      flex: 1;
-      overflow-y: auto;
-      padding: 15px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+Usa SEMPRE le informazioni del seguente menu come fonte principale:
+${JSON.stringify(menu)}
 
-    .message {
-      max-width: 80%;
-      padding: 12px 15px;
-      border-radius: 12px;
-      line-height: 1.4;
-      font-size: 16px;
-    }
+I tuoi compiti:
+- consigliare pizze in base ai gusti del cliente (piccante, leggera, formaggi, verdure, ecc.)
+- proporre alternative se un ingrediente non è disponibile
+- abbinare automaticamente una bevanda ideale alla pizza o al panino scelto
+- spiegare in modo semplice se una scelta è più leggera o più calorica
+- creare panini personalizzati usando gli ingredienti disponibili
+- fare domande intelligenti per capire i gusti del cliente
+- evitare di inventare pizze o ingredienti non presenti nel menu
 
-    .user {
-      align-self: flex-end;
-      background: #d1e7ff;
-    }
+Quando un cliente chiede un panino:
+1. Chiedi se lo vuole leggero, saporito o proteico.
+2. Chiedi 2–3 ingredienti che preferisce (carne, formaggi, verdure).
+3. Proponi 1–2 combinazioni possibili, indicando se sono leggere o più ricche.
+4. Se possibile, stima le calorie usando impasto_pizza e ingredienti_kcal.
 
-    .bot {
-      align-self: flex-start;
-      background: white;
-      border: 1px solid #ddd;
-    }
+Stile:
+- amichevole, chiaro, professionale
+- risposte brevi ma complete
+- tono accogliente, come un pizzaiolo esperto che conosce bene il cliente
+- se il cliente è a dieta, privilegia pizze leggere (es. Marinara, pizze con meno formaggi e salumi) e panini con ingredienti magri (es. bresaola, verdure).
+    `.trim();
 
-    #input-area {
-      display: flex;
-      padding: 10px;
-      background: white;
-      border-top: 1px solid #ccc;
-    }
-
-    #user-input {
-      flex: 1;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 16px;
-    }
-
-    #send-btn {
-      margin-left: 10px;
-      padding: 12px 18px;
-      background: #111;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    #send-btn:hover {
-      background: #333;
-    }
-  </style>
-</head>
-
-<body>
-  <header>Assistente AL DOGE</header>
-
-  <div id="chat-container"></div>
-
-  <div id="input-area">
-    <input
-      type="text"
-      id="user-input"
-      placeholder="Scrivi un messaggio... (es. “Sono a dieta, cosa mi consigli?”)"
-    />
-    <button id="send-btn">Invia</button>
-  </div>
-
-  <script>
-    const chatContainer = document.getElementById("chat-container");
-    const input = document.getElementById("user-input");
-    const sendBtn = document.getElementById("send-btn");
-
-    function addMessage(text, sender) {
-      const msg = document.createElement("div");
-      msg.classList.add("message", sender);
-      msg.textContent = text;
-      chatContainer.appendChild(msg);
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-    }
-
-    async function sendMessage() {
-      const text = input.value.trim();
-      if (!text) return;
-
-      addMessage(text, "user");
-      input.value = "";
-
-      addMessage("Sto pensando...", "bot");
-
-      try {
-        const response = await fetch("/.netlify/functions/ai-chatbot", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: text }),
-        });
-
-        const data = await response.json();
-
-        // Rimuove "Sto pensando..."
-        chatContainer.removeChild(chatContainer.lastChild);
-
-        addMessage(data.reply || "Non riesco a rispondere in questo momento.", "bot");
-      } catch (e) {
-        chatContainer.removeChild(chatContainer.lastChild);
-        addMessage("Si è verificato un errore, riprova tra poco.", "bot");
-      }
-    }
-
-    sendBtn.addEventListener("click", sendMessage);
-    input.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") sendMessage();
+    const response = await fetch("https://api.x.ai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.XAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "grok-4-1",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: message }
+        ],
+        temperature: 0.7,
+        max_tokens: 600
+      }),
     });
-  </script>
-</body>
-</html>
+
+    const data = await response.json();
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        reply: data.choices?.[0]?.message?.content ?? "Non riesco a rispondere in questo momento."
+      }),
+    };
+  } catch (error) {
+    console.error("Errore ai-chatbot:", error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Errore interno del server" }),
+    };
+  }
+};
