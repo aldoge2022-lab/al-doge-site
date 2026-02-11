@@ -4,27 +4,15 @@ export async function handler(event) {
 
     const prompt = `
 Sei l’assistente della pizzeria AL DOGE.
-Crea un consiglio personalizzato per il cliente.
+Crea un consiglio personalizzato usando solo ingredienti reali.
 
-Puoi usare solo questi ingredienti:
-- Pomodoro
-- Mozzarella
-- Speck
-- Gorgonzola
-- Noci
-- Patate al forno
-- Salame dolce
-- Cipolla
-- Rucola
-- Prosciutto crudo
+Ingredienti disponibili:
+Pomodoro, Mozzarella, Speck, Gorgonzola, Noci,
+Patate al forno, Salame dolce, Cipolla, Rucola, Prosciutto crudo.
 
-Il cliente ha scritto: "${richiesta}"
+Richiesta cliente: "${richiesta}"
 
-Rispondi con:
-- Nome creativo della pizza o panino
-- Ingredienti
-- Breve descrizione invitante
-Non scrivere introduzioni.
+Rispondi in modo breve e diretto.
 `;
 
     const response = await fetch("https://api.x.ai/v1/chat/completions", {
@@ -34,18 +22,23 @@ Non scrivere introduzioni.
         "Authorization": `Bearer ${process.env.GROK_API_KEY}`
       },
       body: JSON.stringify({
-        model: "grok-2-latest",
+        model: "grok-4-latest",
         messages: [
           { role: "user", content: prompt }
         ],
-        temperature: 0.8
+        temperature: 0.7
       })
     });
 
     const data = await response.json();
 
-    const testo = data.choices?.[0]?.message?.content || 
-      "Non riusciamo a consigliarti ora. Chiamaci 😉";
+    console.log("AI response:", data);
+
+    const testo = data?.choices?.[0]?.message?.content;
+
+    if (!testo) {
+      throw new Error("Nessuna risposta valida da Grok");
+    }
 
     return {
       statusCode: 200,
@@ -53,6 +46,7 @@ Non scrivere introduzioni.
     };
 
   } catch (error) {
+    console.error("Errore AI:", error);
     return {
       statusCode: 500,
       body: JSON.stringify({
