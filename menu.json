@@ -1,50 +1,163 @@
-[
-  {
-    "nome": "Margherita",
-    "categoria": "classiche",
-    "ingredienti": "Pomodoro, mozzarella, origano",
-    "prezzo": "6.00"
+{
+  "pizze": [
+    {
+      "nome": "Margherita",
+      "ingredienti": ["pomodoro", "mozzarella", "origano"],
+      "allergeni": [1,7],
+      "categoria": "classica"
+    },
+    {
+      "nome": "Prosciutto e Funghi",
+      "ingredienti": ["pomodoro", "mozzarella", "prosciutto cotto", "funghi freschi", "origano"],
+      "allergeni": [1,7],
+      "categoria": "classica"
+    },
+    {
+      "nome": "Prosciutto",
+      "ingredienti": ["pomodoro", "mozzarella", "prosciutto cotto", "origano"],
+      "allergeni": [1,7],
+      "categoria": "classica"
+    },
+    {
+      "nome": "Viennese",
+      "ingredienti": ["pomodoro", "mozzarella", "wurstel", "origano"],
+      "allergeni": [1,7],
+      "categoria": "classica"
+    },
+    {
+      "nome": "Siciliana",
+      "ingredienti": ["pomodoro", "mozzarella", "acciughe", "capperi", "olive nere", "origano"],
+      "allergeni": [1,4,7],
+      "categoria": "classica"
+    },
+    {
+      "nome": "Chips",
+      "ingredienti": ["pomodoro", "mozzarella", "patate fritte", "origano"],
+      "allergeni": [1,7],
+      "categoria": "classica"
+    },
+    {
+      "nome": "Capricciosa",
+      "ingredienti": ["pomodoro", "mozzarella", "prosciutto cotto", "funghi freschi", "carciofi", "origano"],
+      "allergeni": [1,7],
+      "categoria": "classica"
+    },
+    {
+      "nome": "4 Stagioni",
+      "ingredienti": ["pomodoro", "mozzarella", "prosciutto cotto", "peperoni", "funghi freschi", "carciofi", "origano"],
+      "allergeni": [1,7],
+      "categoria": "classica"
+    },
+    {
+      "nome": "4 Formaggi",
+      "ingredienti": ["pomodoro", "mozzarella", "formaggi misti", "gorgonzola", "origano"],
+      "allergeni": [1,7],
+      "categoria": "formaggi"
+    },
+    {
+      "nome": "Pugliese",
+      "ingredienti": ["pomodoro", "mozzarella", "cipolla", "origano"],
+      "allergeni": [1,7],
+      "categoria": "classica"
+    },
+    {
+      "nome": "San Daniele",
+      "ingredienti": ["pomodoro", "mozzarella", "prosciutto crudo San Daniele", "origano"],
+      "allergeni": [1,7],
+      "categoria": "speciale"
+    },
+    {
+      "nome": "Diavola",
+      "ingredienti": ["pomodoro", "mozzarella", "salamino piccante", "peperoncino", "origano"],
+      "allergeni": [1,7],
+      "categoria": "piccante"
+    },
+    {
+      "nome": "Marinara",
+      "ingredienti": ["pomodoro", "aglio", "origano"],
+      "allergeni": [1],
+      "categoria": "leggera"
+    },
+    {
+      "nome": "Viennese e Patatine",
+      "ingredienti": ["pomodoro", "mozzarella", "wurstel", "patatine", "origano"],
+      "allergeni": [1,7],
+      "categoria": "bambini"
+    },
+    {
+      "nome": "Friulana",
+      "ingredienti": ["pomodoro", "mozzarella", "patate al forno", "salame dolce", "cipolla"],
+      "allergeni": [1,7],
+      "categoria": "saporita"
+    }
+  ],
+
+  "panino_al_doge": {
+    "nome": "Panino AL DOGE",
+    "descrizione": "Panino artigianale preparato con impasto pizza AL DOGE, cotto al momento. Farcito con prosciutto crudo San Daniele, rucola fresca e crema di formaggio.",
+    "ingredienti": ["impasto pizza", "prosciutto crudo San Daniele", "rucola", "crema di formaggio"],
+    "peso_totale_g": 220,
+    "kcal_totali_stimate": 495,
+    "allergeni": [1,7]
   },
-  {
-    "nome": "Capricciosa",
-    "categoria": "classiche",
-    "ingredienti": "Pomodoro, mozzarella, prosciutto cotto, funghi freschi, carciofi",
-    "prezzo": "8.00"
+
+  "bevande": [
+    { "nome": "Acqua naturale 0.75L", "kcal": 0, "categoria": "leggera" },
+    { "nome": "Acqua frizzante 0.75L", "kcal": 0, "categoria": "leggera" },
+    { "nome": "Coca Cola", "kcal": 139, "categoria": "dolce" },
+    { "nome": "Coca Cola Zero", "kcal": 1, "categoria": "leggera" },
+    { "nome": "Fanta", "kcal": 150, "categoria": "dolce" },
+    { "nome": "Sprite", "kcal": 140, "categoria": "dolce" },
+    { "nome": "Birra Malteus 0.3", "kcal": 120, "categoria": "birra" },
+    { "nome": "Birra Malteus 0.5", "kcal": 200, "categoria": "birra" },
+    { "nome": "Birra IPA Ducato 0.4", "kcal": 180, "categoria": "birra" },
+    { "nome": "Vino rosso 1/4", "kcal": 125, "categoria": "vino" }
+  ],
+
+  "impasto_pizza": {
+    "descrizione": "Impasto pizza AL DOGE, usato per pizze e panini, cotto al momento.",
+    "kcal_per_100g": 265
   },
-  {
-    "nome": "4 Stagioni",
-    "categoria": "classiche",
-    "ingredienti": "Pomodoro, mozzarella, prosciutto cotto, peperoni, funghi, carciofi",
-    "prezzo": "8.50"
-  },
-  {
-    "nome": "Siciliana",
-    "categoria": "mare",
-    "ingredienti": "Pomodoro, mozzarella, acciughe, capperi, olive nere",
-    "prezzo": "8.50"
-  },
-  {
-    "nome": "Tonno e Cipolla",
-    "categoria": "mare",
-    "ingredienti": "Pomodoro, mozzarella, tonno, cipolla",
-    "prezzo": "7.50"
-  },
-  {
-    "nome": "Estate",
-    "categoria": "verdure",
-    "ingredienti": "Pomodoro, mozzarella, rucola, pomodorini, mozzarelline",
-    "prezzo": "8.50"
-  },
-  {
-    "nome": "4 Formaggi",
-    "categoria": "bianche",
-    "ingredienti": "Mozzarella, gorgonzola, formaggi misti",
-    "prezzo": "8.50"
-  },
-  {
-    "nome": "San Daniele",
-    "categoria": "classiche",
-    "ingredienti": "Pomodoro, mozzarella, prosciutto crudo San Daniele",
-    "prezzo": "9.00"
+
+  "ingredienti_kcal": {
+    "pomodoro": 18,
+    "mozzarella": 280,
+    "mozzarella di bufala": 288,
+    "gorgonzola": 320,
+    "philadelphia": 253,
+    "stracchino": 290,
+    "scamorza": 330,
+    "ricotta affumicata": 174,
+    "grana padano": 398,
+    "burrata": 350,
+    "panna": 335,
+    "aglio": 149,
+    "cipolla": 40,
+    "patate al forno": 150,
+    "patatine fritte": 312,
+    "zucchine": 17,
+    "melanzane": 24,
+    "peperoni": 22,
+    "funghi freschi": 22,
+    "carciofi": 47,
+    "olive nere": 115,
+    "olive taggiasche": 350,
+    "capperi": 23,
+    "prosciutto cotto": 215,
+    "prosciutto crudo San Daniele": 270,
+    "bresaola": 151,
+    "speck": 300,
+    "pancetta": 450,
+    "salsiccia": 330,
+    "salamino piccante": 460,
+    "salame dolce": 420,
+    "wurstel": 270,
+    "tonno": 130,
+    "acciughe": 210,
+    "salmone affumicato": 180,
+    "gamberetti": 85,
+    "frutti di mare": 90,
+    "rucola": 25,
+    "insalata": 5
   }
-]
+}
