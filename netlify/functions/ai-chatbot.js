@@ -3,34 +3,32 @@ import menu from "../../menu.json" assert { type: "json" };
 
 export const handler = async (event) => {
   try {
-    const { message } = JSON.parse(event.body);
+    const { richiesta } = JSON.parse(event.body);
 
-    const systemPrompt = `
-Sei l’assistente ufficiale della Pizzeria AL DOGE di Majano.
+    if (!process.env.XAI_API_KEY) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({
+          risposta: "Chiave API non configurata correttamente.",
+        }),
+      };
+    }
 
-Usa SEMPRE le informazioni del seguente menu come fonte principale:
+    const prompt = `
+Sei un consulente gastronomico premium della pizzeria AL DOGE.
+
+Usa questo menu ufficiale:
 ${JSON.stringify(menu)}
 
-I tuoi compiti:
-- consigliare pizze in base ai gusti del cliente (piccante, leggera, formaggi, verdure, ecc.)
-- proporre alternative se un ingrediente non è disponibile
-- abbinare automaticamente una bevanda ideale alla pizza o al panino scelto
-- spiegare in modo semplice se una scelta è più leggera o più calorica
-- creare panini personalizzati usando gli ingredienti disponibili
-- fare domande intelligenti per capire i gusti del cliente
-- evitare di inventare pizze o ingredienti non presenti nel menu
+Cliente chiede: "${richiesta}"
 
-Quando un cliente chiede un panino:
-1. Chiedi se lo vuole leggero, saporito o proteico.
-2. Chiedi 2–3 ingredienti che preferisce (carne, formaggi, verdure).
-3. Proponi 1–2 combinazioni possibili, indicando se sono leggere o più ricche.
-4. Se possibile, stima le calorie usando impasto_pizza e ingredienti_kcal.
-
-Stile:
-- amichevole, chiaro, professionale
-- risposte brevi ma complete
-- tono accogliente, come un pizzaiolo esperto che conosce bene il cliente
-- se il cliente è a dieta, privilegia pizze leggere (es. Marinara, pizze con meno formaggi e salumi) e panini con ingredienti magri (es. bresaola, verdure).
+Regole:
+- Consiglia UNA sola pizza
+- Inserisci stima calorie usando ingredienti_kcal
+- Suggerisci una bevanda coerente
+- Spiega in modo elegante perché l'abbinamento funziona
+- Massimo 4 frasi
+- Tono professionale e raffinato
     `.trim();
 
     const response = await fetch("https://api.x.ai/v1/chat/completions", {
@@ -42,27 +40,29 @@ Stile:
       body: JSON.stringify({
         model: "grok-4-1",
         messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: message }
+          { role: "system", content: "Sei uno chef italiano esperto." },
+          { role: "user", content: prompt },
         ],
-        temperature: 0.7,
-        max_tokens: 600
+        temperature: 0.8,
       }),
     });
 
     const data = await response.json();
 
+    const testo =
+      data.choices?.[0]?.message?.content ||
+      "Non riusciamo a consigliarti ora.";
+
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        reply: data.choices?.[0]?.message?.content ?? "Non riesco a rispondere in questo momento."
-      }),
+      body: JSON.stringify({ risposta: testo }),
     };
   } catch (error) {
-    console.error("Errore ai-chatbot:", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Errore interno del server" }),
+      body: JSON.stringify({
+        risposta: "Errore AI. Controlla configurazione API.",
+      }),
     };
   }
 };
