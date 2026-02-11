@@ -189,7 +189,6 @@ footer{
 
   <div id="ai-result"></div>
 </section>
-
 <section class="menu-section">
 
   <h2 class="menu-title">Il Nostro Menu</h2>
@@ -204,28 +203,114 @@ footer{
 
   <div class="menu-grid">
 
-    <div class="pizza-item classiche"><strong>Margherita</strong><span>€6,00</span></div>
-    <div class="pizza-item classiche"><strong>Capricciosa</strong><span>€8,00</span></div>
-    <div class="pizza-item classiche"><strong>4 Stagioni</strong><span>€8,50</span></div>
+    <!-- CLASSICHE -->
+    <div class="pizza-item classiche" onclick="toggleDesc(this)">
+      <div>
+        <strong>Margherita</strong>
+        <p class="desc">Pomodoro, mozzarella, origano</p>
+      </div>
+      <span>€6,00</span>
+    </div>
 
-    <div class="pizza-item verdure"><strong>Estate</strong><span>€8,50</span></div>
-    <div class="pizza-item verdure"><strong>Pugliese</strong><span>€6,50</span></div>
+    <div class="pizza-item classiche" onclick="toggleDesc(this)">
+      <div>
+        <strong>Capricciosa</strong>
+        <p class="desc">Pomodoro, mozzarella, prosciutto cotto, funghi freschi, carciofi, origano</p>
+      </div>
+      <span>€8,00</span>
+    </div>
 
-    <div class="pizza-item mare"><strong>Siciliana</strong><span>€8,50</span></div>
-    <div class="pizza-item mare"><strong>Tonno e Cipolla</strong><span>€7,50</span></div>
+    <div class="pizza-item classiche" onclick="toggleDesc(this)">
+      <div>
+        <strong>4 Stagioni</strong>
+        <p class="desc">Pomodoro, mozzarella, prosciutto cotto, peperoni, funghi, carciofi, origano</p>
+      </div>
+      <span>€8,50</span>
+    </div>
 
-    <div class="pizza-item bianche"><strong>4 Formaggi</strong><span>€8,50</span></div>
-    <div class="pizza-item bianche"><strong>San Daniele</strong><span>€9,00</span></div>
+    <!-- VERDURE -->
+    <div class="pizza-item verdure" onclick="toggleDesc(this)">
+      <div>
+        <strong>Estate</strong>
+        <p class="desc">Pomodoro, mozzarella, rucola, pomodorini, mozzarelline, origano</p>
+      </div>
+      <span>€8,50</span>
+    </div>
+
+    <div class="pizza-item verdure" onclick="toggleDesc(this)">
+      <div>
+        <strong>Pugliese</strong>
+        <p class="desc">Pomodoro, mozzarella, cipolla, origano</p>
+      </div>
+      <span>€6,50</span>
+    </div>
+
+    <!-- MARE -->
+    <div class="pizza-item mare" onclick="toggleDesc(this)">
+      <div>
+        <strong>Siciliana</strong>
+        <p class="desc">Pomodoro, mozzarella, acciughe, capperi, olive nere, origano</p>
+      </div>
+      <span>€8,50</span>
+    </div>
+
+    <div class="pizza-item mare" onclick="toggleDesc(this)">
+      <div>
+        <strong>Tonno e Cipolla</strong>
+        <p class="desc">Pomodoro, mozzarella, tonno, cipolla, origano</p>
+      </div>
+      <span>€7,50</span>
+    </div>
+
+    <!-- BIANCHE -->
+    <div class="pizza-item bianche" onclick="toggleDesc(this)">
+      <div>
+        <strong>4 Formaggi</strong>
+        <p class="desc">Mozzarella, gorgonzola, formaggi misti, origano</p>
+      </div>
+      <span>€8,50</span>
+    </div>
+
+    <div class="pizza-item bianche" onclick="toggleDesc(this)">
+      <div>
+        <strong>San Daniele</strong>
+        <p class="desc">Pomodoro, mozzarella, prosciutto crudo San Daniele, origano</p>
+      </div>
+      <span>€9,00</span>
+    </div>
 
   </div>
 
 </section>
+.pizza-item {
+  cursor:pointer;
+  transition:all .3s ease;
+}
 
-<footer>
-  © 2026 AL DOGE – Via S. Daniele 3, Farla di Majano
-</footer>
+.pizza-item:hover {
+  transform:translateY(-3px);
+}
 
-<script>
+.desc{
+  max-height:0;
+  overflow:hidden;
+  font-size:.85rem;
+  color:var(--muted);
+  transition:max-height .4s ease;
+}
+
+.pizza-item.open .desc{
+  max-height:120px;
+  margin-top:6px;
+}<script>
+
+function toggleDesc(el){
+  el.classList.toggle("open");
+}
+
+</script>
+
+
 
 function filterMenu(cat){
   const items=document.querySelectorAll('.pizza-item');
