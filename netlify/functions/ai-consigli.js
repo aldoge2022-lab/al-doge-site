@@ -71,7 +71,7 @@ Regole:
           Authorization: `Bearer ${process.env.GROK_API_KEY}`,
         },
         body: JSON.stringify({
-          model: "grok-2-latest",
+          model: "grok-2",
           messages: [
             { role: "system", content: "Sei uno chef italiano esperto." },
             { role: "user", content: prompt },
