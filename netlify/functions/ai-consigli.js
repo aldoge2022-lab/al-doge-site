@@ -1,68 +1,44 @@
-import fetch from "node-fetch";
-import menu from "../../menu.json" assert { type: "json" };
-
-export const handler = async (event) => {
+exports.handler = async (event) => {
   try {
     const { richiesta } = JSON.parse(event.body);
-
-    if (!process.env.XAI_API_KEY) {
+    
+    if (!richiesta) {
       return {
-        statusCode: 500,
-        body: JSON.stringify({
-          risposta: "Chiave API non configurata correttamente.",
-        }),
+        statusCode: 400,
+        body: JSON.stringify({ risposta: "Per favore, descrivi cosa cerchi." })
       };
     }
 
-    const prompt = `
-Sei un consulente gastronomico premium della pizzeria AL DOGE.
+    const testo = richiesta.toLowerCase();
+    let consiglio = "";
 
-Usa questo menu ufficiale:
-${JSON.stringify(menu)}
-
-Cliente chiede: "${richiesta}"
-
-Regole:
-- Consiglia UNA sola pizza
-- Inserisci stima calorie usando ingredienti_kcal
-- Suggerisci una bevanda coerente
-- Spiega in modo elegante perché l'abbinamento funziona
-- Massimo 4 frasi
-- Tono professionale e raffinato
-    `.trim();
-
-    const response = await fetch("https://api.x.ai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.XAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "grok-4-1",
-        messages: [
-          { role: "system", content: "Sei uno chef italiano esperto." },
-          { role: "user", content: prompt },
-        ],
-        temperature: 0.8,
-      }),
-    });
-
-    const data = await response.json();
-
-    const testo =
-      data.choices?.[0]?.message?.content ||
-      "Non riusciamo a consigliarti ora.";
+    if (testo.includes("dieta") || testo.includes("leggera") || testo.includes("light")) {
+      consiglio = "🌱 Perfetto! La **Marinara** è la scelta migliore per te: solo pomodoro, aglio e origano. Leggera e delizionsa! Prezzo: **€7.50**";
+    } else if (testo.includes("proteica") || testo.includes("proteina") || testo.includes("muscoli")) {
+      consiglio = "💪 Ottimo! La **San Daniele** è ricca di proteine con prosciutto crudo San Daniele. Perfetta per chi vuole nutrirsi bene! Prezzo: **€12.00**";
+    } else if (testo.includes("piccante") || testo.includes("peperoncino") || testo.includes("spicy")) {
+      consiglio = "🔥 Che coraggio! La **Diavola** è per i veri amanti del piccante: mozzarella, salamino piccante e peperoncino. Fuoco in bocca! Prezzo: **€9.50**";
+    } else if (testo.includes("formaggio") || testo.includes("formaggi")) {
+      consiglio = "🧀 Delizia per palati raffinati! La **4 Formaggi** con mozzarella, gorgonzola, formaggi misti è un'esplosione di sapori. Prezzo: **€11.00**";
+    } else if (testo.includes("verdure") || testo.includes("verdura") || testo.includes("vegetariana")) {
+      consiglio = "🥬 Scelta consapevole! La **Capricciosa** con verdure fresche, prosciutto e funghi è equilibrata e gustosa. Prezzo: **€10.50**";
+    } else if (testo.includes("panino")) {
+      consiglio = "🥖 Ottimo! Il **Panino AL DOGE** è artigianale con impasto pizza, prosciutto crudo San Daniele, rucola e crema di formaggio. Prezzo: **€8.50**";
+    } else if (testo.includes("classica") || testo.includes("tradizionale")) {
+      consiglio = "👑 Non sbagliare mai! La **Margherita** classica: pomodoro, mozzarella, origano. Semplice e perfetta. Prezzo: **€8.50**";
+    } else {
+      consiglio = "🍕 Non ho capito bene, ma ti consiglio di provare la **Capricciosa** (€10.50) - è il nostro best seller! Oppure dimmi che tipo di pizza preferisci (leggera, piccante, con formaggi...) e ti aiutiamo.";
+    }
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ risposta: testo }),
+      body: JSON.stringify({ risposta: consiglio })
     };
   } catch (error) {
+    console.error("Errore:", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({
-        risposta: "Errore AI. Controlla configurazione API.",
-      }),
+      body: JSON.stringify({ risposta: "Errore nel processo. Riprova." })
     };
   }
 };
