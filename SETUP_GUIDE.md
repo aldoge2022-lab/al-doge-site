@@ -185,6 +185,12 @@ Value: [l'ID del gruppo ricevuto da RawDataBot]
 2. Prova incognito mode
 3. Cancella cache browser
 
+**Non riesci a pubblicare l'ultimo progetto / sito non aggiornato:**
+1. Verifica che Netlify stia deployando il branch con le ultime modifiche
+2. In Netlify → Deploys, clicca "Trigger deploy" → "Clear cache and deploy site"
+3. Svuota cache browser o prova in incognito
+4. Assicurati di aprire la pagina corretta (es. `/home.html`)
+
 ---
 
 ## 📞 Supporto
