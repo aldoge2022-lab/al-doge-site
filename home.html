@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AL DOGE - Ordina Online</title>
+  <meta name="description" content="Ordina online da AL DOGE - Pizze tradizionali o panini personalizzati con AI">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --gold: #d4af37;
+      --dark: #0b0b0b;
+      --soft: #1a1a1a;
+      --text: #f5f5f5;
+      --muted: #b3b3b3;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--dark);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+    }
+
+    .logo-fixed {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 999;
+      width: 70px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.6);
+      cursor: pointer;
+    }
+
+    .cart-fixed {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 999;
+      background: var(--gold);
+      color: black;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+      transition: transform 0.3s;
+    }
+
+    .cart-fixed:hover {
+      transform: scale(1.1);
+    }
+
+    .cart-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: #ff4444;
+      color: white;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .hero {
+      position: relative;
+      height: 100vh;
+      background: url('hero-image.jpg') center/cover no-repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .overlay {
+      background: rgba(0,0,0,0.7);
+      position: absolute;
+      inset: 0;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 800px;
+      padding: 20px;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      color: var(--gold);
+      font-size: clamp(48px, 8vw, 80px);
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .subtitle {
+      font-size: clamp(18px, 3vw, 24px);
+      color: var(--text);
+      margin-bottom: 50px;
+      font-weight: 300;
+    }
+
+    .main-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 40px;
+    }
+
+    .btn-main {
+      background: var(--gold);
+      color: black;
+      padding: 25px 50px;
+      border-radius: 15px;
+      text-decoration: none;
+      font-size: 20px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      transition: all 0.3s;
+      box-shadow: 0 5px 20px rgba(212, 175, 55, 0.3);
+      min-width: 280px;
+      justify-content: center;
+    }
+
+    .btn-main:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(212, 175, 55, 0.5);
+    }
+
+    .btn-main .emoji {
+      font-size: 32px;
+    }
+
+    .info-section {
+      background: var(--soft);
+      padding: 60px 20px;
+      text-align: center;
+    }
+
+    .info-section h2 {
+      font-family: 'Playfair Display', serif;
+      color: var(--gold);
+      font-size: 32px;
+      margin-bottom: 30px;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .feature {
+      background: var(--dark);
+      padding: 30px;
+      border-radius: 15px;
+      border: 1px solid rgba(212, 175, 55, 0.2);
+    }
+
+    .feature-icon {
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+
+    .feature h3 {
+      color: var(--gold);
+      margin-bottom: 10px;
+      font-size: 20px;
+    }
+
+    .feature p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    footer {
+      background: var(--dark);
+      padding: 40px 20px;
+      text-align: center;
+      color: var(--muted);
+      border-top: 1px solid rgba(212, 175, 55, 0.2);
+    }
+
+    footer a {
+      color: var(--gold);
+      text-decoration: none;
+    }
+
+    @media (max-width: 768px) {
+      .main-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .btn-main {
+        width: 90%;
+        max-width: 350px;
+      }
+
+      .cart-fixed, .logo-fixed {
+        width: 50px;
+        height: 50px;
+      }
+
+      .cart-fixed {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Logo fisso -->
+  <video class="logo-fixed" autoplay loop muted playsinline onclick="window.location.href='index.html'">
+    <source src="logo-animato.mp4" type="video/mp4">
+  </video>
+
+  <!-- Carrello fisso -->
+  <div class="cart-fixed" onclick="window.location.href='carrello.html'" id="cart-icon">
+    🛒
+    <span class="cart-badge" id="cart-badge" style="display: none;">0</span>
+  </div>
+
+  <!-- Hero Section -->
+  <div class="hero">
+    <div class="overlay"></div>
+    <div class="hero-content">
+      <h1>AL DOGE</h1>
+      <p class="subtitle">Ordina Online - Pizza Tradizionale o Panino Personalizzato</p>
+      
+      <div class="main-buttons">
+        <a href="pizze.html" class="btn-main">
+          <span class="emoji">🍕</span>
+          <span>MENU PIZZE</span>
+        </a>
+        <a href="panini-custom.html" class="btn-main">
+          <span class="emoji">🥖</span>
+          <span>PANINI CUSTOM AI</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Section -->
+  <section class="info-section">
+    <h2>Come Funziona</h2>
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">🍕</div>
+        <h3>Menu Pizze</h3>
+        <p>35 pizze tradizionali cotte al forno a legna. Scegli le tue preferite e aggiungi al carrello.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🤖</div>
+        <h3>Panini AI</h3>
+        <p>Crea il tuo panino personalizzato con l'aiuto dell'intelligenza artificiale. Descrivi cosa vuoi e l'AI ti guida!</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">💳</div>
+        <h3>Paga Online</h3>
+        <p>Pagamento sicuro con Stripe. Scegli l'orario di ritiro e paga comodamente online.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">⏰</div>
+        <h3>Ritira Quando Vuoi</h3>
+        <p>Seleziona l'orario di ritiro (18:30-23:00). Il tuo ordine sarà pronto!</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p><strong>AL DOGE</strong> - Via S. Daniele 3, Farla di Majano (UD)</p>
+    <p>📞 <a href="tel:04321840683">0432-1840683</a></p>
+    <p style="margin-top: 20px; font-size: 12px;">© 2026 AL DOGE - Tutti i diritti riservati</p>
+  </footer>
+
+  <script>
+    // Aggiorna badge carrello
+    function updateCartBadge() {
+      const cart = JSON.parse(localStorage.getItem('aldoge_cart') || '[]');
+      const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+      const badge = document.getElementById('cart-badge');
+      
+      if (totalItems > 0) {
+        badge.textContent = totalItems;
+        badge.style.display = 'flex';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    updateCartBadge();
+    
+    // Aggiorna ogni volta che la pagina diventa visibile
+    document.addEventListener('visibilitychange', updateCartBadge);
+  </script>
+</body>
+</html>
