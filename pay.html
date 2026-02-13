@@ -244,12 +244,12 @@
 
       <!-- Quick Amounts -->
       <div class="quick-amounts">
-        <button class="amount-btn" onclick="selectAmount(10)">€10</button>
-        <button class="amount-btn" onclick="selectAmount(20)">€20</button>
-        <button class="amount-btn" onclick="selectAmount(30)">€30</button>
-        <button class="amount-btn" onclick="selectAmount(40)">€40</button>
-        <button class="amount-btn" onclick="selectAmount(50)">€50</button>
-        <button class="amount-btn" onclick="selectAmount(100)">€100</button>
+        <button class="amount-btn" onclick="selectAmount(10, event)">€10</button>
+        <button class="amount-btn" onclick="selectAmount(20, event)">€20</button>
+        <button class="amount-btn" onclick="selectAmount(30, event)">€30</button>
+        <button class="amount-btn" onclick="selectAmount(40, event)">€40</button>
+        <button class="amount-btn" onclick="selectAmount(50, event)">€50</button>
+        <button class="amount-btn" onclick="selectAmount(100, event)">€100</button>
       </div>
 
       <div class="divider">
@@ -313,14 +313,16 @@
       return parseInt(table);
     }
 
-    function selectAmount(amount) {
+    function selectAmount(amount, event) {
       selectedAmount = amount;
       
       // Aggiorna UI
       document.querySelectorAll('.amount-btn').forEach(btn => {
         btn.classList.remove('selected');
       });
-      event.target.classList.add('selected');
+      if (event && event.target) {
+        event.target.classList.add('selected');
+      }
       
       // Imposta input custom
       document.getElementById('custom-amount').value = amount.toFixed(2);

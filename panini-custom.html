@@ -378,7 +378,7 @@
         <div class="price-detail" id="price-detail">Base €5.00 + 0 ingredienti</div>
       </div>
       
-      <button class="add-to-cart-final" onclick="addPaninoToCart()">
+      <button class="add-to-cart-final" onclick="addPaninoToCart(event)">
         🛒 Aggiungi al Carrello
       </button>
     </div>
@@ -485,7 +485,7 @@
         `Base €${PREZZO_BASE_PANINO.toFixed(2)} + ${numIngredients} ingredienti (€${PREZZO_INGREDIENTE.toFixed(2)} cad.)`;
     }
 
-    function addPaninoToCart() {
+    function addPaninoToCart(event) {
       if (selectedIngredients.length === 0) {
         alert('Seleziona almeno un ingrediente!');
         return;
@@ -506,15 +506,17 @@
       CartManager.addItem(item);
       
       // Feedback visivo
-      const btn = event.target;
-      const originalText = btn.innerHTML;
-      btn.innerHTML = '✓ Aggiunto al Carrello!';
-      btn.style.background = '#4CAF50';
-      
-      setTimeout(() => {
-        btn.innerHTML = originalText;
-        btn.style.background = '';
-      }, 2000);
+      const btn = event ? event.target : document.querySelector('.add-to-cart-final');
+      if (btn) {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '✓ Aggiunto al Carrello!';
+        btn.style.background = '#4CAF50';
+        
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          btn.style.background = '';
+        }, 2000);
+      }
       
       // Reset form
       setTimeout(() => {

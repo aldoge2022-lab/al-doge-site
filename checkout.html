@@ -434,8 +434,11 @@
     let elements = null;
     let paymentElement = null;
 
-    // Inizializza Stripe (usa test key per ora)
-    const STRIPE_PUBLIC_KEY = 'pk_test_51QmZ7YRz9m0xxxxxxxxxxxxx'; // Da sostituire con la vera chiave
+    // IMPORTANTE: Stripe Public Key
+    // Questa è una chiave di ESEMPIO per sviluppo/testing
+    // Per produzione, sostituire con la tua vera chiave Stripe LIVE
+    // Oppure caricare da environment variable tramite backend
+    const STRIPE_PUBLIC_KEY = 'pk_test_51QmZ7YRz9m0xxxxxxxxxxxxx'; // DA SOSTITUIRE
 
     function initStripe() {
       // Per demo, usiamo una simulazione

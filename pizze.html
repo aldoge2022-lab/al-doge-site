@@ -382,7 +382,7 @@
               <span class="qty-display" id="qty-${pizza.nome.replace(/\s/g, '-')}">1</span>
               <button class="qty-btn" onclick="changeQuantity('${pizza.nome}', 1)">+</button>
             </div>
-            <button class="add-to-cart-btn" onclick="addToCart('${pizza.nome}')">
+            <button class="add-to-cart-btn" onclick="addToCart('${pizza.nome}', event)">
               🛒 Aggiungi
             </button>
           </div>
@@ -402,7 +402,7 @@
     }
 
     // Aggiungi al carrello
-    function addToCart(pizzaName) {
+    function addToCart(pizzaName, event) {
       const pizza = allPizzas.find(p => p.nome === pizzaName);
       if (!pizza) return;
       
@@ -438,15 +438,17 @@
       document.getElementById(`qty-${id}`).textContent = '1';
       
       // Feedback visivo
-      const btn = event.target;
-      const originalText = btn.innerHTML;
-      btn.innerHTML = '✓ Aggiunto!';
-      btn.style.background = '#4CAF50';
-      
-      setTimeout(() => {
-        btn.innerHTML = originalText;
-        btn.style.background = '';
-      }, 1500);
+      const btn = event ? event.target : null;
+      if (btn) {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '✓ Aggiunto!';
+        btn.style.background = '#4CAF50';
+        
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          btn.style.background = '';
+        }, 1500);
+      }
       
       updateCartBadge();
     }

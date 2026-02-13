@@ -29,7 +29,8 @@ exports.handler = async (event) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           success: true, 
-          message: 'Ordine salvato (Telegram non configurato)' 
+          telegram_enabled: false,
+          message: 'Ordine salvato (Telegram non configurato - configura TELEGRAM_BOT_TOKEN e TELEGRAM_CHAT_ID)' 
         })
       };
     }
@@ -63,7 +64,8 @@ exports.handler = async (event) => {
         'Access-Control-Allow-Origin': '*'
       },
       body: JSON.stringify({ 
-        success: true, 
+        success: true,
+        telegram_enabled: true,
         message: 'Notifica inviata con successo' 
       })
     };

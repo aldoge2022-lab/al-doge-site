@@ -193,7 +193,7 @@ Per problemi tecnici:
 - Email: aldoge2022@gmail.com
 - Tel: 0432-1840683
 
-Per cambiare password admin, editare `admin-orders.html` riga 442.
+Per cambiare password admin, cercare `ADMIN_PASSWORD` in `admin-orders.html`.
 
 ---
 

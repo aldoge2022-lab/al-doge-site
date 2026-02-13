@@ -241,7 +241,7 @@ al-doge-site/
 
 ### Password Admin
 - Password dashboard: `aldoge2024`
-- **IMPORTANTE**: Cambiare in produzione editando `admin-orders.html` riga 442
+- **IMPORTANTE**: Cambiare in produzione cercando `ADMIN_PASSWORD` in `admin-orders.html`
 
 ### Stripe Keys
 - Usare **TEST mode** per sviluppo
