@@ -3,235 +3,137 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AL DOGE – Pizzeria Forno a Legna | Farla di Majano</title>
-
-<meta name="description" content="AL DOGE – Pizzeria con forno a legna a Farla di Majano. Menu completo, pizze classiche e speciali, consigli personalizzati.">
-<meta name="keywords" content="pizzeria Majano, pizza forno a legna, AL DOGE, pizza Friuli">
-
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<title>AL DOGE – Asporto</title>
 
 <style>
-:root{
---gold:#d4af37;
---dark:#0b0b0b;
---soft:#1a1a1a;
---text:#f5f5f5;
---muted:#b3b3b3;
-}
-
 body{
-margin:0;
-background:var(--dark);
-color:var(--text);
-font-family:'Inter',sans-serif;
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:#0f0f0f;
+    color:white;
 }
 
-h1,h2{
-font-family:'Playfair Display',serif;
-color:var(--gold);
+header{
+    text-align:center;
+    padding:60px 20px;
 }
 
-.hero{
-position:relative;
-height:90vh;
-background:url('hero-image.jpg') center/cover no-repeat;
-display:flex;
-align-items:center;
-justify-content:center;
-text-align:center;
-}
-
-.overlay{
-background:rgba(0,0,0,0.6);
-position:absolute;
-inset:0;
-}
-
-.hero-content{
-position:relative;
-z-index:2;
-}
-
-.hero h1{
-font-size:64px;
-margin:0;
-}
-
-.hero p{
-margin-top:15px;
-font-size:18px;
-}
-
-.btn{
-background:var(--gold);
-color:black;
-padding:12px 28px;
-border-radius:30px;
-text-decoration:none;
-display:inline-block;
-margin-top:20px;
-font-weight:500;
-}
-
-.logo-fixed{
-position:fixed;
-top:20px;
-left:20px;
-z-index:999;
-width:70px;
-border-radius:12px;
-box-shadow:0 0 20px rgba(0,0,0,0.6);
+h1{
+    font-size:38px;
+    margin-bottom:10px;
 }
 
 section{
-padding:80px 20px;
-max-width:900px;
-margin:auto;
+    padding:40px 20px;
+    max-width:900px;
+    margin:auto;
 }
 
-.ai-box{
-background:var(--soft);
-padding:30px;
-border-radius:20px;
-text-align:center;
-}
-
-input{
-width:80%;
-padding:12px;
-border-radius:10px;
-border:none;
-margin-top:15px;
+.item{
+    display:flex;
+    justify-content:space-between;
+    border-bottom:1px solid #333;
+    padding:15px 0;
 }
 
 button{
-background:var(--gold);
-border:none;
-padding:12px 25px;
-border-radius:20px;
-margin-top:15px;
-cursor:pointer;
-font-weight:500;
+    background:transparent;
+    border:1px solid #c9a227;
+    color:#c9a227;
+    padding:6px 12px;
+    cursor:pointer;
 }
 
-#ai-result{
-margin-top:20px;
-color:var(--muted);
+button:hover{
+    background:#c9a227;
+    color:black;
 }
 
-.menu-item{
-padding:20px 0;
-border-bottom:1px solid #333;
-display:flex;
-justify-content:space-between;
-align-items:flex-start;
-}
-
-.menu-item h3{
-margin:0;
-color:var(--gold);
-}
-
-.menu-desc{
-font-size:14px;
-color:var(--muted);
-margin-top:5px;
-}
-
-.price{
-font-weight:600;
-color:white;
-}
-
-footer{
-text-align:center;
-padding:40px;
-color:var(--muted);
+#cartBar{
+    position:fixed;
+    bottom:0;
+    width:100%;
+    background:black;
+    padding:15px;
+    display:flex;
+    justify-content:space-between;
+    border-top:1px solid #333;
 }
 </style>
 </head>
 
 <body>
 
-<video class="logo-fixed" autoplay loop muted playsinline>
-<source src="logo-animato.mp4" type="video/mp4">
-</video>
-
-<div class="hero">
-<div class="overlay"></div>
-<div class="hero-content">
+<header>
 <h1>AL DOGE</h1>
-<p>Dove la pizza prende vita nel forno a legna</p>
-
-<a href="tel:04321840683" class="btn">Chiama per ordinare</a>
-
-<!-- ⭐ NUOVO PULSANTE CHATBOT -->
-<a href="chatbot.html" class="btn" style="margin-left:10px; background:#fff; color:#000;">
-  Chatbot AL DOGE
-</a>
-
-</div>
-</div>
+<p>Pizzeria Forno a Legna – Asporto</p>
+</header>
 
 <section>
-<h2>Pizza o Panino? Scrivi e ti consigliamo noi.</h2>
-<div class="ai-box">
-<input id="ai-input" placeholder="Es: Pizza leggera con verdure">
-<br>
-<button onclick="askAI()">Consigliami</button>
-<div id="ai-result"></div>
+<h2>Panini Artigianali</h2>
+
+<div class="item">
+<span>Panino Classico – €8.50</span>
+<button onclick="addToCart('Panino Classico',8.50)">Aggiungi</button>
 </div>
+
+<div class="item">
+<span>Panino Vegano – €9.00</span>
+<button onclick="addToCart('Panino Vegano',9.00)">Aggiungi</button>
+</div>
+
+<div class="item">
+<span>Panino Senza Glutine – €10.00</span>
+<button onclick="addToCart('Panino SG',10.00)">Aggiungi</button>
+</div>
+
 </section>
 
 <section>
-<h2>Il Nostro Menu</h2>
-<div id="menu-container"></div>
+<h2>Pizze</h2>
+
+<div class="item">
+<span>Margherita – €6.50</span>
+<button onclick="addToCart('Margherita',6.50)">Aggiungi</button>
+</div>
+
+<div class="item">
+<span>Diavola – €8.50</span>
+<button onclick="addToCart('Diavola',8.50)">Aggiungi</button>
+</div>
+
 </section>
 
-<footer>
-© 2026 AL DOGE – Via S. Daniele 3, Farla di Majano
-</footer>
+<section>
+<h2>Bevande</h2>
+
+<div class="item">
+<span>Coca Cola – €2.50</span>
+<button onclick="addToCart('Coca Cola',2.50)">Aggiungi</button>
+</div>
+
+<div class="item">
+<span>Birra Bottiglia – €4.00</span>
+<button onclick="addToCart('Birra Bottiglia',4.00)">Aggiungi</button>
+</div>
+
+</section>
+
+<div id="cartBar">
+<span>Totale: € <span id="total">0.00</span></span>
+<button onclick="checkout()">Procedi</button>
+</div>
 
 <script>
-async function loadMenu(){
-  const res = await fetch("menu.json");
-  const data = await res.json();
-  const container = document.getElementById("menu-container");
-  container.innerHTML = "";
+let total = 0;
 
-  data.pizze.forEach(pizza => {
-    const item = document.createElement("div");
-    item.className = "menu-item";
-    item.innerHTML = `
-      <div>
-        <h3>${pizza.nome}</h3>
-        <div class="menu-desc">${pizza.ingredienti.join(", ")}</div>
-      </div>
-      <div class="price">—</div>
-    `;
-    container.appendChild(item);
-  });
+function addToCart(name,price){
+    total += price;
+    document.getElementById("total").innerText = total.toFixed(2);
 }
-loadMenu();
 
-async function askAI(){
-const input=document.getElementById("ai-input").value;
-const result=document.getElementById("ai-result");
-if(!input)return;
-
-result.innerHTML="Sto pensando...";
-
-try{
-const res=await fetch("/.netlify/functions/ai-consigli",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({ richiesta: input })
-});
-const data=await res.json();
-result.innerHTML=data.risposta;
-}catch{
-result.innerHTML="Non riusciamo a consigliarti ora.";
-}
+function checkout(){
+    alert("Funzione pagamento in arrivo. Totale: € " + total.toFixed(2));
 }
 </script>
 
