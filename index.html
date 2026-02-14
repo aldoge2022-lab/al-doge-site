@@ -125,17 +125,70 @@ button:hover{
 </div>
 
 <script>
-let total = 0;
+let cart = [];
 
-function addToCart(name,price){
-    total += price;
-    document.getElementById("total").innerText = total.toFixed(2);
+function addToCart(name, price){
+    const existing = cart.find(item => item.name === name);
+
+    if(existing){
+        existing.qty += 1;
+    } else {
+        cart.push({ name, price, qty: 1 });
+    }
+
+    renderCart();
 }
 
-function checkout(){
-    alert("Funzione pagamento in arrivo. Totale: € " + total.toFixed(2));
+function removeItem(index){
+    cart.splice(index, 1);
+    renderCart();
+}
+
+function changeQty(index, delta){
+    cart[index].qty += delta;
+
+    if(cart[index].qty <= 0){
+        removeItem(index);
+        return;
+    }
+
+    renderCart();
+}
+
+function renderCart(){
+    const cartContainer = document.getElementById("cartItems");
+    const totalContainer = document.getElementById("total");
+
+    cartContainer.innerHTML = "";
+    let total = 0;
+
+    cart.forEach((item, index)=>{
+        const itemTotal = item.price * item.qty;
+        total += itemTotal;
+
+        cartContainer.innerHTML += `
+            <div style="margin-bottom:10px;">
+                <strong>${item.name}</strong><br>
+                €${item.price.toFixed(2)} x ${item.qty}
+                <button onclick="changeQty(${index}, -1)">−</button>
+                <button onclick="changeQty(${index}, 1)">+</button>
+                <button onclick="removeItem(${index})">❌</button>
+                <br>
+                Subtotale: €${itemTotal.toFixed(2)}
+            </div>
+        `;
+    });
+
+    totalContainer.innerText = total.toFixed(2);
+}
+
+function goToCheckout(){
+    if(cart.length === 0){
+        alert("Il carrello è vuoto.");
+        return;
+    }
+
+    localStorage.setItem("aldoge_cart", JSON.stringify(cart));
+    window.location.href = "checkout.html";
 }
 </script>
-
-</body>
-</html>
