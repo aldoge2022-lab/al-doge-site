@@ -7,86 +7,94 @@
 
 <style>
 body{
-  font-family:Arial;
+  font-family: Arial, sans-serif;
   background:#111;
   color:white;
   margin:0;
   padding:20px;
 }
 
-.order{
-  background:#1c1c1c;
-  padding:15px;
-  margin-bottom:10px;
-  border-radius:8px;
+h2{
+  margin-top:0;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin-bottom:15px;
+  border:none;
+  border-radius:5px;
 }
 
 button{
   background:#c59d5f;
   border:none;
-  padding:10px 20px;
+  padding:12px 20px;
   cursor:pointer;
   font-weight:bold;
+  width:100%;
+  border-radius:5px;
+}
+
+.summary-box{
+  background:#1c1c1c;
+  padding:15px;
+  border-radius:8px;
+  margin-bottom:20px;
 }
 </style>
 </head>
 
 <body>
 
-<h1>Riepilogo Ordine</h1>
+<h2>Riepilogo Ordine</h2>
+<div id="order-summary" class="summary-box"></div>
 
-<div id="orderSummary"></div>
-
-<h2>Totale: € <span id="finalTotal">0.00</span></h2>
-
-<h3>Dati Cliente</h3>
-
-<input type="text" id="name" placeholder="Nome" style="width:100%;padding:10px;margin-bottom:10px;">
-<input type="text" id="phone" placeholder="Telefono" style="width:100%;padding:10px;margin-bottom:10px;">
-
-<br><br>
+<h2>Dati Cliente</h2>
+<input type="text" id="name" placeholder="Nome">
+<input type="text" id="phone" placeholder="Telefono">
 
 <button onclick="confirmOrder()">Conferma Ordine</button>
 
 <script>
-
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
-let total = 0;
 
-function loadOrder(){
-  const container = document.getElementById("orderSummary");
+function renderSummary(){
+  const container = document.getElementById("order-summary");
 
-  cart.forEach(item=>{
-    total += item.price;
-
-    const div = document.createElement("div");
-    div.className = "order";
-    div.innerText = item.name + " - €" + item.price.toFixed(2);
-
-    container.appendChild(div);
-  });
-
-  document.getElementById("finalTotal").innerText = total.toFixed(2);
-}
-
-function confirmOrder(){
-
-  const name = document.getElementById("name").value;
-  const phone = document.getElementById("phone").value;
-
-  if(!name || !phone){
-    alert("Compila tutti i campi");
+  if(cart.length === 0){
+    container.innerHTML = "<p>Il carrello è vuoto.</p>";
     return;
   }
 
-  alert("Ordine inviato! (Modalità Test)");
+  let html = "<ul>";
+  let total = 0;
 
-  localStorage.removeItem("cart");
-  window.location.href = "index.html";
+  cart.forEach(item => {
+    html += `<li>${item.name} – €${item.price.toFixed(2)}</li>`;
+    total += item.price;
+  });
+
+  html += "</ul>";
+  html += `<p><strong>Totale: €${total.toFixed(2)}</strong></p>`;
+
+  container.innerHTML = html;
 }
 
-loadOrder();
+function confirmOrder(){
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
 
+  if(!name || !phone){
+    alert("Inserisci nome e telefono.");
+    return;
+  }
+
+  alert("Ordine confermato! Grazie.");
+  localStorage.removeItem("cart");
+}
+
+renderSummary();
 </script>
 
 </body>
