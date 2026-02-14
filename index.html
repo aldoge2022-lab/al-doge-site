@@ -7,57 +7,48 @@
 
 <style>
 body{
-    margin:0;
-    font-family:Arial, sans-serif;
-    background:#0f0f0f;
-    color:white;
+  font-family: Arial, sans-serif;
+  background:#111;
+  color:white;
+  margin:0;
 }
 
 header{
-    text-align:center;
-    padding:60px 20px;
+  background:black;
+  padding:20px;
+  text-align:center;
+  font-size:24px;
 }
 
-h1{
-    font-size:38px;
-    margin-bottom:10px;
+.section{
+  padding:20px;
 }
 
-section{
-    padding:40px 20px;
-    max-width:900px;
-    margin:auto;
-}
-
-.item{
-    display:flex;
-    justify-content:space-between;
-    border-bottom:1px solid #333;
-    padding:15px 0;
+.product{
+  background:#1c1c1c;
+  padding:15px;
+  margin-bottom:15px;
+  border-radius:8px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
 
 button{
-    background:transparent;
-    border:1px solid #c9a227;
-    color:#c9a227;
-    padding:6px 12px;
-    cursor:pointer;
+  background:#c59d5f;
+  border:none;
+  padding:8px 15px;
+  cursor:pointer;
+  font-weight:bold;
 }
 
-button:hover{
-    background:#c9a227;
-    color:black;
-}
-
-#cartBar{
-    position:fixed;
-    bottom:0;
-    width:100%;
-    background:black;
-    padding:15px;
-    display:flex;
-    justify-content:space-between;
-    border-top:1px solid #333;
+.cart{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  background:black;
+  padding:15px;
+  text-align:center;
 }
 </style>
 </head>
@@ -65,130 +56,76 @@ button:hover{
 <body>
 
 <header>
-<h1>AL DOGE</h1>
-<p>Pizzeria Forno a Legna – Asporto</p>
+AL DOGE – ORDINA ONLINE
 </header>
 
-<section>
+<div class="section">
+
 <h2>Panini Artigianali</h2>
 
-<div class="item">
-<span>Panino Classico – €8.50</span>
-<button onclick="addToCart('Panino Classico',8.50)">Aggiungi</button>
+<div class="product">
+  <div>
+    <strong>Doge Classico</strong><br>
+    Prosciutto crudo, mozzarella
+  </div>
+  <div>
+    €8.00
+    <button onclick="addToCart('Doge Classico',8)">+</button>
+  </div>
 </div>
 
-<div class="item">
-<span>Panino Vegano – €9.00</span>
-<button onclick="addToCart('Panino Vegano',9.00)">Aggiungi</button>
+<div class="product">
+  <div>
+    <strong>Vegano</strong><br>
+    Verdure grigliate, crema vegana
+  </div>
+  <div>
+    €8.50
+    <button onclick="addToCart('Vegano',8.5)">+</button>
+  </div>
 </div>
 
-<div class="item">
-<span>Panino Senza Glutine – €10.00</span>
-<button onclick="addToCart('Panino SG',10.00)">Aggiungi</button>
+<div class="product">
+  <div>
+    <strong>Gluten Free</strong><br>
+    Prosciutto cotto, mozzarella senza lattosio
+  </div>
+  <div>
+    €9.00
+    <button onclick="addToCart('Gluten Free',9)">+</button>
+  </div>
 </div>
 
-</section>
-
-<section>
-<h2>Pizze</h2>
-
-<div class="item">
-<span>Margherita – €6.50</span>
-<button onclick="addToCart('Margherita',6.50)">Aggiungi</button>
 </div>
 
-<div class="item">
-<span>Diavola – €8.50</span>
-<button onclick="addToCart('Diavola',8.50)">Aggiungi</button>
-</div>
-
-</section>
-
-<section>
-<h2>Bevande</h2>
-
-<div class="item">
-<span>Coca Cola – €2.50</span>
-<button onclick="addToCart('Coca Cola',2.50)">Aggiungi</button>
-</div>
-
-<div class="item">
-<span>Birra Bottiglia – €4.00</span>
-<button onclick="addToCart('Birra Bottiglia',4.00)">Aggiungi</button>
-</div>
-
-</section>
-
-<div id="cartBar">
-<span>Totale: € <span id="total">0.00</span></span>
-<button onclick="checkout()">Procedi</button>
+<div class="cart">
+Totale: € <span id="total">0.00</span>
+<br><br>
+<a href="checkout.html">
+<button>Vai al Checkout</button>
+</a>
 </div>
 
 <script>
-let cart = [];
+
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+let total = 0;
 
 function addToCart(name, price){
-    const existing = cart.find(item => item.name === name);
-
-    if(existing){
-        existing.qty += 1;
-    } else {
-        cart.push({ name, price, qty: 1 });
-    }
-
-    renderCart();
+  cart.push({name, price});
+  localStorage.setItem("cart", JSON.stringify(cart));
+  calculateTotal();
 }
 
-function removeItem(index){
-    cart.splice(index, 1);
-    renderCart();
+function calculateTotal(){
+  total = 0;
+  cart.forEach(item => total += item.price);
+  document.getElementById("total").innerText = total.toFixed(2);
 }
 
-function changeQty(index, delta){
-    cart[index].qty += delta;
+calculateTotal();
 
-    if(cart[index].qty <= 0){
-        removeItem(index);
-        return;
-    }
-
-    renderCart();
-}
-
-function renderCart(){
-    const cartContainer = document.getElementById("cartItems");
-    const totalContainer = document.getElementById("total");
-
-    cartContainer.innerHTML = "";
-    let total = 0;
-
-    cart.forEach((item, index)=>{
-        const itemTotal = item.price * item.qty;
-        total += itemTotal;
-
-        cartContainer.innerHTML += `
-            <div style="margin-bottom:10px;">
-                <strong>${item.name}</strong><br>
-                €${item.price.toFixed(2)} x ${item.qty}
-                <button onclick="changeQty(${index}, -1)">−</button>
-                <button onclick="changeQty(${index}, 1)">+</button>
-                <button onclick="removeItem(${index})">❌</button>
-                <br>
-                Subtotale: €${itemTotal.toFixed(2)}
-            </div>
-        `;
-    });
-
-    totalContainer.innerText = total.toFixed(2);
-}
-
-function goToCheckout(){
-    if(cart.length === 0){
-        alert("Il carrello è vuoto.");
-        return;
-    }
-
-    localStorage.setItem("aldoge_cart", JSON.stringify(cart));
-    window.location.href = "checkout.html";
-}
 </script>
+
+</body>
+</html>
