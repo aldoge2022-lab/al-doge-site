@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ordine Confermato – AL DOGE</title>
+  <meta name="description" content="Pagamento completato e ordine in preparazione. Grazie per aver scelto AL DOGE.">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #d4af37;
+      --dark: #0b0b0b;
+      --soft: #1a1a1a;
+      --text: #f5f5f5;
+      --muted: #b3b3b3;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--dark);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .card {
+      background: var(--soft);
+      border-radius: 20px;
+      padding: 40px 30px;
+      max-width: 520px;
+      border: 1px solid rgba(212, 175, 55, 0.3);
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      color: var(--gold);
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+
+    .status {
+      margin: 20px 0;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .btn {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 24px;
+      background: var(--gold);
+      color: black;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Ordine confermato ✅</h1>
+    <p class="status" id="status">Stiamo confermando il tuo ordine...</p>
+    <a class="btn" href="index.html">Torna al menu</a>
+  </div>
+
+  <script>
+    async function confirmOrder() {
+      const status = document.getElementById('status');
+      const pending = localStorage.getItem('aldoge_pending_order');
+
+      if (!pending) {
+        status.textContent = 'Pagamento completato. Se hai già inviato l\'ordine, lo stiamo preparando!';
+        return;
+      }
+
+      try {
+        const payload = JSON.parse(pending);
+        payload.pagamento = 'stripe';
+
+        const response = await fetch('/.netlify/functions/invia-ordine', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Errore nella conferma ordine.');
+        }
+
+        localStorage.removeItem('aldoge_pending_order');
+        localStorage.removeItem('aldoge_cart');
+        status.textContent = 'Ordine inviato! Ti aspettiamo in locale all\'orario scelto.';
+      } catch (error) {
+        status.textContent = `Pagamento ricevuto, ma non siamo riusciti a inviare l'ordine. Contatta il locale.`;
+        console.error(error);
+      }
+    }
+
+    confirmOrder();
+  </script>
+</body>
+</html>
