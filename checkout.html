@@ -1,100 +1,127 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Checkout – AL DOGE</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout – AL DOGE</title>
 
-<style>
-body{
-  font-family: Arial, sans-serif;
-  background:#111;
-  color:white;
-  margin:0;
-  padding:20px;
-}
-
-h2{
-  margin-top:0;
-}
-
-input{
-  width:100%;
-  padding:10px;
-  margin-bottom:15px;
-  border:none;
-  border-radius:5px;
-}
-
-button{
-  background:#c59d5f;
-  border:none;
-  padding:12px 20px;
-  cursor:pointer;
-  font-weight:bold;
-  width:100%;
-  border-radius:5px;
-}
-
-.summary-box{
-  background:#1c1c1c;
-  padding:15px;
-  border-radius:8px;
-  margin-bottom:20px;
-}
-</style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-<h2>Riepilogo Ordine</h2>
-<div id="order-summary" class="summary-box"></div>
+<header>
+    <h1>Checkout</h1>
+    <a href="index.html">← Torna al menu</a>
+</header>
 
-<h2>Dati Cliente</h2>
-<input type="text" id="name" placeholder="Nome">
-<input type="text" id="phone" placeholder="Telefono">
+<main>
 
-<button onclick="confirmOrder()">Conferma Ordine</button>
+    <section>
+        <h2>Riepilogo ordine</h2>
+        <div id="riepilogo"></div>
+        <p id="totale" class="totale"></p>
+    </section>
+
+    <section>
+        <h2>Dati cliente</h2>
+
+        <form id="form-checkout">
+            <label>Nome e Cognome</label>
+            <input type="text" id="nome" required>
+
+            <label>Telefono</label>
+            <input type="text" id="telefono" required>
+
+            <label>Note (opzionale)</label>
+            <textarea id="note"></textarea>
+
+            <button type="submit">Invia ordine</button>
+        </form>
+    </section>
+
+</main>
+
+<footer>
+    <p>© 2026 AL DOGE – Majano</p>
+</footer>
+
+<script src="js/prodotti.js"></script>
+<script src="js/cart.js"></script>
 
 <script>
-let cart = JSON.parse(localStorage.getItem("cart")) || [];
+// ===============================
+//  MOSTRA RIEPILOGO CARRELLO
+// ===============================
 
-function renderSummary(){
-  const container = document.getElementById("order-summary");
+function mostraRiepilogo() {
+    const carrello = getCarrello();
+    const div = document.getElementById("riepilogo");
 
-  if(cart.length === 0){
-    container.innerHTML = "<p>Il carrello è vuoto.</p>";
-    return;
-  }
+    if (carrello.length === 0) {
+        div.innerHTML = "<p>Il carrello è vuoto.</p>";
+        return;
+    }
 
-  let html = "<ul>";
-  let total = 0;
+    carrello.forEach(item => {
+        const riga = document.createElement("div");
+        riga.className = "riga-riepilogo";
 
-  cart.forEach(item => {
-    html += `<li>${item.name} – €${item.price.toFixed(2)}</li>`;
-    total += item.price;
-  });
+        riga.innerHTML = `
+            <span>${item.nome} (x${item.quantita})</span>
+            <span>€ ${(item.prezzo * item.quantita).toFixed(2)}</span>
+        `;
 
-  html += "</ul>";
-  html += `<p><strong>Totale: €${total.toFixed(2)}</strong></p>`;
+        div.appendChild(riga);
+    });
 
-  container.innerHTML = html;
+    document.getElementById("totale").textContent =
+        "Totale: € " + calcolaTotale().toFixed(2);
 }
 
-function confirmOrder(){
-  const name = document.getElementById("name").value.trim();
-  const phone = document.getElementById("phone").value.trim();
+document.addEventListener("DOMContentLoaded", mostraRiepilogo);
 
-  if(!name || !phone){
-    alert("Inserisci nome e telefono.");
-    return;
-  }
 
-  alert("Ordine confermato! Grazie.");
-  localStorage.removeItem("cart");
-}
+// ===============================
+//  INVIO ORDINE A NETLIFY
+// ===============================
 
-renderSummary();
+document.getElementById("form-checkout").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const nome = document.getElementById("nome").value.trim();
+    const telefono = document.getElementById("telefono").value.trim();
+    const note = document.getElementById("note").value.trim();
+    const carrello = getCarrello();
+
+    if (!nome || !telefono || carrello.length === 0) {
+        alert("Compila tutti i campi e assicurati che il carrello non sia vuoto.");
+        return;
+    }
+
+    const ordine = {
+        nome,
+        telefono,
+        note,
+        carrello,
+        totale: calcolaTotale()
+    };
+
+    const risposta = await fetch("/.netlify/functions/invia-ordine", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(ordine)
+    });
+
+    const risultato = await risposta.json();
+
+    if (risultato.ok) {
+        svuotaCarrello();
+        window.location.href = "success.html";
+    } else {
+        alert("Errore nell'invio dell'ordine. Riprova.");
+    }
+});
 </script>
 
 </body>
