@@ -253,6 +253,7 @@
       "nome": "Doge Classico",
       "prezzo": 8.00,
       "ingredienti": ["Prosciutto crudo", "Mozzarella"],
+      "allergeni": [1,7],
       "categoria": "panini",
       "consigliato": true
     },
@@ -261,6 +262,7 @@
       "nome": "Vegano",
       "prezzo": 8.50,
       "ingredienti": ["Verdure grigliate", "Crema vegana"],
+      "allergeni": [1],
       "categoria": "panini"
     },
     {
@@ -268,6 +270,7 @@
       "nome": "Gluten Free",
       "prezzo": 9.00,
       "ingredienti": ["Prosciutto cotto", "Mozzarella senza lattosio"],
+      "allergeni": [7],
       "categoria": "panini"
     }
   ],

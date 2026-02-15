@@ -79,7 +79,7 @@
       const pending = localStorage.getItem('aldoge_pending_order');
 
       if (!pending) {
-        status.textContent = 'Pagamento completato. Se hai già inviato l\'ordine, lo stiamo preparando!';
+        status.textContent = "Pagamento completato. Se hai già inviato l'ordine, lo stiamo preparando!";
         return;
       }
 
@@ -100,9 +100,9 @@
 
         localStorage.removeItem('aldoge_pending_order');
         localStorage.removeItem('aldoge_cart');
-        status.textContent = 'Ordine inviato! Ti aspettiamo in locale all\'orario scelto.';
+        status.textContent = "Ordine inviato! Ti aspettiamo in locale all'orario scelto.";
       } catch (error) {
-        status.textContent = `Pagamento ricevuto, ma non siamo riusciti a inviare l'ordine. Contatta il locale.`;
+        status.textContent = "Pagamento ricevuto, ma non siamo riusciti a inviare l'ordine. Contatta il locale al numero indicato sul sito.";
         console.error(error);
       }
     }

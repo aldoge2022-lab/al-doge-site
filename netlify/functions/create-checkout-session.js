@@ -1,3 +1,12 @@
+const fs = require('fs');
+const path = require('path');
+
+const MENU_PATH = path.join(__dirname, '../../menu.json');
+const PREZZO_BASE_PANINO = 5.0;
+const PREZZO_INGREDIENTE = 0.5;
+let menuCache;
+let priceMapCache;
+
 function buildSuccessUrl(baseUrl) {
   const url = new URL('/success.html', baseUrl);
   url.searchParams.set('session_id', '{CHECKOUT_SESSION_ID}');
@@ -20,6 +29,39 @@ function getBaseUrl(event) {
 
 function sanitizeText(text, maxLength = 120) {
   return String(text || '').replace(/[<>]/g, '').trim().slice(0, maxLength);
+}
+
+function getMenuData() {
+  if (!menuCache) {
+    const raw = fs.readFileSync(MENU_PATH, 'utf8');
+    menuCache = JSON.parse(raw);
+  }
+  return menuCache;
+}
+
+function getPriceMap() {
+  if (!priceMapCache) {
+    const menu = getMenuData();
+    const items = []
+      .concat(menu.pizze || [], menu.panini || [], menu.bevande || [])
+      .filter((item) => typeof item.prezzo === 'number');
+    priceMapCache = new Map(items.map((item) => [item.nome, item.prezzo]));
+  }
+  return priceMapCache;
+}
+
+function getUnitPrice(item) {
+  const priceMap = getPriceMap();
+  const fromMenu = priceMap.get(item.nome);
+  if (typeof fromMenu === 'number') {
+    return fromMenu;
+  }
+
+  if (item.nome === 'Panino Custom AL DOGE' && Array.isArray(item.ingredienti)) {
+    return PREZZO_BASE_PANINO + item.ingredienti.length * PREZZO_INGREDIENTE;
+  }
+
+  return null;
 }
 
 exports.handler = async (event) => {
@@ -72,10 +114,15 @@ exports.handler = async (event) => {
     const validItems = prodotti
       .map((item) => ({
         nome: sanitizeText(item.nome),
-        prezzo: Number(item.prezzo || 0),
-        quantita: Math.max(1, Number(item.quantita || 1))
+        quantita: Number(item.quantita || 0),
+        ingredienti: Array.isArray(item.ingredienti) ? item.ingredienti : []
       }))
-      .filter((item) => item.nome && item.prezzo > 0);
+      .filter((item) => item.nome && item.quantita > 0)
+      .map((item) => {
+        const prezzo = getUnitPrice(item);
+        return prezzo !== null ? { ...item, prezzo } : null;
+      })
+      .filter(Boolean);
 
     if (validItems.length === 0) {
       return {
@@ -86,9 +133,9 @@ exports.handler = async (event) => {
     }
 
     validItems.forEach((item, index) => {
-      const name = sanitizeText(item.nome);
-      const unitAmount = Math.round(Number(item.prezzo || 0) * 100);
-      const quantity = Math.max(1, Number(item.quantita || 1));
+      const name = item.nome;
+      const unitAmount = Math.round(item.prezzo * 100);
+      const quantity = Number(item.quantita);
 
       params.append(`line_items[${index}][price_data][currency]`, 'eur');
       params.append(`line_items[${index}][price_data][product_data][name]`, name);
@@ -104,7 +151,7 @@ exports.handler = async (event) => {
     const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
       headers: {
-        Authorization: `Basic ${Buffer.from(`${STRIPE_SECRET_KEY}:`).toString('base64')}`,
+        Authorization: `Bearer ${STRIPE_SECRET_KEY}`,
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       body: params

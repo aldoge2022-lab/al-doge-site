@@ -284,10 +284,26 @@
       }
     }
 
+    function normalizePhone(phone) {
+      const trimmed = phone.trim();
+      const digits = trimmed.startsWith('+')
+        ? trimmed.slice(1).replace(/\D/g, '')
+        : trimmed.replace(/\D/g, '');
+
+      if (!digits) {
+        return '';
+      }
+
+      if (trimmed.startsWith('+')) {
+        return `+${digits}`;
+      }
+      return digits;
+    }
+
     function getFormData() {
       return {
         name: document.getElementById('name').value.trim(),
-        phone: document.getElementById('phone').value.trim(),
+        phone: normalizePhone(document.getElementById('phone').value.trim()),
         pickupTime: document.getElementById('pickup-time').value,
         notes: document.getElementById('notes').value.trim(),
         privacy: document.getElementById('privacy').checked
@@ -306,8 +322,8 @@
         return 'Compila tutti i campi obbligatori.';
       }
 
-      if (!/^\+?[0-9\s]{6,20}$/.test(data.phone)) {
-        return 'Inserisci un numero di telefono valido.';
+      if (!/^\+?\d{9,15}$/.test(data.phone)) {
+        return 'Inserisci un numero di telefono valido (9-15 cifre, può iniziare con +).';
       }
 
       if (!data.privacy) {
@@ -334,7 +350,9 @@
         prodotti: cart.map(item => ({
           nome: item.name,
           quantita: item.quantity,
-          prezzo: item.price
+          prezzo: item.price,
+          tipo: item.type,
+          ingredienti: item.ingredients || []
         })),
         totale: CartManager.getTotal(),
         nome: data.name,

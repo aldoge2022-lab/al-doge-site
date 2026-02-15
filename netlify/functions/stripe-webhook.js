@@ -18,9 +18,28 @@ function verifySignature(rawBody, signatureHeader, secret) {
   const signature = elements.v1;
   if (!timestamp || !signature) return false;
 
+  const now = Math.floor(Date.now() / 1000);
+  const toleranceSeconds = 300;
+  const timestampNumber = Number(timestamp);
+
+  if (!Number.isFinite(timestampNumber)) {
+    return false;
+  }
+
+  if (timestampNumber > now || Math.abs(now - timestampNumber) > toleranceSeconds) {
+    return false;
+  }
+
   const signedPayload = `${timestamp}.${rawBody}`;
   const expected = crypto.createHmac('sha256', secret).update(signedPayload, 'utf8').digest('hex');
-  return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
+  const expectedBuffer = Buffer.from(expected);
+  const signatureBuffer = Buffer.from(signature);
+
+  if (expectedBuffer.length !== signatureBuffer.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(expectedBuffer, signatureBuffer);
 }
 
 function formatCurrency(value) {
@@ -76,17 +95,21 @@ exports.handler = async (event) => {
       const pickupTime = sanitizeText(session.metadata?.orario || '');
       const notes = sanitizeText(session.metadata?.note || '', 200);
 
-      if (TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID && STRIPE_SECRET_KEY) {
-        const sessionResponse = await fetch(
-          `https://api.stripe.com/v1/checkout/sessions/${sessionId}?expand[]=line_items`,
-          {
-            headers: {
-              Authorization: `Basic ${Buffer.from(`${STRIPE_SECRET_KEY}:`).toString('base64')}`
+      if (TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID) {
+        let lineItems = [];
+
+        if (STRIPE_SECRET_KEY) {
+          const sessionResponse = await fetch(
+            `https://api.stripe.com/v1/checkout/sessions/${sessionId}?expand[]=line_items`,
+            {
+              headers: {
+                Authorization: `Bearer ${STRIPE_SECRET_KEY}`
+              }
             }
-          }
-        );
-        const sessionData = await sessionResponse.json();
-        const lineItems = sessionData.line_items?.data || [];
+          );
+          const sessionData = await sessionResponse.json();
+          lineItems = sessionData.line_items?.data || [];
+        }
 
         const messageLines = [
           '✅ PAGAMENTO STRIPE CONFERMATO',
@@ -98,9 +121,13 @@ exports.handler = async (event) => {
           'Ordine:'
         ].filter(Boolean);
 
-        lineItems.forEach((item) => {
-          messageLines.push(`- ${item.quantity}x ${item.description}`);
-        });
+        if (lineItems.length > 0) {
+          lineItems.forEach((item) => {
+            messageLines.push(`- ${item.quantity}x ${item.description}`);
+          });
+        } else {
+          messageLines.push('- Dettagli ordine non disponibili');
+        }
 
         messageLines.push('');
         messageLines.push(`Totale pagato: €${formatCurrency(session.amount_total)}`);
@@ -117,6 +144,8 @@ exports.handler = async (event) => {
             text: messageLines.join('\n')
           })
         });
+      } else {
+        console.warn('Telegram non configurato per webhook Stripe.');
       }
     } catch (error) {
       console.error('Errore webhook Stripe:', error);

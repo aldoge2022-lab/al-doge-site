@@ -1,6 +1,15 @@
+const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
+
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 const RATE_LIMIT_MAX = 5;
 const rateLimitStore = new Map();
+const MENU_PATH = path.join(__dirname, '../../menu.json');
+const PREZZO_BASE_PANINO = 5.0;
+const PREZZO_INGREDIENTE = 0.5;
+let menuCache;
+let priceMapCache;
 
 function getClientIp(event) {
   const forwarded = event.headers['x-forwarded-for'];
@@ -14,9 +23,14 @@ function isRateLimited(ip) {
   const now = Date.now();
   const requests = rateLimitStore.get(ip) || [];
   const recent = requests.filter((timestamp) => now - timestamp < RATE_LIMIT_WINDOW_MS);
+  if (recent.length >= RATE_LIMIT_MAX) {
+    rateLimitStore.set(ip, recent);
+    return true;
+  }
+
   recent.push(now);
   rateLimitStore.set(ip, recent);
-  return recent.length > RATE_LIMIT_MAX;
+  return false;
 }
 
 function sanitizeText(text, maxLength = 200) {
@@ -30,6 +44,39 @@ function sanitizeText(text, maxLength = 200) {
 
 function formatCurrency(value) {
   return Number(value || 0).toFixed(2);
+}
+
+function getMenuData() {
+  if (!menuCache) {
+    const raw = fs.readFileSync(MENU_PATH, 'utf8');
+    menuCache = JSON.parse(raw);
+  }
+  return menuCache;
+}
+
+function getPriceMap() {
+  if (!priceMapCache) {
+    const menu = getMenuData();
+    const items = []
+      .concat(menu.pizze || [], menu.panini || [], menu.bevande || [])
+      .filter((item) => typeof item.prezzo === 'number');
+    priceMapCache = new Map(items.map((item) => [item.nome, item.prezzo]));
+  }
+  return priceMapCache;
+}
+
+function getUnitPrice(item) {
+  const priceMap = getPriceMap();
+  const fromMenu = priceMap.get(item.nome);
+  if (typeof fromMenu === 'number') {
+    return fromMenu;
+  }
+
+  if (item.nome === 'Panino Custom AL DOGE' && Array.isArray(item.ingredienti)) {
+    return PREZZO_BASE_PANINO + item.ingredienti.length * PREZZO_INGREDIENTE;
+  }
+
+  return null;
 }
 
 exports.handler = async (event) => {
@@ -84,9 +131,16 @@ exports.handler = async (event) => {
       .map((item) => ({
         nome: sanitizeText(item.nome, 80),
         quantita: Number(item.quantita || 0),
-        prezzo: Number(item.prezzo || 0)
+        ingredienti: Array.isArray(item.ingredienti)
+          ? item.ingredienti.map((ingredient) => sanitizeText(ingredient, 60))
+          : []
       }))
-      .filter((item) => item.nome && item.quantita > 0 && item.prezzo >= 0);
+      .filter((item) => item.nome && item.quantita > 0)
+      .map((item) => {
+        const prezzo = getUnitPrice(item);
+        return prezzo !== null ? { ...item, prezzo } : null;
+      })
+      .filter(Boolean);
 
     if (items.length === 0) {
       return {
@@ -97,10 +151,11 @@ exports.handler = async (event) => {
     }
 
     const total = items.reduce((sum, item) => sum + item.prezzo * item.quantita, 0);
-    const orderId = Date.now().toString();
+    const orderId = crypto.randomUUID();
 
     const messageLines = [
       '🟢 NUOVO ORDINE ASPORTO',
+      `Ordine: #${orderId}`,
       '',
       `Cliente: ${nome}`,
       `Telefono: ${telefono}`,
@@ -150,6 +205,7 @@ exports.handler = async (event) => {
     if (RESEND_API_KEY && RESEND_FROM_EMAIL && ADMIN_EMAIL) {
       const emailBody = `
         <h2>Nuovo ordine asporto</h2>
+        <p><strong>Ordine:</strong> #${orderId}</p>
         <p><strong>Cliente:</strong> ${nome}</p>
         <p><strong>Telefono:</strong> ${telefono}</p>
         <p><strong>Orario ritiro:</strong> ${orario}</p>
