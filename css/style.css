@@ -1,0 +1,158 @@
+:root {
+  --gold: #d4af37;
+  --dark: #111111;
+  --light: #f7f7f7;
+  --text: #222222;
+  --muted: #777777;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", "Segoe UI", Tahoma, sans-serif;
+  background: var(--light);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+header {
+  background: var(--dark);
+  color: white;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+header a {
+  color: inherit;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+main {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 0 24px 40px;
+  display: grid;
+  gap: 32px;
+}
+
+section {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+h2 {
+  margin-top: 0;
+  font-size: 1.4rem;
+}
+
+.lista-prodotti {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.prodotto {
+  border: 1px solid #e4e4e4;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #fffdf7;
+}
+
+.prodotto h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.prezzo {
+  font-weight: 700;
+}
+
+button {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  background: var(--gold);
+  color: #111111;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #c89f2d;
+}
+
+.carrello-badge {
+  background: var(--gold);
+  color: #111111;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.riga-riepilogo {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px dashed #e2e2e2;
+}
+
+.totale {
+  margin-top: 16px;
+  font-weight: 700;
+}
+
+#form-checkout {
+  display: grid;
+  gap: 12px;
+}
+
+#form-checkout label {
+  font-weight: 600;
+}
+
+#form-checkout input,
+#form-checkout textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #cccccc;
+  font: inherit;
+}
+
+#form-checkout button {
+  justify-self: start;
+}
+
+footer {
+  text-align: center;
+  padding: 24px;
+  color: var(--muted);
+}
+
+@media (max-width: 640px) {
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
