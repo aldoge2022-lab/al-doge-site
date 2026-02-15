@@ -1,130 +1,85 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AL DOGE – Asporto</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AL DOGE – Ordina Online</title>
 
-<style>
-body{
-  font-family: Arial, sans-serif;
-  background:#111;
-  color:white;
-  margin:0;
-}
+    <link rel="stylesheet" href="css/style.css">
 
-header{
-  background:black;
-  padding:20px;
-  text-align:center;
-  font-size:24px;
-}
-
-.section{
-  padding:20px;
-}
-
-.product{
-  background:#1c1c1c;
-  padding:15px;
-  margin-bottom:15px;
-  border-radius:8px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-button{
-  background:#c59d5f;
-  border:none;
-  padding:8px 15px;
-  cursor:pointer;
-  font-weight:bold;
-}
-
-.cart{
-  position:fixed;
-  bottom:0;
-  width:100%;
-  background:black;
-  padding:15px;
-  text-align:center;
-}
-</style>
+    <!-- SEO -->
+    <meta name="description" content="Ordina panini, pizze e bevande da AL DOGE. Asporto veloce, qualità garantita.">
 </head>
 
 <body>
 
 <header>
-AL DOGE – ORDINA ONLINE
+    <h1>AL DOGE – Ordina Online</h1>
+
+    <!-- Badge carrello -->
+    <a href="checkout.html" class="carrello-badge">
+        Carrello <span id="badge-carrello">0</span>
+    </a>
 </header>
 
-<div class="section">
+<main>
 
-<h2>Panini Artigianali</h2>
+    <!-- SEZIONE PANINI -->
+    <section>
+        <h2>Panini</h2>
+        <div id="lista-panini" class="lista-prodotti"></div>
+    </section>
 
-<div class="product">
-  <div>
-    <strong>Doge Classico</strong><br>
-    Prosciutto crudo, mozzarella
-  </div>
-  <div>
-    €8.00
-    <button onclick="addToCart('Doge Classico',8)">+</button>
-  </div>
-</div>
+    <!-- SEZIONE PIZZE -->
+    <section>
+        <h2>Pizze</h2>
+        <div id="lista-pizze" class="lista-prodotti"></div>
+    </section>
 
-<div class="product">
-  <div>
-    <strong>Vegano</strong><br>
-    Verdure grigliate, crema vegana
-  </div>
-  <div>
-    €8.50
-    <button onclick="addToCart('Vegano',8.5)">+</button>
-  </div>
-</div>
+    <!-- SEZIONE BEVANDE -->
+    <section>
+        <h2>Bevande</h2>
+        <div id="lista-bevande" class="lista-prodotti"></div>
+    </section>
 
-<div class="product">
-  <div>
-    <strong>Gluten Free</strong><br>
-    Prosciutto cotto, mozzarella senza lattosio
-  </div>
-  <div>
-    €9.00
-    <button onclick="addToCart('Gluten Free',9)">+</button>
-  </div>
-</div>
+</main>
 
-</div>
+<footer>
+    <p>© 2026 AL DOGE – Majano</p>
+</footer>
 
-<div class="cart">
-Totale: € <span id="total">0.00</span>
-<br><br>
-<a href="checkout.html">
-<button>Vai al Checkout</button>
-</a>
-</div>
+<!-- SCRIPT -->
+<script src="js/prodotti.js"></script>
+<script src="js/cart.js"></script>
 
 <script>
+// ===============================
+//  GENERA LISTE PRODOTTI
+// ===============================
 
-let cart = JSON.parse(localStorage.getItem("cart")) || [];
-let total = 0;
+function generaLista(categoria, containerId) {
+    const container = document.getElementById(containerId);
+    const filtrati = prodotti.filter(p => p.categoria === categoria);
 
-function addToCart(name, price){
-  cart.push({name, price});
-  localStorage.setItem("cart", JSON.stringify(cart));
-  calculateTotal();
+    filtrati.forEach(p => {
+        const div = document.createElement("div");
+        div.className = "prodotto";
+
+        div.innerHTML = `
+            <h3>${p.nome}</h3>
+            <p class="prezzo">€ ${p.prezzo.toFixed(2)}</p>
+            <button onclick="aggiungiAlCarrello('${p.id}')">Aggiungi al carrello</button>
+        `;
+
+        container.appendChild(div);
+    });
 }
 
-function calculateTotal(){
-  total = 0;
-  cart.forEach(item => total += item.price);
-  document.getElementById("total").innerText = total.toFixed(2);
-}
-
-calculateTotal();
-
+document.addEventListener("DOMContentLoaded", () => {
+    generaLista("panini", "lista-panini");
+    generaLista("pizze", "lista-pizze");
+    generaLista("bevande", "lista-bevande");
+});
 </script>
 
 </body>
