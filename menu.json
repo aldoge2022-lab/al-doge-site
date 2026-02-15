@@ -247,6 +247,34 @@
     }
   ],
 
+  "panini": [
+    {
+      "id": "panino_doge_classico",
+      "nome": "Doge Classico",
+      "prezzo": 8.00,
+      "ingredienti": ["Prosciutto crudo", "Mozzarella"],
+      "allergeni": [1,7],
+      "categoria": "panini",
+      "consigliato": true
+    },
+    {
+      "id": "panino_vegano",
+      "nome": "Vegano",
+      "prezzo": 8.50,
+      "ingredienti": ["Verdure grigliate", "Crema vegana"],
+      "allergeni": [1],
+      "categoria": "panini"
+    },
+    {
+      "id": "panino_gluten_free",
+      "nome": "Gluten Free",
+      "prezzo": 9.00,
+      "ingredienti": ["Prosciutto cotto", "Mozzarella senza lattosio"],
+      "allergeni": [7],
+      "categoria": "panini"
+    }
+  ],
+
   "panino_al_doge": {
     "nome": "Panino AL DOGE",
     "descrizione": "Panino artigianale preparato con impasto pizza AL DOGE, cotto al momento. Farcito con prosciutto crudo San Daniele, rucola fresca e crema di formaggio.",
@@ -257,16 +285,16 @@
   },
 
   "bevande": [
-    { "nome": "Acqua naturale 0.75L", "kcal": 0, "categoria": "leggera" },
-    { "nome": "Acqua frizzante 0.75L", "kcal": 0, "categoria": "leggera" },
-    { "nome": "Coca Cola", "kcal": 139, "categoria": "dolce" },
-    { "nome": "Coca Cola Zero", "kcal": 1, "categoria": "leggera" },
-    { "nome": "Fanta", "kcal": 150, "categoria": "dolce" },
-    { "nome": "Sprite", "kcal": 140, "categoria": "dolce" },
-    { "nome": "Birra Malteus 0.3", "kcal": 120, "categoria": "birra" },
-    { "nome": "Birra Malteus 0.5", "kcal": 200, "categoria": "birra" },
-    { "nome": "Birra IPA Ducato 0.4", "kcal": 180, "categoria": "birra" },
-    { "nome": "Vino rosso 1/4", "kcal": 125, "categoria": "vino" }
+    { "nome": "Acqua naturale 0.75L", "kcal": 0, "categoria": "leggera", "prezzo": 2.00 },
+    { "nome": "Acqua frizzante 0.75L", "kcal": 0, "categoria": "leggera", "prezzo": 2.00 },
+    { "nome": "Coca Cola", "kcal": 139, "categoria": "dolce", "prezzo": 3.00 },
+    { "nome": "Coca Cola Zero", "kcal": 1, "categoria": "leggera", "prezzo": 3.00 },
+    { "nome": "Fanta", "kcal": 150, "categoria": "dolce", "prezzo": 3.00 },
+    { "nome": "Sprite", "kcal": 140, "categoria": "dolce", "prezzo": 3.00 },
+    { "nome": "Birra Malteus 0.3", "kcal": 120, "categoria": "birra", "prezzo": 4.00 },
+    { "nome": "Birra Malteus 0.5", "kcal": 200, "categoria": "birra", "prezzo": 5.00, "consigliato": true },
+    { "nome": "Birra IPA Ducato 0.4", "kcal": 180, "categoria": "birra", "prezzo": 5.50 },
+    { "nome": "Vino rosso 1/4", "kcal": 125, "categoria": "vino", "prezzo": 4.00 }
   ],
 
   "impasto_pizza": {

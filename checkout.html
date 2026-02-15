@@ -1,101 +1,445 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Checkout – AL DOGE</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout – AL DOGE</title>
+  <meta name="description" content="Completa il tuo ordine da AL DOGE: inserisci i dati di contatto, scegli l'orario di ritiro e conferma.">
+  <meta property="og:title" content="Checkout – AL DOGE">
+  <meta property="og:description" content="Completa il tuo ordine da AL DOGE e scegli l'orario di ritiro.">
+  <meta property="og:type" content="website">
 
-<style>
-body{
-  font-family: Arial, sans-serif;
-  background:#111;
-  color:white;
-  margin:0;
-  padding:20px;
-}
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-h2{
-  margin-top:0;
-}
+  <style>
+    :root {
+      --gold: #d4af37;
+      --dark: #0b0b0b;
+      --soft: #1a1a1a;
+      --text: #f5f5f5;
+      --muted: #b3b3b3;
+      --danger: #ff6b6b;
+    }
 
-input{
-  width:100%;
-  padding:10px;
-  margin-bottom:15px;
-  border:none;
-  border-radius:5px;
-}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-button{
-  background:#c59d5f;
-  border:none;
-  padding:12px 20px;
-  cursor:pointer;
-  font-weight:bold;
-  width:100%;
-  border-radius:5px;
-}
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      padding: 30px 20px 60px;
+    }
 
-.summary-box{
-  background:#1c1c1c;
-  padding:15px;
-  border-radius:8px;
-  margin-bottom:20px;
-}
-</style>
+    h1 {
+      font-family: 'Playfair Display', serif;
+      color: var(--gold);
+      font-size: clamp(32px, 5vw, 46px);
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin-bottom: 30px;
+    }
+
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+
+    .card {
+      background: var(--soft);
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid rgba(212, 175, 55, 0.2);
+    }
+
+    .card h2 {
+      font-size: 20px;
+      color: var(--gold);
+      margin-bottom: 16px;
+    }
+
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .order-total {
+      border-top: 1px solid rgba(212, 175, 55, 0.2);
+      margin-top: 16px;
+      padding-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      font-weight: 600;
+      color: var(--gold);
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 6px;
+      color: var(--muted);
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      background: #111;
+      color: var(--text);
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--gold);
+    }
+
+    .privacy {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .privacy input {
+      width: auto;
+      margin-top: 4px;
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .btn {
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .btn-primary {
+      background: var(--gold);
+      color: black;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: scale(1.02);
+    }
+
+    .error {
+      color: var(--danger);
+      font-size: 13px;
+      margin-top: -10px;
+      margin-bottom: 12px;
+    }
+
+    .empty-state {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 880px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
-
 <body>
+  <h1>Checkout</h1>
+  <p class="subtitle">Completa i tuoi dati per finalizzare l'ordine da asporto.</p>
 
-<h2>Riepilogo Ordine</h2>
-<div id="order-summary" class="summary-box"></div>
+  <div class="container">
+    <section class="card" aria-live="polite">
+      <h2>Riepilogo Ordine</h2>
+      <div id="order-summary"></div>
+      <div class="order-total">
+        <span>Totale</span>
+        <span id="order-total">€0.00</span>
+      </div>
+    </section>
 
-<h2>Dati Cliente</h2>
-<input type="text" id="name" placeholder="Nome">
-<input type="text" id="phone" placeholder="Telefono">
+    <section class="card">
+      <h2>Dati Cliente</h2>
+      <form id="checkout-form">
+        <label for="name">Nome e cognome *</label>
+        <input type="text" id="name" name="name" required maxlength="60" autocomplete="name">
 
-<button onclick="confirmOrder()">Conferma Ordine</button>
+        <label for="phone">Telefono *</label>
+        <input type="tel" id="phone" name="phone" required maxlength="20" autocomplete="tel">
 
-<script>
-let cart = JSON.parse(localStorage.getItem("cart")) || [];
+        <label for="pickup-time">Orario ritiro *</label>
+        <select id="pickup-time" name="pickup-time" required>
+          <option value="">Seleziona un orario</option>
+        </select>
 
-function renderSummary(){
-  const container = document.getElementById("order-summary");
+        <label for="notes">Note (opzionale)</label>
+        <textarea id="notes" name="notes" maxlength="200" placeholder="Allergie, richieste speciali..."></textarea>
 
-  if(cart.length === 0){
-    container.innerHTML = "<p>Il carrello è vuoto.</p>";
-    return;
-  }
+        <div class="privacy">
+          <input type="checkbox" id="privacy" required>
+          <label for="privacy">Ho letto e accetto la privacy policy per la gestione dell'ordine.</label>
+        </div>
 
-  let html = "<ul>";
-  let total = 0;
+        <div class="error" id="form-error" style="display: none;"></div>
 
-  cart.forEach(item => {
-    html += `<li>${item.name} – €${item.price.toFixed(2)}</li>`;
-    total += item.price;
-  });
+        <div class="actions">
+          <button type="button" class="btn btn-primary" id="submit-order">Invia ordine (paga al ritiro)</button>
+          <button type="button" class="btn btn-secondary" id="pay-online">Paga online con Stripe</button>
+        </div>
+      </form>
+    </section>
+  </div>
 
-  html += "</ul>";
-  html += `<p><strong>Totale: €${total.toFixed(2)}</strong></p>`;
+  <script src="cart-utils.js"></script>
+  <script>
+    const orderSummary = document.getElementById('order-summary');
+    const orderTotal = document.getElementById('order-total');
+    const submitOrderBtn = document.getElementById('submit-order');
+    const payOnlineBtn = document.getElementById('pay-online');
+    const errorBox = document.getElementById('form-error');
 
-  container.innerHTML = html;
-}
+    function renderSummary() {
+      const cart = CartManager.getCart();
+      if (cart.length === 0) {
+        orderSummary.innerHTML = '<p class="empty-state">Il carrello è vuoto. Torna al menu per aggiungere prodotti.</p>';
+        submitOrderBtn.disabled = true;
+        payOnlineBtn.disabled = true;
+        orderTotal.textContent = '€0.00';
+        return;
+      }
 
-function confirmOrder(){
-  const name = document.getElementById("name").value.trim();
-  const phone = document.getElementById("phone").value.trim();
+      orderSummary.innerHTML = cart.map(item => `
+        <div class="order-item">
+          <span>${item.quantity}x ${item.name}</span>
+          <span>€${(item.price * item.quantity).toFixed(2)}</span>
+        </div>
+      `).join('');
 
-  if(!name || !phone){
-    alert("Inserisci nome e telefono.");
-    return;
-  }
+      orderTotal.textContent = `€${CartManager.getTotal().toFixed(2)}`;
+      submitOrderBtn.disabled = false;
+      payOnlineBtn.disabled = false;
+    }
 
-  alert("Ordine confermato! Grazie.");
-  localStorage.removeItem("cart");
-}
+    function buildPickupOptions() {
+      const select = document.getElementById('pickup-time');
+      const startHour = 18;
+      const startMinute = 30;
+      const endHour = 23;
+      let hour = startHour;
+      let minute = startMinute;
 
-renderSummary();
-</script>
+      while (hour < endHour || (hour === endHour && minute === 0)) {
+        const label = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+        const option = document.createElement('option');
+        option.value = label;
+        option.textContent = label;
+        select.appendChild(option);
 
+        minute += 15;
+        if (minute >= 60) {
+          minute = 0;
+          hour += 1;
+        }
+      }
+    }
+
+    function normalizePhone(phone) {
+      const trimmed = phone.trim();
+      const digits = trimmed.startsWith('+')
+        ? trimmed.slice(1).replace(/\D/g, '')
+        : trimmed.replace(/\D/g, '');
+
+      if (!digits) {
+        return '';
+      }
+
+      if (trimmed.startsWith('+')) {
+        return `+${digits}`;
+      }
+      return digits;
+    }
+
+    function getFormData() {
+      return {
+        name: document.getElementById('name').value.trim(),
+        phone: normalizePhone(document.getElementById('phone').value.trim()),
+        pickupTime: document.getElementById('pickup-time').value,
+        notes: document.getElementById('notes').value.trim(),
+        privacy: document.getElementById('privacy').checked
+      };
+    }
+
+    function validateForm() {
+      const data = getFormData();
+      const cart = CartManager.getCart();
+
+      if (cart.length === 0) {
+        return 'Il carrello è vuoto.';
+      }
+
+      if (!data.name || !data.phone || !data.pickupTime) {
+        return 'Compila tutti i campi obbligatori.';
+      }
+
+      if (!/^\+?\d{9,15}$/.test(data.phone)) {
+        return 'Inserisci un numero di telefono valido (9-15 cifre, può iniziare con +).';
+      }
+
+      if (!data.privacy) {
+        return 'Devi accettare la privacy policy per continuare.';
+      }
+
+      return null;
+    }
+
+    function showError(message) {
+      if (!message) {
+        errorBox.style.display = 'none';
+        errorBox.textContent = '';
+        return;
+      }
+      errorBox.textContent = message;
+      errorBox.style.display = 'block';
+    }
+
+    function buildOrderPayload(paymentMode) {
+      const cart = CartManager.getCart();
+      const data = getFormData();
+      return {
+        prodotti: cart.map(item => ({
+          nome: item.name,
+          quantita: item.quantity,
+          prezzo: item.price,
+          tipo: item.type,
+          ingredienti: item.ingredients || []
+        })),
+        totale: CartManager.getTotal(),
+        nome: data.name,
+        telefono: data.phone,
+        orario: data.pickupTime,
+        note: data.notes,
+        pagamento: paymentMode
+      };
+    }
+
+    async function submitOrder(paymentMode) {
+      const error = validateForm();
+      if (error) {
+        showError(error);
+        return;
+      }
+
+      showError(null);
+      const payload = buildOrderPayload(paymentMode);
+      const button = paymentMode === 'stripe' ? payOnlineBtn : submitOrderBtn;
+
+      button.disabled = true;
+      button.textContent = '⏳ Invio in corso...';
+
+      try {
+        const response = await fetch('/.netlify/functions/invia-ordine', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Errore nell\'invio dell\'ordine.');
+        }
+
+        CartManager.clearCart();
+        localStorage.removeItem('aldoge_pending_order');
+        window.location.href = `success.html?order=${encodeURIComponent(result.orderId || '')}`;
+      } catch (error) {
+        showError(error.message);
+        button.disabled = false;
+        button.textContent = paymentMode === 'stripe' ? 'Paga online con Stripe' : 'Invia ordine (paga al ritiro)';
+      }
+    }
+
+    async function startStripeCheckout() {
+      const error = validateForm();
+      if (error) {
+        showError(error);
+        return;
+      }
+
+      showError(null);
+      const payload = buildOrderPayload('stripe');
+      localStorage.setItem('aldoge_pending_order', JSON.stringify(payload));
+
+      payOnlineBtn.disabled = true;
+      payOnlineBtn.textContent = '⏳ Reindirizzamento...';
+
+      try {
+        const response = await fetch('/.netlify/functions/create-checkout-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        if (!response.ok || !result.url) {
+          throw new Error(result.error || 'Impossibile avviare il pagamento online.');
+        }
+
+        window.location.href = result.url;
+      } catch (error) {
+        showError(error.message);
+        payOnlineBtn.disabled = false;
+        payOnlineBtn.textContent = 'Paga online con Stripe';
+      }
+    }
+
+    submitOrderBtn.addEventListener('click', () => submitOrder('ritiro'));
+    payOnlineBtn.addEventListener('click', startStripeCheckout);
+
+    buildPickupOptions();
+    renderSummary();
+
+    document.addEventListener('visibilitychange', renderSummary);
+  </script>
 </body>
 </html>
