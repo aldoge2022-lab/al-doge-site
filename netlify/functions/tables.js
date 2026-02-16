@@ -17,6 +17,12 @@ const buildResponse = (statusCode, payload, headers = JSON_HEADERS) => ({
   body: JSON.stringify(payload)
 });
 
+const logError = (message, error) => {
+  if (process.env.NODE_ENV !== "production") {
+    console.error(message, error);
+  }
+};
+
 const getSupabaseClient = () => {
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -60,18 +66,20 @@ exports.handler = async (event) => {
   try {
     supabase = getSupabaseClient();
   } catch (error) {
+    logError("Supabase configuration error", error);
     return buildResponse(500, { error: "Configurazione server mancante" });
   }
 
   try {
     const { data, error } = await supabase
       .from("tables")
-      .select("id, numero, qr_token, created_at")
+      .select("id, numero, created_at")
       .eq("numero", tableNumber)
       .maybeSingle();
 
     if (error) {
-      return buildResponse(500, { error: "Errore server" });
+      logError("Supabase query error", error);
+      return buildResponse(500, { error: "Errore database" });
     }
 
     if (!data) {
@@ -80,6 +88,7 @@ exports.handler = async (event) => {
 
     return buildResponse(200, data);
   } catch (error) {
+    logError("Unexpected server error", error);
     return buildResponse(500, { error: "Errore server" });
   }
 };
