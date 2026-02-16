@@ -18,9 +18,12 @@ const buildResponse = (statusCode, payload, headers = JSON_HEADERS) => ({
 });
 
 const logError = (message, error) => {
-  if (process.env.NODE_ENV !== "production") {
-    console.error(message, error);
+  if (process.env.NODE_ENV === "production") {
+    console.error(message);
+    return;
   }
+
+  console.error(message, error);
 };
 
 const getSupabaseClient = () => {
@@ -57,7 +60,7 @@ exports.handler = async (event) => {
 
   const tableNumber = Number(tableParam);
 
-  if (!Number.isInteger(tableNumber)) {
+  if (!Number.isFinite(tableNumber) || !Number.isInteger(tableNumber)) {
     return buildResponse(400, { error: "Parametro table non valido" });
   }
 
