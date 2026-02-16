@@ -321,14 +321,14 @@
     // Ottieni numero tavolo da URL
     function getTableNumber() {
       const params = new URLSearchParams(window.location.search);
-      const table = params.get('table');
+      const table = Number.parseInt(params.get('table'), 10);
       
-      if (!table || isNaN(table) || table < 1 || table > MAX_TABLE_NUMBER) {
+      if (!Number.isInteger(table) || table < 1 || table > MAX_TABLE_NUMBER) {
         alert('Numero tavolo non valido');
         return null;
       }
       
-      return parseInt(table);
+      return table;
     }
 
     function selectAmount(amount, event) {
@@ -401,7 +401,10 @@
     }
 
     function generateOrderId() {
-      const randomPart = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      if (window.crypto && typeof crypto.randomUUID === 'function') {
+        return crypto.randomUUID();
+      }
+      const randomPart = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
       return `${Date.now()}-${randomPart}`;
     }
 

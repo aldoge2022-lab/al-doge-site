@@ -60,7 +60,7 @@ function normalizeItems(items) {
       throw new Error('Quantità non valida');
     }
 
-    // Stripe richiede almeno 50 centesimi per linea.
+    // Stripe requires at least 50 cents per line item.
     if (!Number.isInteger(unitAmount) || unitAmount < 50) {
       throw new Error('Prezzo non valido');
     }

@@ -67,16 +67,20 @@ function setStatus(message, isError = false) {
 function getCartItems() {
     const cart = CartManager.getCart();
     if (cart.length > 0) {
-        return cart;
+        return cart.map(normalizeCartItem);
     }
 
     const legacyCart = JSON.parse(localStorage.getItem("carrello") || "[]");
-    return legacyCart.map((item) => ({
-        name: item.nome,
-        price: item.prezzo,
-        quantity: item.quantita,
-        ingredients: item.ingredienti || []
-    }));
+    return legacyCart.map(normalizeCartItem);
+}
+
+function normalizeCartItem(item) {
+    return {
+        name: item.name || item.nome,
+        price: item.price || item.prezzo,
+        quantity: item.quantity || item.quantita,
+        ingredients: item.ingredients || item.ingredienti || []
+    };
 }
 
 function calcolaTotale(items) {
@@ -101,14 +105,14 @@ function mostraRiepilogo() {
         const riga = document.createElement("div");
         riga.className = "riga-riepilogo";
 
-        const ingredienti = Array.isArray(item.ingredients) && item.ingredients.length > 0
+        const ingredienti = item.ingredients.length > 0
             ? ` - ${item.ingredients.join(", ")}`
             : "";
-        const quantity = item.quantity || item.quantita || 1;
-        const price = item.price || item.prezzo || 0;
+        const quantity = item.quantity || 1;
+        const price = item.price || 0;
 
         riga.innerHTML = `
-            <span>${item.name || item.nome} (x${quantity})${ingredienti}</span>
+            <span>${item.name} (x${quantity})${ingredienti}</span>
             <span>€ ${(price * quantity).toFixed(2)}</span>
         `;
 
@@ -186,12 +190,7 @@ document.getElementById("form-checkout").addEventListener("submit", async (e) =>
             body: JSON.stringify({
                 type: "order",
                 customer: { name: nome, phone: telefono, notes: note },
-                items: carrello.map((item) => ({
-                    name: item.name || item.nome,
-                    price: item.price || item.prezzo,
-                    quantity: item.quantity || item.quantita,
-                    ingredients: item.ingredients || item.ingredienti || []
-                }))
+                items: carrello
             })
         });
 

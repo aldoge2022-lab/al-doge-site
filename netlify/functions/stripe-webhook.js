@@ -49,7 +49,7 @@ function verifyStripeSignature(payload, signatureHeader, secret) {
     return false;
   }
 
-  const tolerance = 5 * 60; // Stripe consiglia una finestra di 5 minuti.
+  const tolerance = 5 * 60; // Stripe recommends a 5-minute tolerance window.
   const timestampNumber = Number(timestampValue);
   if (!Number.isFinite(timestampNumber)) {
     return false;
