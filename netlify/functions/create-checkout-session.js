@@ -3,6 +3,8 @@ const crypto = require('crypto');
 const DEFAULT_CURRENCY = 'eur';
 const MAX_LINE_ITEMS = 50;
 const MAX_TABLE_NUMBER = 10;
+const MIN_UNIT_AMOUNT_CENTS = 50;
+const MIN_TABLE_PAYMENT_CENTS = 100;
 
 const DEFAULT_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type',
@@ -67,7 +69,7 @@ function normalizeItems(items) {
       throw new Error('Prezzo non valido');
     }
 
-    if (unitAmount < 50) {
+    if (unitAmount < MIN_UNIT_AMOUNT_CENTS) {
       throw new Error('Il prezzo deve essere almeno €0.50');
     }
 
@@ -189,7 +191,7 @@ exports.handler = async (event) => {
         throw new Error('Numero tavolo non valido');
       }
 
-      if (!Number.isInteger(amountCents) || amountCents < 100) {
+      if (!Number.isInteger(amountCents) || amountCents < MIN_TABLE_PAYMENT_CENTS) {
         throw new Error('Importo non valido');
       }
 

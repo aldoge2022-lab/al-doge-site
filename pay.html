@@ -441,7 +441,7 @@
           if (!isSameSession) {
             recordTablePayment(pendingPayment.amount, pendingPayment.tableNumber);
             paymentInfo = {
-              sessionId: sessionId,
+              sessionId,
               amount: pendingPayment.amount,
               tableNumber: pendingPayment.tableNumber
             };
