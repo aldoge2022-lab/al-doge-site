@@ -435,7 +435,7 @@
           setStatus('Pagamento non verificato. Contatta il personale.', true);
           return;
         }
-        let paymentInfo = processedPayment;
+        let paymentInfo = null;
 
         if (pendingPayment) {
           if (!isSameSession) {
@@ -446,8 +446,12 @@
               tableNumber: pendingPayment.tableNumber
             };
             localStorage.setItem(processedSessionKey, JSON.stringify(paymentInfo));
+          } else {
+            paymentInfo = processedPayment;
           }
           localStorage.removeItem(pendingPaymentKey);
+        } else if (isSameSession) {
+          paymentInfo = processedPayment;
         }
 
         if (paymentInfo?.amount) {

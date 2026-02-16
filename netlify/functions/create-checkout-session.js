@@ -62,7 +62,7 @@ function normalizeItems(items) {
       throw new Error('Quantità non valida');
     }
 
-    // Enforce a minimum of €0.50 per line item for EUR payments.
+    // Stripe platform minimum for EUR payments is €0.50 per line item.
     if (!Number.isInteger(unitAmount)) {
       throw new Error('Prezzo non valido');
     }
