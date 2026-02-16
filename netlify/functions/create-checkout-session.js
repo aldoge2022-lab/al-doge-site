@@ -1,3 +1,5 @@
+const crypto = require('crypto');
+
 const DEFAULT_CURRENCY = 'eur';
 const MAX_LINE_ITEMS = 50;
 const MAX_TABLE_NUMBER = 10;
@@ -88,6 +90,13 @@ function normalizeItems(items) {
   });
 }
 
+function generateOrderId(prefix) {
+  if (typeof crypto.randomUUID === 'function') {
+    return `${prefix}-${crypto.randomUUID()}`;
+  }
+  return `${prefix}-${crypto.randomBytes(8).toString('hex')}`;
+}
+
 function buildStripeParams({ lineItems, successUrl, cancelUrl, metadata, clientReferenceId }) {
   const params = new URLSearchParams();
 
@@ -165,7 +174,7 @@ exports.handler = async (event) => {
   try {
     const orderType = payload.type === 'table_payment' ? 'table_payment' : 'order';
     const baseUrl = buildBaseUrl(event);
-    const orderId = `${orderType === 'table_payment' ? 'TBL' : 'ORD'}-${Date.now()}`;
+    const orderId = generateOrderId(orderType === 'table_payment' ? 'TBL' : 'ORD');
 
     let lineItems = [];
     let successUrl = `${baseUrl}/checkout.html?success=1&session_id={CHECKOUT_SESSION_ID}`;

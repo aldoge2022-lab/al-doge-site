@@ -435,23 +435,23 @@
           setStatus('Pagamento non verificato. Contatta il personale.', true);
           return;
         }
-        let paymentToDisplay = processedPayment;
+        let currentPaymentInfo = processedPayment;
 
         if (pendingPayment) {
           if (!isSameSession) {
             recordTablePayment(pendingPayment.amount, pendingPayment.tableNumber);
-            paymentToDisplay = {
-              sessionId: sessionId || null,
+            currentPaymentInfo = {
+              sessionId: sessionId,
               amount: pendingPayment.amount,
               tableNumber: pendingPayment.tableNumber
             };
-            localStorage.setItem(processedSessionKey, JSON.stringify(paymentToDisplay));
+            localStorage.setItem(processedSessionKey, JSON.stringify(currentPaymentInfo));
           }
           localStorage.removeItem(pendingPaymentKey);
         }
 
-        if (paymentToDisplay?.amount) {
-          document.getElementById('paid-amount').textContent = paymentToDisplay.amount.toFixed(2);
+        if (currentPaymentInfo?.amount) {
+          document.getElementById('paid-amount').textContent = currentPaymentInfo.amount.toFixed(2);
         }
 
         document.getElementById('payment-form').style.display = 'none';
