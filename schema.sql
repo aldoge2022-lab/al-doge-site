@@ -12,8 +12,8 @@ create table if not exists tables (
 create table if not exists orders (
   id uuid primary key default uuid_generate_v4(),
   table_id uuid references tables(id) on delete cascade,
-  status text default 'pending',
-  totale numeric(10,2) not null,
+  status text default 'pending' check (status in ('pending', 'paid', 'preparing', 'ready', 'completed')),
+  totale numeric(10,2) not null check (totale >= 0),
   stripe_session_id text,
   created_at timestamp default now()
 );
@@ -23,7 +23,7 @@ create table if not exists order_items (
   id uuid primary key default uuid_generate_v4(),
   order_id uuid references orders(id) on delete cascade,
   nome text not null,
-  prezzo numeric(10,2) not null,
-  quantita integer not null,
+  prezzo numeric(10,2) not null check (prezzo > 0),
+  quantita integer not null check (quantita > 0),
   created_at timestamp default now()
 );
