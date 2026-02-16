@@ -1,0 +1,24 @@
+{
+  "name": "al-doge-site",
+  "version": "1.0.0",
+  "description": "Sistema completo di ordini online per pizzeria con menu pizze, creatore panini AI, pagamento Stripe, notifiche Telegram e dashboard admin.",
+  "main": "cart-utils.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aldoge2022-lab/al-doge-site.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/aldoge2022-lab/al-doge-site/issues"
+  },
+  "homepage": "https://github.com/aldoge2022-lab/al-doge-site#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0"
+  }
+}
