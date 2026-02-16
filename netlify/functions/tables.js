@@ -60,7 +60,7 @@ exports.handler = async (event) => {
 
   const tableNumber = Number(tableParam);
 
-  if (!Number.isFinite(tableNumber) || !Number.isInteger(tableNumber)) {
+  if (!Number.isInteger(tableNumber)) {
     return buildResponse(400, { error: "Parametro table non valido" });
   }
 
