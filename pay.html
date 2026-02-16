@@ -401,12 +401,12 @@
     }
 
     function generateOrderId() {
-      if (window.crypto && typeof crypto.randomUUID === 'function') {
-        return crypto.randomUUID();
+      if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+        return window.crypto.randomUUID();
       }
-      if (window.crypto && typeof crypto.getRandomValues === 'function') {
+      if (window.crypto && typeof window.crypto.getRandomValues === 'function') {
         const buffer = new Uint32Array(2);
-        crypto.getRandomValues(buffer);
+        window.crypto.getRandomValues(buffer);
         return `${Date.now()}-${buffer[0].toString(16)}${buffer[1].toString(16)}`;
       }
       const randomPart = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');

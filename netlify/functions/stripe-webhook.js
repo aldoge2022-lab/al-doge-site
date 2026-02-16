@@ -49,7 +49,7 @@ function verifyStripeSignature(payload, signatureHeader, secret) {
     return false;
   }
 
-  const tolerance = 5 * 60; // Stripe recommends a 5-minute tolerance window.
+  const tolerance = 5 * 60; // Stripe recommends a 5-minute tolerance window for webhooks.
   const timestampNumber = Number(timestampValue);
   if (!Number.isFinite(timestampNumber)) {
     return false;
@@ -76,7 +76,7 @@ async function fetchLineItems(sessionId) {
   );
 
   if (!response.ok) {
-    throw new Error('Errore nel recupero line items');
+    throw new Error(`Errore nel recupero line items per session ${sessionId}: HTTP ${response.status}`);
   }
 
   const data = await response.json();
