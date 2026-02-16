@@ -70,7 +70,8 @@ function normalizeItems(items) {
     }
 
     if (unitAmount < MIN_UNIT_AMOUNT_CENTS) {
-      throw new Error('Il prezzo deve essere almeno €0.50');
+      const minAmount = (MIN_UNIT_AMOUNT_CENTS / 100).toFixed(2);
+      throw new Error(`Il prezzo deve essere almeno €${minAmount}`);
     }
 
     const ingredients = Array.isArray(item.ingredients)

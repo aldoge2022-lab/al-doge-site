@@ -435,7 +435,7 @@
           setStatus('Pagamento non verificato. Contatta il personale.', true);
           return;
         }
-        let paymentInfo = null;
+        let paymentInfo;
 
         if (pendingPayment) {
           if (!isSameSession) {

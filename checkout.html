@@ -66,12 +66,9 @@ function setStatus(message, isError = false) {
 
 function getCartItems() {
     const cart = CartManager.getCart();
-    if (cart.length > 0) {
-        return cart.map(normalizeCartItem);
-    }
-
     const legacyCart = JSON.parse(localStorage.getItem("carrello") || "[]");
-    return legacyCart.map(normalizeCartItem);
+    const items = cart.length > 0 ? cart : legacyCart;
+    return items.map(normalizeCartItem);
 }
 
 function normalizeCartItem(item) {

@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 
+const WEBHOOK_TIMESTAMP_TOLERANCE = 5 * 60;
 const DEFAULT_HEADERS = {
   'Content-Type': 'application/json'
 };
@@ -49,7 +50,7 @@ function verifyStripeSignature(payload, signatureHeader, secret) {
     return false;
   }
 
-  const tolerance = 5 * 60; // Stripe recommends a 5-minute tolerance window for webhooks (configurable).
+  const tolerance = WEBHOOK_TIMESTAMP_TOLERANCE; // Stripe recommends a 5-minute tolerance window for webhooks (configurable).
   const timestampNumber = Number(timestampValue);
   if (!Number.isFinite(timestampNumber)) {
     return false;
