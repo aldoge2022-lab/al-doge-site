@@ -17,6 +17,8 @@ const buildResponse = (statusCode, payload, headers = JSON_HEADERS) => ({
   body: JSON.stringify(payload)
 });
 
+const isValidTableNumber = (value) => Number.isInteger(value) && value > 0;
+
 const logError = (message, error) => {
   if (process.env.NODE_ENV === "production") {
     console.error(message);
@@ -60,7 +62,7 @@ exports.handler = async (event) => {
 
   const tableNumber = Number(tableParam);
 
-  if (Number.isNaN(tableNumber) || !Number.isInteger(tableNumber) || tableNumber <= 0) {
+  if (!isValidTableNumber(tableNumber)) {
     return buildResponse(400, { error: "Parametro table non valido" });
   }
 
