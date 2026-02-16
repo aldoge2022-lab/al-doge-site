@@ -52,6 +52,7 @@ const CartManager = {
   // Svuota carrello
   clearCart: function() {
     localStorage.removeItem('aldoge_cart');
+    localStorage.removeItem('carrello');
     this.updateBadge();
   },
 

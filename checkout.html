@@ -144,7 +144,6 @@ function handleCheckoutReturn() {
     if (params.get("success")) {
         setStatus("Pagamento completato! Riceverai conferma a breve.");
         CartManager.clearCart();
-        localStorage.removeItem("carrello");
         document.getElementById("form-checkout").style.display = "none";
         mostraRiepilogo();
     }
