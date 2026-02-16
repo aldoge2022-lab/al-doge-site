@@ -1,5 +1,6 @@
 const DEFAULT_CURRENCY = 'eur';
 const MAX_LINE_ITEMS = 50;
+const MAX_TABLE_NUMBER = 10;
 
 const DEFAULT_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type',
@@ -59,6 +60,7 @@ function normalizeItems(items) {
       throw new Error('Quantità non valida');
     }
 
+    // Stripe richiede almeno 50 centesimi per linea.
     if (!Number.isInteger(unitAmount) || unitAmount < 50) {
       throw new Error('Prezzo non valido');
     }
@@ -170,7 +172,7 @@ exports.handler = async (event) => {
       const tableNumber = Number(payload.tableNumber);
       const amountCents = toCents(payload.amount);
 
-      if (!Number.isInteger(tableNumber) || tableNumber < 1 || tableNumber > 10) {
+      if (!Number.isInteger(tableNumber) || tableNumber < 1 || tableNumber > MAX_TABLE_NUMBER) {
         throw new Error('Numero tavolo non valido');
       }
 

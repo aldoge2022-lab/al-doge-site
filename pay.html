@@ -252,7 +252,7 @@
       <h1>AL DOGE</h1>
       <div class="table-number">Tavolo <span id="table-number">-</span></div>
       <p class="subtitle">Seleziona l'importo o inseriscilo manualmente</p>
-      <div class="status-message" id="status-message" role="status"></div>
+      <div class="status-message" id="status-message" role="status" aria-live="polite"></div>
 
       <!-- Quick Amounts -->
       <div class="quick-amounts">
@@ -314,15 +314,16 @@
     let selectedAmount = 0;
     let stripeClient = null;
     const statusMessage = document.getElementById('status-message');
+    const MAX_TABLE_NUMBER = 10;
     const pendingPaymentKey = 'aldoge_table_payment_pending';
-    const processedSessionKey = 'aldoge_table_payment_session';
+    const processedSessionKey = 'aldoge_table_payment_processed';
 
     // Ottieni numero tavolo da URL
     function getTableNumber() {
       const params = new URLSearchParams(window.location.search);
       const table = params.get('table');
       
-      if (!table || isNaN(table) || table < 1 || table > 10) {
+      if (!table || isNaN(table) || table < 1 || table > MAX_TABLE_NUMBER) {
         alert('Numero tavolo non valido');
         return null;
       }
@@ -386,7 +387,7 @@
 
     function recordTablePayment(amount, table) {
       const order = {
-        orderId: Date.now(),
+        orderId: generateOrderId(),
         timestamp: new Date().toISOString(),
         tableNumber: table,
         total: amount,
@@ -399,6 +400,11 @@
       localStorage.setItem('aldoge_orders', JSON.stringify(orders));
     }
 
+    function generateOrderId() {
+      const randomPart = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      return `${Date.now()}-${randomPart}`;
+    }
+
     function handleReturnState() {
       const params = new URLSearchParams(window.location.search);
       if (!params.has('success') && !params.has('canceled')) {
@@ -407,20 +413,26 @@
 
       if (params.get('success')) {
         const pendingPayment = JSON.parse(localStorage.getItem(pendingPaymentKey) || 'null');
+        const processedPayment = JSON.parse(localStorage.getItem(processedSessionKey) || 'null');
         const sessionId = params.get('session_id');
-        const alreadyProcessed = sessionId && localStorage.getItem(processedSessionKey) === sessionId;
+        const isSameSession = sessionId && processedPayment?.sessionId === sessionId;
+        let paymentToDisplay = processedPayment;
 
-        if (pendingPayment && !alreadyProcessed) {
-          recordTablePayment(pendingPayment.amount, pendingPayment.tableNumber);
-          localStorage.removeItem(pendingPaymentKey);
-          if (sessionId) {
-            localStorage.setItem(processedSessionKey, sessionId);
+        if (pendingPayment) {
+          if (!processedPayment || !isSameSession) {
+            recordTablePayment(pendingPayment.amount, pendingPayment.tableNumber);
+            paymentToDisplay = {
+              sessionId: sessionId || null,
+              amount: pendingPayment.amount,
+              tableNumber: pendingPayment.tableNumber
+            };
+            localStorage.setItem(processedSessionKey, JSON.stringify(paymentToDisplay));
           }
+          localStorage.removeItem(pendingPaymentKey);
         }
 
-        const amountToShow = pendingPayment ? pendingPayment.amount : selectedAmount;
-        if (amountToShow) {
-          document.getElementById('paid-amount').textContent = amountToShow.toFixed(2);
+        if (paymentToDisplay?.amount) {
+          document.getElementById('paid-amount').textContent = paymentToDisplay.amount.toFixed(2);
         }
 
         document.getElementById('payment-form').style.display = 'none';
