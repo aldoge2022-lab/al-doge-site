@@ -60,12 +60,12 @@
 ### Checkout Completo ✅
 - [x] Step 1: Dati cliente (nome, telefono, note)
 - [x] Step 2: Orario ritiro (18:30-23:00, slot 15min)
-- [x] Step 3: Pagamento Stripe (simulato, pronto produzione)
+- [x] Step 3: Pagamento Stripe Checkout (pronto produzione)
 - [x] Conferma ordine con numero
 - [x] Salvataggio localStorage
 
 ### Pagamenti ✅
-- [x] Integrazione Stripe (test mode)
+- [x] Integrazione Stripe Checkout (test mode)
 - [x] QR Code per 10 tavoli
 - [x] Importi predefiniti (€10-€100)
 - [x] Input importo personalizzato
@@ -121,7 +121,7 @@
 - ✅ CORS headers configurati
 - ✅ HTTPS only (Netlify)
 - ✅ Password admin protetta
-- ✅ Stripe test mode
+- ✅ Stripe Checkout test mode
 - ✅ Codice commentato
 
 ---

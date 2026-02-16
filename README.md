@@ -40,7 +40,7 @@ Sistema completo di ordini online per pizzeria con menu pizze, creatore panini A
 - **Step 1**: Dati cliente (nome, telefono, note)
 - **Step 2**: Selezione orario ritiro (18:30-23:00, slot 15min)
 - **Step 3**: Riepilogo ordine e pagamento
-- Integrazione Stripe Payment (modalità test)
+- Integrazione Stripe Checkout (modalità test)
 - Conferma ordine con numero
 
 ### 6. **Notifiche Telegram** (`netlify/functions/telegram-notify.js`)
@@ -122,13 +122,15 @@ GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxxxxxxx
 ```
 STRIPE_PUBLIC_KEY=pk_test_xxxxxxxxxxxx
 STRIPE_SECRET_KEY=sk_test_xxxxxxxxxxxx
+STRIPE_WEBHOOK_SECRET=whsec_xxxxxxxxxxxx
 ```
 
 **Setup Stripe:**
 1. Crea account su https://stripe.com
 2. Vai in Developer → API Keys
 3. Copia Public Key e Secret Key (usa TEST mode per sviluppo)
-4. Per produzione, attiva account e usa LIVE keys
+4. Configura il webhook: `/.netlify/functions/stripe-webhook`
+5. Per produzione, attiva account e usa LIVE keys
 
 ### 4. **Setup Firebase/Firestore (Opzionale)**
 
@@ -229,10 +231,13 @@ al-doge-site/
 ├── menu.json              # Database 35 pizze
 ├── netlify/
 │   └── functions/
-│       ├── groq-panini.js      # AI panini custom
-│       ├── telegram-notify.js  # Notifiche Telegram
-│       ├── ai-chatbot.js       # Chatbot esistente
-│       └── ai-consigli.js      # Consigli AI esistenti
+│       ├── groq-panini.js            # AI panini custom
+│       ├── telegram-notify.js        # Notifiche Telegram
+│       ├── stripe-config.js          # Public key Stripe
+│       ├── create-checkout-session.js # Stripe Checkout session
+│       ├── stripe-webhook.js         # Webhook Stripe
+│       ├── ai-chatbot.js             # Chatbot esistente
+│       └── ai-consigli.js            # Consigli AI esistenti
 ├── netlify.toml           # Configurazione Netlify
 └── README.md              # Questo file
 ```

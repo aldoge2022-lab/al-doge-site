@@ -21,6 +21,7 @@
         <h2>Riepilogo ordine</h2>
         <div id="riepilogo"></div>
         <p id="totale" class="totale"></p>
+        <p id="checkout-status" class="status-message" role="status"></p>
     </section>
 
     <section>
@@ -36,7 +37,7 @@
             <label>Note (opzionale)</label>
             <textarea id="note"></textarea>
 
-            <button type="submit">Invia ordine</button>
+            <button type="submit" id="checkout-button">Paga con Stripe</button>
         </form>
     </section>
 
@@ -46,20 +47,53 @@
     <p>© 2026 AL DOGE – Majano</p>
 </footer>
 
-<script src="js/prodotti.js"></script>
-<script src="js/cart.js"></script>
+<script src="https://js.stripe.com/v3/"></script>
+<script src="cart-utils.js"></script>
 
 <script>
 // ===============================
 //  MOSTRA RIEPILOGO CARRELLO
 // ===============================
 
+const statusMessage = document.getElementById("checkout-status");
+const checkoutButton = document.getElementById("checkout-button");
+let stripeClient = null;
+
+function setStatus(message, isError = false) {
+    statusMessage.textContent = message;
+    statusMessage.classList.toggle("error", isError);
+}
+
+function getCartItems() {
+    const cart = CartManager.getCart();
+    if (cart.length > 0) {
+        return cart;
+    }
+
+    const legacyCart = JSON.parse(localStorage.getItem("carrello") || "[]");
+    return legacyCart.map((item) => ({
+        name: item.nome,
+        price: item.prezzo,
+        quantity: item.quantita,
+        ingredients: item.ingredienti || []
+    }));
+}
+
+function calcolaTotale(items) {
+    return items.reduce((sum, item) => {
+        const quantity = Number(item.quantity || 0);
+        const price = Number(item.price || 0);
+        return sum + (price * quantity);
+    }, 0);
+}
+
 function mostraRiepilogo() {
-    const carrello = getCarrello();
+    const carrello = getCartItems();
     const div = document.getElementById("riepilogo");
 
     if (carrello.length === 0) {
         div.innerHTML = "<p>Il carrello è vuoto.</p>";
+        checkoutButton.disabled = true;
         return;
     }
 
@@ -67,19 +101,59 @@ function mostraRiepilogo() {
         const riga = document.createElement("div");
         riga.className = "riga-riepilogo";
 
+        const ingredienti = Array.isArray(item.ingredients) && item.ingredients.length > 0
+            ? ` - ${item.ingredients.join(", ")}`
+            : "";
+        const quantity = item.quantity || item.quantita || 1;
+        const price = item.price || item.prezzo || 0;
+
         riga.innerHTML = `
-            <span>${item.nome} (x${item.quantita})</span>
-            <span>€ ${(item.prezzo * item.quantita).toFixed(2)}</span>
+            <span>${item.name || item.nome} (x${quantity})${ingredienti}</span>
+            <span>€ ${(price * quantity).toFixed(2)}</span>
         `;
 
         div.appendChild(riga);
     });
 
     document.getElementById("totale").textContent =
-        "Totale: € " + calcolaTotale().toFixed(2);
+        "Totale: € " + calcolaTotale(carrello).toFixed(2);
 }
 
-document.addEventListener("DOMContentLoaded", mostraRiepilogo);
+async function loadStripeClient() {
+    if (stripeClient) {
+        return stripeClient;
+    }
+
+    const response = await fetch("/.netlify/functions/stripe-config");
+    const data = await response.json();
+
+    if (!response.ok || !data.publicKey) {
+        throw new Error(data.error || "Stripe non configurato");
+    }
+
+    stripeClient = Stripe(data.publicKey);
+    return stripeClient;
+}
+
+function handleCheckoutReturn() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("success")) {
+        setStatus("Pagamento completato! Riceverai conferma a breve.");
+        CartManager.clearCart();
+        localStorage.removeItem("carrello");
+        document.getElementById("form-checkout").style.display = "none";
+        mostraRiepilogo();
+    }
+
+    if (params.get("canceled")) {
+        setStatus("Pagamento annullato. Puoi riprovare quando vuoi.", true);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    mostraRiepilogo();
+    handleCheckoutReturn();
+});
 
 
 // ===============================
@@ -92,34 +166,50 @@ document.getElementById("form-checkout").addEventListener("submit", async (e) =>
     const nome = document.getElementById("nome").value.trim();
     const telefono = document.getElementById("telefono").value.trim();
     const note = document.getElementById("note").value.trim();
-    const carrello = getCarrello();
+    const carrello = getCartItems();
 
     if (!nome || !telefono || carrello.length === 0) {
-        alert("Compila tutti i campi e assicurati che il carrello non sia vuoto.");
+        setStatus("Compila tutti i campi e assicurati che il carrello non sia vuoto.", true);
         return;
     }
 
-    const ordine = {
-        nome,
-        telefono,
-        note,
-        carrello,
-        totale: calcolaTotale()
-    };
+    checkoutButton.disabled = true;
+    checkoutButton.textContent = "⏳ Reindirizzamento...";
+    setStatus("");
 
-    const risposta = await fetch("/.netlify/functions/invia-ordine", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(ordine)
-    });
+    try {
+        const stripe = await loadStripeClient();
 
-    const risultato = await risposta.json();
+        const risposta = await fetch("/.netlify/functions/create-checkout-session", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                type: "order",
+                customer: { name: nome, phone: telefono, notes: note },
+                items: carrello.map((item) => ({
+                    name: item.name || item.nome,
+                    price: item.price || item.prezzo,
+                    quantity: item.quantity || item.quantita,
+                    ingredients: item.ingredients || item.ingredienti || []
+                }))
+            })
+        });
 
-    if (risultato.ok) {
-        svuotaCarrello();
-        window.location.href = "success.html";
-    } else {
-        alert("Errore nell'invio dell'ordine. Riprova.");
+        const risultato = await risposta.json();
+
+        if (!risposta.ok || !risultato.sessionId) {
+            throw new Error(risultato.error || "Errore nella creazione del pagamento.");
+        }
+
+        const { error } = await stripe.redirectToCheckout({ sessionId: risultato.sessionId });
+        if (error) {
+            throw new Error(error.message);
+        }
+    } catch (error) {
+        console.error("Errore checkout:", error);
+        setStatus(error.message || "Errore nel processare il pagamento. Riprova.", true);
+        checkoutButton.disabled = false;
+        checkoutButton.textContent = "Paga con Stripe";
     }
 });
 </script>

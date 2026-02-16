@@ -113,8 +113,15 @@ Value: [l'ID del gruppo ricevuto da RawDataBot]
    STRIPE_PUBLIC_KEY=pk_live_xxxxx
    STRIPE_SECRET_KEY=sk_live_xxxxx
    ```
-8. Modifica `checkout.html` riga 437: usa le LIVE keys
-9. Rideploya sito
+8. Configura il webhook in Stripe → Developers → Webhooks:
+   - Endpoint: `https://[tuo-sito].netlify.app/.netlify/functions/stripe-webhook`
+   - Eventi: `checkout.session.completed`
+   - Copia il signing secret
+9. Aggiungi su Netlify:
+   ```
+   STRIPE_WEBHOOK_SECRET=whsec_xxxxx
+   ```
+10. Rideploya sito
 
 ### Configura Groq AI (Panini Custom)
 

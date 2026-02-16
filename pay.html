@@ -221,6 +221,17 @@
       color: var(--muted);
     }
 
+    .status-message {
+      margin-top: 16px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #4CAF50;
+    }
+
+    .status-message.error {
+      color: #ff9999;
+    }
+
     @media (max-width: 480px) {
       .container {
         padding: 30px 20px;
@@ -241,6 +252,7 @@
       <h1>AL DOGE</h1>
       <div class="table-number">Tavolo <span id="table-number">-</span></div>
       <p class="subtitle">Seleziona l'importo o inseriscilo manualmente</p>
+      <div class="status-message" id="status-message" role="status"></div>
 
       <!-- Quick Amounts -->
       <div class="quick-amounts">
@@ -296,9 +308,14 @@
     </div>
   </div>
 
+  <script src="https://js.stripe.com/v3/"></script>
   <script>
     let tableNumber = null;
     let selectedAmount = 0;
+    let stripeClient = null;
+    const statusMessage = document.getElementById('status-message');
+    const pendingPaymentKey = 'aldoge_table_payment_pending';
+    const processedSessionKey = 'aldoge_table_payment_session';
 
     // Ottieni numero tavolo da URL
     function getTableNumber() {
@@ -346,9 +363,79 @@
       document.getElementById('pay-btn').disabled = amount <= 0;
     }
 
+    function setStatus(message, isError = false) {
+      statusMessage.textContent = message;
+      statusMessage.classList.toggle('error', isError);
+    }
+
+    async function loadStripeClient() {
+      if (stripeClient) {
+        return stripeClient;
+      }
+
+      const response = await fetch('/.netlify/functions/stripe-config');
+      const data = await response.json();
+
+      if (!response.ok || !data.publicKey) {
+        throw new Error(data.error || 'Stripe non configurato');
+      }
+
+      stripeClient = Stripe(data.publicKey);
+      return stripeClient;
+    }
+
+    function recordTablePayment(amount, table) {
+      const order = {
+        orderId: Date.now(),
+        timestamp: new Date().toISOString(),
+        tableNumber: table,
+        total: amount,
+        status: 'paid',
+        type: 'table_payment'
+      };
+
+      const orders = JSON.parse(localStorage.getItem('aldoge_orders') || '[]');
+      orders.push(order);
+      localStorage.setItem('aldoge_orders', JSON.stringify(orders));
+    }
+
+    function handleReturnState() {
+      const params = new URLSearchParams(window.location.search);
+      if (!params.has('success') && !params.has('canceled')) {
+        return;
+      }
+
+      if (params.get('success')) {
+        const pendingPayment = JSON.parse(localStorage.getItem(pendingPaymentKey) || 'null');
+        const sessionId = params.get('session_id');
+        const alreadyProcessed = sessionId && localStorage.getItem(processedSessionKey) === sessionId;
+
+        if (pendingPayment && !alreadyProcessed) {
+          recordTablePayment(pendingPayment.amount, pendingPayment.tableNumber);
+          localStorage.removeItem(pendingPaymentKey);
+          if (sessionId) {
+            localStorage.setItem(processedSessionKey, sessionId);
+          }
+        }
+
+        const amountToShow = pendingPayment ? pendingPayment.amount : selectedAmount;
+        if (amountToShow) {
+          document.getElementById('paid-amount').textContent = amountToShow.toFixed(2);
+        }
+
+        document.getElementById('payment-form').style.display = 'none';
+        document.getElementById('success-message').classList.add('show');
+        return;
+      }
+
+      if (params.get('canceled')) {
+        setStatus('Pagamento annullato. Puoi riprovare quando vuoi.', true);
+      }
+    }
+
     async function processPayment() {
       if (selectedAmount <= 0) {
-        alert('Inserisci un importo valido');
+        setStatus('Inserisci un importo valido', true);
         return;
       }
 
@@ -357,39 +444,35 @@
       btn.textContent = '⏳ Elaborazione...';
 
       try {
-        // Simula pagamento (in produzione usare Stripe Payment Intent)
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // Crea ordine
-        const order = {
-          orderId: Date.now(),
-          timestamp: new Date().toISOString(),
-          tableNumber: tableNumber,
-          total: selectedAmount,
-          status: 'paid',
-          type: 'table_payment'
-        };
+        setStatus('');
+        const stripe = await loadStripeClient();
+        localStorage.setItem(pendingPaymentKey, JSON.stringify({
+          amount: selectedAmount,
+          tableNumber: tableNumber
+        }));
 
-        // Salva ordine
-        const orders = JSON.parse(localStorage.getItem('aldoge_orders') || '[]');
-        orders.push(order);
-        localStorage.setItem('aldoge_orders', JSON.stringify(orders));
-
-        // Invia notifica Telegram
-        await fetch('/.netlify/functions/telegram-notify', {
+        const response = await fetch('/.netlify/functions/create-checkout-session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(order)
+          body: JSON.stringify({
+            type: 'table_payment',
+            amount: selectedAmount,
+            tableNumber: tableNumber
+          })
         });
 
-        // Mostra successo
-        document.getElementById('paid-amount').textContent = selectedAmount.toFixed(2);
-        document.getElementById('payment-form').style.display = 'none';
-        document.getElementById('success-message').classList.add('show');
+        const data = await response.json();
+        if (!response.ok || !data.sessionId) {
+          throw new Error(data.error || 'Errore nel creare il pagamento.');
+        }
 
+        const { error } = await stripe.redirectToCheckout({ sessionId: data.sessionId });
+        if (error) {
+          throw new Error(error.message);
+        }
       } catch (error) {
         console.error('Errore pagamento:', error);
-        alert('Errore nel processare il pagamento. Riprova.');
+        setStatus(error.message || 'Errore nel processare il pagamento. Riprova.', true);
         btn.disabled = false;
         btn.textContent = '💳 Paga Ora';
       }
@@ -399,6 +482,7 @@
     tableNumber = getTableNumber();
     if (tableNumber) {
       document.getElementById('table-number').textContent = tableNumber;
+      handleReturnState();
     } else {
       document.getElementById('payment-form').innerHTML = `
         <div style="padding: 40px; text-align: center;">

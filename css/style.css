@@ -122,6 +122,16 @@ button:hover {
   font-weight: 700;
 }
 
+.status-message {
+  margin-top: 16px;
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+.status-message.error {
+  color: #c62828;
+}
+
 #form-checkout {
   display: grid;
   gap: 12px;
