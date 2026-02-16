@@ -61,8 +61,12 @@ function normalizeItems(items) {
     }
 
     // Stripe requires at least 50 cents per line item.
-    if (!Number.isInteger(unitAmount) || unitAmount < 50) {
+    if (!Number.isInteger(unitAmount)) {
       throw new Error('Prezzo non valido');
+    }
+
+    if (unitAmount < 50) {
+      throw new Error('Il prezzo deve essere almeno €0.50');
     }
 
     const ingredients = Array.isArray(item.ingredients)

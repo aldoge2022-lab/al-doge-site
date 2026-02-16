@@ -115,7 +115,7 @@ Value: [l'ID del gruppo ricevuto da RawDataBot]
    ```
 8. Configura il webhook in Stripe → Developers → Webhooks:
    - Endpoint: `https://[tuo-sito].netlify.app/.netlify/functions/stripe-webhook`
-   - Eventi: `checkout.session.completed`
+   - Eventi: `checkout.session.completed`, `checkout.session.async_payment_succeeded`
    - Copia il signing secret
 9. Aggiungi su Netlify:
    ```

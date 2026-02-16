@@ -404,6 +404,11 @@
       if (window.crypto && typeof crypto.randomUUID === 'function') {
         return crypto.randomUUID();
       }
+      if (window.crypto && typeof crypto.getRandomValues === 'function') {
+        const buffer = new Uint32Array(2);
+        crypto.getRandomValues(buffer);
+        return `${Date.now()}-${buffer[0].toString(16)}${buffer[1].toString(16)}`;
+      }
       const randomPart = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
       return `${Date.now()}-${randomPart}`;
     }
@@ -415,14 +420,25 @@
       }
 
       if (params.get('success')) {
+        const sessionId = params.get('session_id');
+
+        if (!sessionId) {
+          setStatus('Pagamento non verificato. Contatta il personale.', true);
+          return;
+        }
+
         const pendingPayment = JSON.parse(localStorage.getItem(pendingPaymentKey) || 'null');
         const processedPayment = JSON.parse(localStorage.getItem(processedSessionKey) || 'null');
-        const sessionId = params.get('session_id');
-        const isSameSession = sessionId && processedPayment?.sessionId === sessionId;
+        const isSameSession = processedPayment?.sessionId === sessionId;
+
+        if (!pendingPayment && !isSameSession) {
+          setStatus('Pagamento non verificato. Contatta il personale.', true);
+          return;
+        }
         let paymentToDisplay = processedPayment;
 
         if (pendingPayment) {
-          if (!processedPayment || !isSameSession) {
+          if (!isSameSession) {
             recordTablePayment(pendingPayment.amount, pendingPayment.tableNumber);
             paymentToDisplay = {
               sessionId: sessionId || null,
