@@ -1,3 +1,5 @@
+const MAX_MESSAGE_LENGTH = 500;
+
 export async function handler(event) {
   try {
     if (event.httpMethod !== "POST") {
@@ -16,7 +18,7 @@ export async function handler(event) {
 
     const { message } = payload ?? {};
 
-    if (typeof message !== "string" || message.trim().length === 0 || message.length > 500) {
+    if (typeof message !== "string" || message.trim().length === 0 || message.length > MAX_MESSAGE_LENGTH) {
       return {
         statusCode: 400,
         body: JSON.stringify({ error: "Messaggio non valido" })
@@ -52,6 +54,7 @@ export async function handler(event) {
     const data = await response.json();
 
     if (!response.ok) {
+      console.error("OpenAI API error:", response.status);
       return {
         statusCode: response.status,
         body: JSON.stringify({ error: "Errore server AI" })
@@ -75,6 +78,7 @@ export async function handler(event) {
     };
 
   } catch (error) {
+    console.error("AI chat handler error:", error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: "Errore server AI" })
