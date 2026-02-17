@@ -19,7 +19,7 @@ export async function handler(event) {
     const { message } = payload ?? {};
     const trimmedMessage = typeof message === "string" ? message.trim() : "";
 
-    if (typeof message !== "string" || trimmedMessage.length === 0 || message.length > MAX_MESSAGE_LENGTH) {
+    if (typeof message !== "string" || trimmedMessage.length === 0 || trimmedMessage.length > MAX_MESSAGE_LENGTH) {
       return {
         statusCode: 400,
         body: JSON.stringify({ error: "Messaggio non valido" })
@@ -46,7 +46,7 @@ export async function handler(event) {
             role: "system",
             content: "Sei l'assistente ufficiale della Pizzeria AL DOGE. Consiglia pizze e panini in modo professionale e convincente."
           },
-          { role: "user", content: message }
+          { role: "user", content: trimmedMessage }
         ],
         temperature: 0.7
       })
