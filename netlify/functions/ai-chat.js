@@ -19,7 +19,7 @@ export async function handler(event) {
     const { message } = payload ?? {};
     const trimmedMessage = typeof message === "string" ? message.trim() : "";
 
-    if (typeof message !== "string" || trimmedMessage.length === 0 || trimmedMessage.length > MAX_MESSAGE_LENGTH) {
+    if (trimmedMessage.length === 0 || trimmedMessage.length > MAX_MESSAGE_LENGTH) {
       return {
         statusCode: 400,
         body: JSON.stringify({ error: "Messaggio non valido" })
@@ -57,7 +57,7 @@ export async function handler(event) {
     if (!response.ok) {
       console.error("OpenAI API error:", response.status, data?.error?.message);
       return {
-        statusCode: response.status,
+        statusCode: 502,
         body: JSON.stringify({ error: "Errore server AI" })
       };
     }
