@@ -4,12 +4,29 @@ export async function handler(event) {
       return { statusCode: 405, body: "Method Not Allowed" };
     }
 
-    const { message } = JSON.parse(event.body);
-
-    if (!message || message.length > 500) {
+    let payload;
+    try {
+      payload = JSON.parse(event.body);
+    } catch (parseError) {
       return {
         statusCode: 400,
         body: JSON.stringify({ error: "Messaggio non valido" })
+      };
+    }
+
+    const { message } = payload ?? {};
+
+    if (typeof message !== "string" || message.trim().length === 0 || message.length > 500) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Messaggio non valido" })
+      };
+    }
+
+    if (!process.env.OPENAI_API_KEY) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: "Errore server AI" })
       };
     }
 
@@ -34,10 +51,26 @@ export async function handler(event) {
 
     const data = await response.json();
 
+    if (!response.ok) {
+      return {
+        statusCode: response.status,
+        body: JSON.stringify({ error: "Errore server AI" })
+      };
+    }
+
+    const reply = data?.choices?.[0]?.message?.content;
+
+    if (!reply) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: "Errore server AI" })
+      };
+    }
+
     return {
       statusCode: 200,
       body: JSON.stringify({
-        reply: data.choices[0].message.content
+        reply
       })
     };
 
