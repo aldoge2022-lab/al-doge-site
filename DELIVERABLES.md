@@ -8,7 +8,7 @@
 
 ### 1. Pagine Cliente (6 pagine)
 ```
-✅ home.html              - Homepage con 2 bottoni (Pizze/Panini)
+✅ index.html             - Homepage con 2 bottoni (Pizze/Panini)
 ✅ pizze.html             - Menu 35 pizze con filtri e ricerca
 ✅ panini-custom.html     - Creatore panini AI personalizzati
 ✅ carrello.html          - Carrello unificato con gestione
@@ -191,7 +191,7 @@ STRIPE_SECRET_KEY=...      # Per pagamenti reali
 ## 📱 URLS SISTEMA
 
 ```
-🏠 Homepage:        /home.html
+🏠 Homepage:        /index.html
 🍕 Menu Pizze:      /pizze.html
 🥖 Panini Custom:   /panini-custom.html
 🛒 Carrello:        /carrello.html
@@ -232,7 +232,7 @@ STRIPE_SECRET_KEY=...      # Per pagamenti reali
 ## 📞 ACCESSI & CREDENZIALI
 
 ### Cliente
-- **URL**: https://[sito].netlify.app/home.html
+- **URL**: https://[sito].netlify.app/index.html
 - **Registrazione**: Non richiesta
 - **Pagamento**: Carta di credito (Stripe)
 
