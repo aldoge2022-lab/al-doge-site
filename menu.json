@@ -1,0 +1,318 @@
+{
+  "pizze": [
+    {
+      "nome": "Margherita",
+      "prezzo": 6.00,
+      "ingredienti": ["pomodoro", "mozzarella", "origano"],
+      "allergeni": [1,7],
+      "categoria": "classica"
+    },
+    {
+      "nome": "Prosciutto e Funghi",
+      "prezzo": 8.00,
+      "ingredienti": ["pomodoro", "mozzarella", "prosciutto cotto", "funghi freschi", "origano"],
+      "allergeni": [1,7],
+      "categoria": "classica"
+    },
+    {
+      "nome": "Prosciutto",
+      "prezzo": 7.50,
+      "ingredienti": ["pomodoro", "mozzarella", "prosciutto cotto", "origano"],
+      "allergeni": [1,7],
+      "categoria": "classica"
+    },
+    {
+      "nome": "Viennese",
+      "prezzo": 7.00,
+      "ingredienti": ["pomodoro", "mozzarella", "wurstel", "origano"],
+      "allergeni": [1,7],
+      "categoria": "classica"
+    },
+    {
+      "nome": "Siciliana",
+      "prezzo": 8.50,
+      "ingredienti": ["pomodoro", "mozzarella", "acciughe", "capperi", "olive nere", "origano"],
+      "allergeni": [1,4,7],
+      "categoria": "classica"
+    },
+    {
+      "nome": "Chips",
+      "prezzo": 6.50,
+      "ingredienti": ["pomodoro", "mozzarella", "patate fritte", "origano"],
+      "allergeni": [1,7],
+      "categoria": "classica"
+    },
+    {
+      "nome": "Capricciosa",
+      "prezzo": 8.00,
+      "ingredienti": ["pomodoro", "mozzarella", "prosciutto cotto", "funghi freschi", "carciofi", "origano"],
+      "allergeni": [1,7],
+      "categoria": "classica"
+    },
+    {
+      "nome": "4 Stagioni",
+      "prezzo": 8.50,
+      "ingredienti": ["pomodoro", "mozzarella", "prosciutto cotto", "peperoni", "funghi freschi", "carciofi", "origano"],
+      "allergeni": [1,7],
+      "categoria": "classica"
+    },
+    {
+      "nome": "4 Formaggi",
+      "prezzo": 8.50,
+      "ingredienti": ["pomodoro", "mozzarella", "tre tipi di formaggi", "gorgonzola", "origano"],
+      "allergeni": [1,7],
+      "categoria": "formaggi"
+    },
+    {
+      "nome": "Pugliese",
+      "prezzo": 6.50,
+      "ingredienti": ["pomodoro", "mozzarella", "cipolla", "origano"],
+      "allergeni": [1,7],
+      "categoria": "classica"
+    },
+    {
+      "nome": "Bresaola Rucola e Grana",
+      "prezzo": 9.00,
+      "ingredienti": ["pomodoro", "mozzarella", "bresaola", "rucola", "grana", "origano"],
+      "allergeni": [1,7],
+      "categoria": "speciale"
+    },
+    {
+      "nome": "San Daniele",
+      "prezzo": 9.00,
+      "ingredienti": ["pomodoro", "mozzarella", "prosciutto crudo San Daniele", "origano"],
+      "allergeni": [1,7],
+      "categoria": "speciale"
+    },
+    {
+      "nome": "Diavola",
+      "prezzo": 8.00,
+      "ingredienti": ["pomodoro", "mozzarella", "salamino piccante", "peperoncino", "origano"],
+      "allergeni": [1,7],
+      "categoria": "piccante"
+    },
+    {
+      "nome": "Panna e Speck",
+      "prezzo": 8.50,
+      "ingredienti": ["pomodoro", "mozzarella", "panna", "speck", "origano"],
+      "allergeni": [1,7],
+      "categoria": "speciale"
+    },
+    {
+      "nome": "Marinara",
+      "prezzo": 5.50,
+      "ingredienti": ["pomodoro", "aglio", "origano"],
+      "allergeni": [1],
+      "categoria": "leggera"
+    },
+    {
+      "nome": "Viennese e Patatine",
+      "prezzo": 7.50,
+      "ingredienti": ["pomodoro", "mozzarella", "wurstel", "patatine", "origano"],
+      "allergeni": [1,7],
+      "categoria": "bambini"
+    },
+    {
+      "nome": "Friulana",
+      "prezzo": 9.00,
+      "ingredienti": ["pomodoro", "mozzarella", "patate al forno", "salame dolce", "cipolla"],
+      "allergeni": [1,7],
+      "categoria": "saporita"
+    },
+    {
+      "nome": "Calzone",
+      "prezzo": 8.00,
+      "ingredienti": ["pomodoro", "mozzarella", "prosciutto cotto", "funghi freschi", "origano"],
+      "allergeni": [1,7],
+      "categoria": "classica"
+    },
+    {
+      "nome": "Romana",
+      "prezzo": 7.50,
+      "ingredienti": ["pomodoro", "mozzarella", "acciughe", "origano"],
+      "allergeni": [1,4,7],
+      "categoria": "classica"
+    },
+    {
+      "nome": "Tonno e Cipolla",
+      "prezzo": 7.50,
+      "ingredienti": ["pomodoro", "mozzarella", "tonno", "cipolla", "origano"],
+      "allergeni": [1,4,7],
+      "categoria": "classica"
+    },
+    {
+      "nome": "Nirvana",
+      "prezzo": 10.00,
+      "ingredienti": ["pomodoro", "mozzarella", "prosciutto cotto", "brie", "salsiccia", "prosciutto San Daniele", "origano"],
+      "allergeni": [1,7],
+      "categoria": "speciale"
+    },
+    {
+      "nome": "Napoletana",
+      "prezzo": 8.00,
+      "ingredienti": ["pomodoro", "mozzarella", "acciughe", "olive nere", "origano"],
+      "allergeni": [1,7],
+      "categoria": "classica"
+    },
+    {
+      "nome": "8 Gusti",
+      "prezzo": 10.00,
+      "ingredienti": ["pomodoro", "mozzarella", "prosciutto cotto", "funghi freschi", "carciofi", "peperoni", "wurstel", "salamino piccante", "asparagi", "origano"],
+      "allergeni": [1,7],
+      "categoria": "speciale"
+    },
+    {
+      "nome": "Boscaiola",
+      "prezzo": 8.50,
+      "ingredienti": ["pomodoro", "mozzarella", "funghi porcini", "panna", "speck", "ricotta affumicata", "origano"],
+      "allergeni": [1,7],
+      "categoria": "speciale"
+    },
+    {
+      "nome": "Primo Amore",
+      "prezzo": 8.00,
+      "ingredienti": ["pomodoro", "mozzarella", "mozzarelline", "pomodorini", "origano"],
+      "allergeni": [1,7],
+      "categoria": "classica"
+    },
+    {
+      "nome": "Bufala",
+      "prezzo": 9.00,
+      "ingredienti": ["pomodoro", "mozzarella", "mozzarella di Bufala", "origano"],
+      "allergeni": [1,7],
+      "categoria": "speciale"
+    },
+    {
+      "nome": "Estate",
+      "prezzo": 8.50,
+      "ingredienti": ["pomodoro", "mozzarella", "rucola", "pomodorini", "mozzarelline", "origano"],
+      "allergeni": [1,7],
+      "categoria": "stagionale"
+    },
+    {
+      "nome": "Autunno",
+      "prezzo": 8.50,
+      "ingredienti": ["pomodoro", "mozzarella", "purea di zucca", "salsiccia", "ricotta affumicata", "origano"],
+      "allergeni": [1,7],
+      "categoria": "stagionale"
+    },
+    {
+      "nome": "Inverno",
+      "prezzo": 7.50,
+      "ingredienti": ["pomodoro", "mozzarella", "radicchio di Treviso", "grana", "origano"],
+      "allergeni": [1,7],
+      "categoria": "stagionale"
+    },
+    {
+      "nome": "Contadina",
+      "prezzo": 8.50,
+      "ingredienti": ["pomodoro", "mozzarella", "radicchio di Treviso", "salsiccia", "ricotta affumicata", "origano"],
+      "allergeni": [1,7],
+      "categoria": "saporita"
+    },
+    {
+      "nome": "Texana",
+      "prezzo": 8.00,
+      "ingredienti": ["pomodoro", "mozzarella", "fagioli", "cipolla", "salsiccia", "peperoncino", "origano"],
+      "allergeni": [1,7],
+      "categoria": "piccante"
+    },
+    {
+      "nome": "Sfiziosa",
+      "prezzo": 9.00,
+      "ingredienti": ["pomodoro", "mozzarella", "radicchio di Treviso", "gorgonzola", "speck in cottura", "origano"],
+      "allergeni": [1,7],
+      "categoria": "speciale"
+    },
+    {
+      "nome": "La Greca",
+      "prezzo": 7.50,
+      "ingredienti": ["pomodoro", "mozzarella", "feta", "olive verdi e nere", "origano"],
+      "allergeni": [1,7],
+      "categoria": "classica"
+    },
+    {
+      "nome": "Nicolò",
+      "prezzo": 8.50,
+      "ingredienti": ["pomodoro", "mozzarella", "prosciutto cotto", "zucchine", "philadelphia", "origano"],
+      "allergeni": [1,7],
+      "categoria": "speciale"
+    },
+    {
+      "nome": "Fresca",
+      "prezzo": 8.50,
+      "ingredienti": ["pomodoro", "mozzarella", "olive taggiasche", "scamorza", "pomodorini", "origano"],
+      "allergeni": [1,7],
+      "categoria": "classica"
+    }
+  ],
+
+  "panino_al_doge": {
+    "nome": "Panino AL DOGE",
+    "descrizione": "Panino artigianale preparato con impasto pizza AL DOGE, cotto al momento. Farcito con prosciutto crudo San Daniele, rucola fresca e crema di formaggio.",
+    "ingredienti": ["impasto pizza", "prosciutto crudo San Daniele", "rucola", "crema di formaggio"],
+    "peso_totale_g": 220,
+    "kcal_totali_stimate": 495,
+    "allergeni": [1,7]
+  },
+
+  "bevande": [
+    { "nome": "Acqua naturale 0.75L", "kcal": 0, "categoria": "leggera" },
+    { "nome": "Acqua frizzante 0.75L", "kcal": 0, "categoria": "leggera" },
+    { "nome": "Coca Cola", "kcal": 139, "categoria": "dolce" },
+    { "nome": "Coca Cola Zero", "kcal": 1, "categoria": "leggera" },
+    { "nome": "Fanta", "kcal": 150, "categoria": "dolce" },
+    { "nome": "Sprite", "kcal": 140, "categoria": "dolce" },
+    { "nome": "Birra Malteus 0.3", "kcal": 120, "categoria": "birra" },
+    { "nome": "Birra Malteus 0.5", "kcal": 200, "categoria": "birra" },
+    { "nome": "Birra IPA Ducato 0.4", "kcal": 180, "categoria": "birra" },
+    { "nome": "Vino rosso 1/4", "kcal": 125, "categoria": "vino" }
+  ],
+
+  "impasto_pizza": {
+    "descrizione": "Impasto pizza AL DOGE, usato per pizze e panini, cotto al momento.",
+    "kcal_per_100g": 265
+  },
+
+  "ingredienti_kcal": {
+    "pomodoro": 18,
+    "mozzarella": 280,
+    "mozzarella di bufala": 288,
+    "gorgonzola": 320,
+    "philadelphia": 253,
+    "stracchino": 290,
+    "scamorza": 330,
+    "ricotta affumicata": 174,
+    "grana padano": 398,
+    "burrata": 350,
+    "panna": 335,
+    "aglio": 149,
+    "cipolla": 40,
+    "patate al forno": 150,
+    "patatine fritte": 312,
+    "zucchine": 17,
+    "melanzane": 24,
+    "peperoni": 22,
+    "funghi freschi": 22,
+    "carciofi": 47,
+    "olive nere": 115,
+    "olive taggiasche": 350,
+    "capperi": 23,
+    "prosciutto cotto": 215,
+    "prosciutto crudo San Daniele": 270,
+    "bresaola": 151,
+    "speck": 300,
+    "pancetta": 450,
+    "salsiccia": 330,
+    "salamino piccante": 460,
+    "salame dolce": 420,
+    "wurstel": 270,
+    "tonno": 130,
+    "acciughe": 210,
+    "salmone affumicato": 180,
+    "gamberetti": 85,
+    "frutti di mare": 90,
+    "rucola": 25,
+    "insalata": 5
+  }
+}

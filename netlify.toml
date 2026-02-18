@@ -1,2 +1,3 @@
-[functions]
-  node_bundler = "esbuild"
+[build]
+  publish = "."
+  functions = "netlify/functions"
