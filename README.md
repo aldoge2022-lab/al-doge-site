@@ -4,7 +4,7 @@ Sistema completo di ordini online per pizzeria con menu pizze, creatore panini A
 
 ## 📋 Funzionalità Principali
 
-### 1. **Homepage Moderna** (`home.html`)
+### 1. **Homepage Moderna** (`index.html`)
 - Design responsive con colori brand AL DOGE
 - 2 bottoni principali: 🍕 PIZZE e 🥖 PANINI CUSTOM
 - Carrello badge con counter articoli
@@ -144,14 +144,14 @@ Per salvare ordini su database cloud invece che localStorage:
 ### Per Clienti:
 
 1. **Ordinare Pizze:**
-   - Vai su `home.html` → "MENU PIZZE"
+   - Vai su `index.html` → "MENU PIZZE"
    - Sfoglia le 35 pizze disponibili
    - Usa filtri per trovare la pizza perfetta
    - Seleziona quantità e aggiungi al carrello
    - Procedi al checkout
 
 2. **Creare Panino Custom:**
-   - Vai su `home.html` → "PANINI CUSTOM AI"
+   - Vai su `index.html` → "PANINI CUSTOM AI"
    - Scegli un preset o descrivi cosa vuoi
    - L'AI suggerisce ingredienti
    - Modifica a piacere ingredienti
@@ -191,7 +191,7 @@ Per salvare ordini su database cloud invece che localStorage:
 ## 🧪 Testing
 
 ### Test Locale
-1. Apri `home.html` nel browser
+1. Apri `index.html` nel browser
 2. Aggiungi articoli al carrello
 3. Completa checkout (usa modalità test Stripe)
 4. Verifica notifiche Telegram
@@ -217,7 +217,7 @@ Testa le Netlify Functions localmente prima del deploy.
 
 ```
 al-doge-site/
-├── home.html              # Homepage con 2 bottoni principali
+├── index.html             # Homepage con 2 bottoni principali
 ├── pizze.html             # Menu 35 pizze con filtri
 ├── panini-custom.html     # Creatore panini AI
 ├── carrello.html          # Carrello unificato
