@@ -674,5 +674,77 @@
       window.location.href = 'home.html';
     }
   </script>
+  <script src="cart-utils.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const confirmBtn = document.getElementById("confirm-order");
+
+  async function sendOrder() {
+    const name = document.getElementById("customer-name").value.trim();
+    const phone = document.getElementById("customer-phone").value.trim();
+    const address = document.getElementById("customer-address").value.trim();
+    const notes = document.getElementById("customer-notes")?.value.trim() || "";
+
+    if (!name || !phone || !address) {
+      alert("Compila nome, telefono e indirizzo.");
+      return;
+    }
+
+    const cart = CartManager.getCart();
+    const total = CartManager.getTotal();
+
+    if (!cart.length) {
+      alert("Il carrello è vuoto.");
+      return;
+    }
+
+    const orderData = {
+      name,
+      phone,
+      address,
+      notes,
+      items: cart.map(i => ({
+        name: i.name,
+        qty: i.quantity,
+        price: i.price
+      })),
+      total: total.toFixed(2)
+    };
+
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = "Invio...";
+
+    try {
+      const response = await fetch("/.netlify/functions/telegram-notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData)
+      });
+
+      if (!response.ok) {
+        alert("Errore nell'invio dell'ordine.");
+        return;
+      }
+
+      alert("Ordine inviato con successo!");
+      CartManager.clearCart();
+      window.location.href = "home.html";
+
+    } catch (err) {
+      alert("Errore di connessione.");
+    } finally {
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = "Conferma ordine";
+    }
+  }
+
+  confirmBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    sendOrder();
+  });
+});
+</script>
+
 </body>
 </html>
