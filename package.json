@@ -1,0 +1,9 @@
+{
+  "name": "al-doge-site",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "dependencies": {
+    "node-fetch": "^2.6.7"
+  }
+}
