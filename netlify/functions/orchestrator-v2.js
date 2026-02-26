@@ -600,11 +600,23 @@ exports.handler = async (event) => {
 
       const first = picks[0];
       const second = picks[1] || picks[0];
+
       const description = buildSuggestDescription(message, preferences);
-      const reply = `Se cerchi ${description} ti consiglio:
-1️⃣ ${first.nome}
-2️⃣ ${second.nome}
-Vuoi che ne aggiunga uno al carrello?`;
+
+      function shortReason(product) {
+        if (product.tag?.includes("proteico")) return "ricca di proteine";
+        if (product.tag?.includes("premium")) return "più ricercata e intensa";
+        if (product.tag?.includes("vegetariano")) return "leggera e vegetariana";
+        if (product.tag?.includes("piccante")) return "dal gusto deciso";
+        return "una scelta equilibrata";
+      }
+
+      const reply = `Se cerchi ${description} ti propongo:
+
+1️⃣ ${first.nome} – ${shortReason(first)}
+2️⃣ ${second.nome} – ${shortReason(second)}
+
+Vuoi che aggiunga la prima al carrello?`;
 
       console.log("[AI_MAIN]", first?.id || null);
       console.log("[AI_UPSELL]", null);
@@ -612,7 +624,13 @@ Vuoi che ne aggiunga uno al carrello?`;
       return json(200, buildResponse({
         ok: true,
         action: null,
-        mainItem: null,
+        mainItem: {
+          id: first.id,
+          nome: first.nome,
+          prezzo: Number(first.prezzo) || 0,
+          ingredienti: first.ingredienti,
+          categoria: first.categoria,
+        },
         upsell: null,
         reply,
       }));
