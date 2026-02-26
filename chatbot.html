@@ -123,7 +123,7 @@
       addMessage("Sto pensando...", "bot");
 
       try {
-        const response = await fetch("/.netlify/functions/ai-chatbot", {
+        const response = await fetch("/.netlify/functions/orchestrator-v2", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: text }),
