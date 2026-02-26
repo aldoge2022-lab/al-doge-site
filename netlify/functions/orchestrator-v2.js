@@ -560,6 +560,38 @@ exports.handler = async (event) => {
       }));
     }
 
+    // Conferma semplice dopo proposta
+    if (/^(sì|si|ok|va bene|aggiungi)$/i.test(message.trim()) && sessionState?.lastMainItemId) {
+      let confirmedMainItem;
+
+      try {
+        confirmedMainItem = await getMenuItemById(sessionState.lastMainItemId);
+      } catch (error) {
+        if (error instanceof SupabaseUnavailableError) {
+          return json(200, buildResponse({ ok: false, action: null, mainItem: null, upsell: null, reply: MENU_UPDATING_REPLY }));
+        }
+        throw error;
+      }
+
+      if (!confirmedMainItem) {
+        return json(200, buildResponse({ ok: false, action: null, mainItem: null, upsell: null, reply: NO_MATCH_REPLY }));
+      }
+
+      return json(200, buildResponse({
+        ok: true,
+        action: "add_to_cart",
+        mainItem: {
+          id: confirmedMainItem.id,
+          nome: confirmedMainItem.nome,
+          prezzo: Number(confirmedMainItem.prezzo) || 0,
+          ingredienti: confirmedMainItem.ingredienti,
+          categoria: confirmedMainItem.categoria,
+        },
+        upsell: null,
+        reply: `Perfetto, aggiungo ${confirmedMainItem.nome} al carrello.`,
+      }));
+    }
+
     if (intent === "SUGGEST") {
       let menuItems;
       try {
@@ -642,10 +674,31 @@ Vuoi che ne aggiunga uno al carrello?`;
       throw error;
     }
 
-    const reply = await generatePersuasiveCopy(mainItem, upsell);
-    const action = "add_to_cart";
+    const action = rawIntent === "ADD_EXPLICIT" ? "add_to_cart" : null;
 
-    console.log("[AI_MAIN]", mainItem?.id || null);
+    if (!action) {
+      const reply = `Ti propongo ${mainItem.nome}. Vuoi che la aggiunga al carrello?`;
+
+      return json(200, buildResponse({
+        ok: true,
+        action: null,
+        mainItem: {
+          id: mainItem.id,
+          nome: mainItem.nome,
+          prezzo: Number(mainItem.prezzo) || 0,
+          ingredienti: mainItem.ingredienti,
+          categoria: mainItem.categoria,
+        },
+        upsell: null,
+        reply,
+      }));
+    }
+
+    const reply = await generatePersuasiveCopy(mainItem, upsell);
+
+    if (action === "add_to_cart") {
+      console.log("[AI_MAIN]", mainItem?.id || null);
+    }
     console.log("[AI_UPSELL]", upsell?.id || null);
 
     return json(200, buildResponse({
