@@ -27,6 +27,14 @@ const TAG_KEYWORDS = {
   classica: ["classica", "semplice", "tradizionale"],
 };
 
+const SUGGEST_TAG_KEYWORDS = {
+  proteico: ["proteico", "proteina", "proteine", "bresaola", "pollo", "manzo", "tonno"],
+  vegetariano: ["vegetariano", "vegetariana", "veg"],
+  piccante: ["piccante", "spicy", "peperoncino"],
+  premium: ["premium", "gourmet", "speciale", "ricercato", "ricercata"],
+  leggero: ["leggero", "leggera", "light"],
+};
+
 const MAIN_CATEGORIES = new Set(["pizza", "panino"]);
 const SIMPLE_CONFIRM_MESSAGES = new Set(["si", "sì", "ok", "va bene"]);
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -97,6 +105,85 @@ function detectIngredients(text) {
     .filter((t) => t.length > 2 && !stop.has(t));
 
   return [...new Set(tokens)].slice(0, 8);
+}
+
+function extractPreferences(message = "") {
+  const normalized = normalizeText(message);
+  const category = normalized.includes("panino") ? "panino" : normalized.includes("pizza") ? "pizza" : null;
+  const ingredientKeywords = detectIngredients(normalized);
+
+  const tags = [];
+  for (const [tag, words] of Object.entries(SUGGEST_TAG_KEYWORDS)) {
+    if (words.some((word) => normalized.includes(word))) {
+      tags.push(tag);
+    }
+  }
+
+  return {
+    category,
+    keywords: ingredientKeywords,
+    tags,
+  };
+}
+
+function rankProductsByPreferences(products = [], preferences = { category: null, keywords: [], tags: [] }) {
+  const normalizedCategory = preferences?.category ? normalizeText(preferences.category) : null;
+  const desiredKeywords = Array.isArray(preferences?.keywords)
+    ? preferences.keywords.map((keyword) => normalizeText(keyword)).filter(Boolean)
+    : [];
+  const desiredTags = Array.isArray(preferences?.tags)
+    ? preferences.tags.map((tag) => normalizeText(tag)).filter(Boolean)
+    : [];
+
+  return products
+    .map((product) => {
+      const productIngredients = Array.isArray(product.ingredienti)
+        ? product.ingredienti.map((ingredient) => normalizeText(ingredient))
+        : [];
+      const productTags = Array.isArray(product.tag) ? product.tag.map((tag) => normalizeText(tag)) : [];
+      const productCategory = normalizeText(product.categoria || "");
+
+      let score = 0;
+
+      for (const keyword of desiredKeywords) {
+        if (productIngredients.some((ingredient) => ingredient.includes(keyword) || keyword.includes(ingredient))) {
+          score += 3;
+        }
+      }
+
+      for (const tag of desiredTags) {
+        if (productTags.includes(tag)) {
+          score += 2;
+        }
+      }
+
+      if (normalizedCategory && productCategory === normalizedCategory) {
+        score += 1;
+      }
+
+      if (productTags.includes("premium")) {
+        score += 1;
+      }
+
+      return { product, score };
+    })
+    .sort((a, b) => b.score - a.score || Number(a.product.prezzo) - Number(b.product.prezzo));
+}
+
+function buildSuggestDescription(message, preferences) {
+  if (preferences?.tags?.length) {
+    return `qualcosa di ${preferences.tags[0]}`;
+  }
+  if (preferences?.keywords?.length) {
+    return `${preferences.keywords.join(", ")}`;
+  }
+  if (preferences?.category === "pizza") {
+    return "una pizza";
+  }
+  if (preferences?.category === "panino") {
+    return "un panino";
+  }
+  return sanitizeText(message) || "qualcosa di buono";
 }
 
 function detectIntent(rawMessage = "") {
@@ -473,6 +560,64 @@ exports.handler = async (event) => {
       }));
     }
 
+    if (intent === "SUGGEST") {
+      let menuItems;
+      try {
+        menuItems = await queryMenuItems({ categoria: undefined });
+      } catch (error) {
+        if (error instanceof SupabaseUnavailableError) {
+          return json(200, buildResponse({ ok: false, action: null, mainItem: null, upsell: null, reply: MENU_UPDATING_REPLY }));
+        }
+        throw error;
+      }
+
+      if (!menuItems || menuItems.length === 0) {
+        return json(200, buildResponse({ ok: false, action: null, mainItem: null, upsell: null, reply: NO_MATCH_REPLY }));
+      }
+
+      const preferences = extractPreferences(message);
+      const mappedItems = menuItems.map((item) => mapProduct(item));
+      let picks = [];
+
+      if (preferences.category) {
+        const filtered = mappedItems.filter((item) => item.categoria === preferences.category);
+        picks = rankProductsByPreferences(filtered, preferences).map((entry) => entry.product).slice(0, 2);
+      } else {
+        const ranked = rankProductsByPreferences(mappedItems, preferences);
+        const topPizza = ranked.find((entry) => entry.product.categoria === "pizza")?.product || null;
+        const topPanino = ranked.find((entry) => entry.product.categoria === "panino")?.product || null;
+
+        if (topPizza && topPanino) {
+          picks = [topPizza, topPanino];
+        } else {
+          picks = ranked.slice(0, 2).map((entry) => entry.product);
+        }
+      }
+
+      if (picks.length === 0) {
+        return json(200, buildResponse({ ok: false, action: null, mainItem: null, upsell: null, reply: NO_MATCH_REPLY }));
+      }
+
+      const first = picks[0];
+      const second = picks[1] || picks[0];
+      const description = buildSuggestDescription(message, preferences);
+      const reply = `Se cerchi ${description} ti consiglio:
+1️⃣ ${first.nome}
+2️⃣ ${second.nome}
+Vuoi che ne aggiunga uno al carrello?`;
+
+      console.log("[AI_MAIN]", first?.id || null);
+      console.log("[AI_UPSELL]", null);
+
+      return json(200, buildResponse({
+        ok: true,
+        action: null,
+        mainItem: null,
+        upsell: null,
+        reply,
+      }));
+    }
+
     let mainItem;
     try {
       mainItem = await matchProduct(message);
@@ -498,7 +643,7 @@ exports.handler = async (event) => {
     }
 
     const reply = await generatePersuasiveCopy(mainItem, upsell);
-    const action = intent === "ADD_EXPLICIT" || rawIntent === "CONFIRM_UPSELL" ? "add_to_cart" : "suggestion";
+    const action = "add_to_cart";
 
     console.log("[AI_MAIN]", mainItem?.id || null);
     console.log("[AI_UPSELL]", upsell?.id || null);
@@ -526,6 +671,8 @@ exports.handler = async (event) => {
 module.exports = {
   ...module.exports,
   detectIntent,
+  extractPreferences,
+  rankProductsByPreferences,
   matchProduct,
   computeUpsell,
   computeDrinkUpsell,
