@@ -508,6 +508,43 @@ exports.handler = async (event) => {
       return json(200, buildResponse({ ok: false, action: null, mainItem: null, upsell: null, reply: NO_MATCH_REPLY }));
     }
 
+    const rawMessage = message;
+    const normalized = normalizeText(rawMessage);
+
+    if (
+      normalized.includes("panino") &&
+      normalized.includes("aggiungi") &&
+      normalized.includes("carrello")
+    ) {
+      const ingredients = detectIngredients(normalized);
+
+      const result = buildPanino({ ingredients });
+
+      if (!result.ok) {
+        return json(200, {
+          ok: false,
+          reply: result.error,
+          cartUpdates: []
+        });
+      }
+
+      return json(200, {
+        ok: true,
+        reply: "Panino aggiunto al carrello.",
+        cartUpdates: [
+          {
+            action: "add",
+            item: {
+              type: "custom_panino",
+              name: "Panino personalizzato",
+              ingredients: result.panino.ingredients,
+              price: result.panino.price
+            }
+          }
+        ]
+      });
+    }
+
     const rawIntent = detectIntent(message);
     const intent = rawIntent === "UNKNOWN" ? "SUGGEST" : rawIntent;
     console.log("[AI_INTENT]", intent);
