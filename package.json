@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "type": "commonjs",
   "dependencies": {
+    "@supabase/supabase-js": "^2.48.0",
+    "openai": "^4.77.4",
     "stripe": "^14.0.0"
   }
 }
