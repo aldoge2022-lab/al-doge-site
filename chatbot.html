@@ -104,7 +104,7 @@
     const chatContainer = document.getElementById("chat");
     const input = document.getElementById("user-input");
     const sendBtn = document.getElementById("send-btn");
-    const ORCHESTRATOR_ENDPOINT = "/.netlify/functions/orchestrator-v3";
+    const AI_ENGINE_ENDPOINT = "/.netlify/functions/ai-engine";
 
     function addMessage(text, sender) {
       const msg = document.createElement("li");
@@ -124,7 +124,7 @@
       addMessage("Sto pensando...", "bot");
 
       try {
-        const response = await fetch(ORCHESTRATOR_ENDPOINT, {
+        const response = await fetch(AI_ENGINE_ENDPOINT, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: text }),

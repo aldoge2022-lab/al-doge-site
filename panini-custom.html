@@ -386,19 +386,19 @@
 
   <script src="cart-utils.js"></script>
   <script>
-    let selectedIngredients = [];
+    let aiIngredients = [];
     let aiSuggestion = null;
 
     async function selectPreset(type) {
       showLoading();
-      
+
       try {
-        const response = await fetch('/.netlify/functions/groq-panini', {
+        const response = await fetch('/.netlify/functions/ai-engine', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ preset: type })
+          body: JSON.stringify({ message: `panino ${type}` })
         });
-        
+
         const data = await response.json();
         handleAIResponse(data);
       } catch (error) {
@@ -418,12 +418,12 @@
       showLoading();
       
       try {
-        const response = await fetch('/.netlify/functions/groq-panini', {
+        const response = await fetch('/.netlify/functions/ai-engine', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ richiesta: input })
+          body: JSON.stringify({ message: `panino personalizzato: ${input}` })
         });
-        
+
         const data = await response.json();
         handleAIResponse(data);
       } catch (error) {
@@ -435,70 +435,57 @@
 
     function handleAIResponse(data) {
       hideLoading();
-      
+
+      if (!data?.ok || data.type !== "panino" || !data.item) {
+        alert('Risposta AI non valida per il panino. Riprova.');
+        return;
+      }
+
       aiSuggestion = data;
-      selectedIngredients = [...data.ingredienti];
-      
-      document.getElementById('ai-description').textContent = data.descrizione;
+      aiIngredients = Array.isArray(data.item.ingredienti) ? data.item.ingredienti : [];
+
+      document.getElementById('ai-description').textContent = data.reply || '';
       renderIngredients();
       updatePrice();
-      
+
       document.getElementById('result-section').classList.add('show');
       document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
     }
 
     function renderIngredients() {
       const grid = document.getElementById('ingredients-grid');
-      
-      // Tutti gli ingredienti disponibili
-      const allIngredients = INGREDIENTI_DISPONIBILI;
-      
-      grid.innerHTML = allIngredients.map(ing => {
-        const isSelected = selectedIngredients.includes(ing);
-        return `
-          <div class="ingredient-item ${isSelected ? 'selected' : ''}" onclick="toggleIngredient('${ing}')">
-            <span class="ingredient-name">${ing}</span>
-            <input type="checkbox" class="ingredient-checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation()">
-          </div>
-        `;
-      }).join('');
-    }
-
-    function toggleIngredient(ingredient) {
-      const index = selectedIngredients.indexOf(ingredient);
-      if (index > -1) {
-        selectedIngredients.splice(index, 1);
-      } else {
-        selectedIngredients.push(ingredient);
+      if (!aiIngredients.length) {
+        grid.innerHTML = '<div class="ingredient-item">Nessun ingrediente disponibile</div>';
+        return;
       }
-      
-      renderIngredients();
-      updatePrice();
+
+      grid.innerHTML = aiIngredients.map(ing => `
+        <div class="ingredient-item selected">
+          <span class="ingredient-name">${ing}</span>
+        </div>
+      `).join('');
     }
 
     function updatePrice() {
-      const numIngredients = selectedIngredients.length;
-      const total = PREZZO_BASE_PANINO + (numIngredients * PREZZO_INGREDIENTE);
-      
+      const numIngredients = aiIngredients.length;
+      const total = aiSuggestion?.item?.prezzo || 0;
+
       document.getElementById('total-price').textContent = `€${total.toFixed(2)}`;
       document.getElementById('price-detail').textContent = 
-        `Base €${PREZZO_BASE_PANINO.toFixed(2)} + ${numIngredients} ingredienti (€${PREZZO_INGREDIENTE.toFixed(2)} cad.)`;
+        `${numIngredients} ingredienti suggeriti dall'IA - prezzo calcolato dal backend`;
     }
 
     function addPaninoToCart(event) {
-      if (selectedIngredients.length === 0) {
-        alert('Seleziona almeno un ingrediente!');
+      if (!aiSuggestion || !aiSuggestion.item) {
+        alert('Chiedi prima all’AI di creare il panino.');
         return;
       }
       
-      const numIngredients = selectedIngredients.length;
-      const price = PREZZO_BASE_PANINO + (numIngredients * PREZZO_INGREDIENTE);
-      
       const item = {
         type: 'panino',
-        name: 'Panino Custom AL DOGE',
-        price: price,
-        ingredients: selectedIngredients,
+        name: aiSuggestion.item.nome || 'Panino Custom AL DOGE',
+        price: Number(aiSuggestion.item.prezzo) || 0,
+        ingredients: Array.isArray(aiSuggestion.item.ingredienti) ? aiSuggestion.item.ingredienti : [],
         allergeni: [1, 7], // Impasto pizza contiene glutine e lattosio
         quantity: 1
       };
@@ -522,7 +509,7 @@
       setTimeout(() => {
         document.getElementById('result-section').classList.remove('show');
         document.getElementById('custom-input').value = '';
-        selectedIngredients = [];
+        aiIngredients = [];
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }, 2500);
     }
