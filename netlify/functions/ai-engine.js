@@ -6,6 +6,8 @@ const { routeIntent } = require("../../core/ai/intent-router");
 const { scoreMenuByTags } = require("../../core/ai/tag-engine");
 const { pickRecommendation } = require("../../core/ai/recommendation-engine");
 
+let lastSuggestedId = null;
+
 const hasOpenAI = Boolean(process.env.OPENAI_API_KEY);
 const openai = hasOpenAI ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
 const hasSupabase = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
@@ -258,7 +260,23 @@ async function handlePizza(message, sessionId) {
     scoredMenu = availableMenu.map((pizza) => ({ ...pizza, score: pizza.score ?? 0 }));
   }
 
-  const candidate = pickRecommendation(scoredMenu, sessionId) || scoredMenu[0] || DEFAULT_PIZZA_FALLBACK;
+  let candidate = pickRecommendation(scoredMenu, sessionId);
+
+  if (!candidate) {
+    // Fallback intelligente anti-loop
+    const pool = scoredMenu.filter((item) => item.id !== lastSuggestedId);
+
+    const usablePool = pool.length ? pool : scoredMenu;
+
+    if (usablePool.length) {
+      candidate = usablePool[Math.floor(Math.random() * usablePool.length)];
+      lastSuggestedId = candidate?.id ?? lastSuggestedId;
+    }
+  }
+
+  if (!candidate) {
+    candidate = DEFAULT_PIZZA_FALLBACK;
+  }
 
   const item = {
     id: candidate.id || null,
