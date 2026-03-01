@@ -268,9 +268,10 @@ async function handlePizza(message, sessionId) {
 
     const usablePool = pool.length ? pool : scoredMenu;
 
-    candidate = usablePool[Math.floor(Math.random() * usablePool.length)];
-
-    lastSuggestedId = candidate?.id ?? lastSuggestedId;
+    if (usablePool.length) {
+      candidate = usablePool[Math.floor(Math.random() * usablePool.length)];
+      lastSuggestedId = candidate?.id ?? lastSuggestedId;
+    }
   }
 
   if (!candidate) {
