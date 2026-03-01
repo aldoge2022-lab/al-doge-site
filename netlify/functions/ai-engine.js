@@ -2,6 +2,9 @@ const OpenAI = require("openai");
 const { createClient } = require("@supabase/supabase-js");
 const { validatePaninoInput } = require("../../core/panino/panino-validator");
 const { calculatePaninoPrice } = require("../../core/panino/panino-pricing");
+const { routeIntent } = require("../../core/ai/intent-router");
+const { scoreMenuByTags } = require("../../core/ai/tag-engine");
+const { pickRecommendation } = require("../../core/ai/recommendation-engine");
 
 const hasOpenAI = Boolean(process.env.OPENAI_API_KEY);
 const openai = hasOpenAI ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
@@ -95,58 +98,66 @@ function determineDomain(message = "") {
   return "pizza";
 }
 
-async function interpretPizzaIntent(message) {
-  if (!openai) {
-    return {
-      include: [],
-      exclude: [],
-      spicy: false,
-      white_base: false,
-      category_hint: null
-    };
+function resolveSessionId(headers = {}, explicitSessionId = null) {
+  if (explicitSessionId) {
+    return String(explicitSessionId);
   }
 
-  try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      temperature: 0,
-      response_format: { type: "json_object" },
-      messages: [
-        {
-          role: "system",
-          content: `Sei un parser di intent per una pizzeria.
-Restituisci SOLO JSON valido conforme a questo schema:
-{
-  "include": string[],
-  "exclude": string[],
-  "spicy": boolean,
-  "white_base": boolean,
-  "category_hint": string | null
+  const normalizedHeaders = Object.entries(headers || {}).reduce((acc, [key, value]) => {
+    acc[String(key).toLowerCase()] = value;
+    return acc;
+  }, {});
+
+  const headerSession =
+    normalizedHeaders["x-session-id"] ||
+    normalizedHeaders["x-sessionid"] ||
+    normalizedHeaders["x-client-session"] ||
+    normalizedHeaders["x-nf-request-id"];
+
+  return String(headerSession || "anon");
 }
-`
-        },
-        { role: "user", content: message }
-      ]
-    });
 
-    const parsed = JSON.parse(response.choices[0].message.content || "{}");
-    return {
-      include: Array.isArray(parsed.include) ? parsed.include : [],
-      exclude: Array.isArray(parsed.exclude) ? parsed.exclude : [],
-      spicy: Boolean(parsed.spicy),
-      white_base: Boolean(parsed.white_base),
-      category_hint: typeof parsed.category_hint === "string" ? parsed.category_hint : null
-    };
-  } catch (error) {
-    console.error("[AI_ENGINE][INTENT_ERROR]", { message: error.message });
-    return {
-      include: [],
-      exclude: [],
-      spicy: false,
-      white_base: false,
-      category_hint: null
-    };
+async function interpretPizzaIntent(message) {
+  const text = normalize(message);
+  const intent = {
+    include: [],
+    exclude: [],
+    spicy: false,
+    white_base: false,
+    category_hint: null
+  };
+
+  if (!text) {
+    return intent;
   }
+
+  PANINO_WHITELIST.forEach((keyword) => {
+    if (text.includes(normalize(keyword))) {
+      intent.include.push(keyword);
+    }
+  });
+
+  const senzaRegex = /senza\s+([a-zA-Zàèéìòù]+)/g;
+  let match;
+  while ((match = senzaRegex.exec(text))) {
+    intent.exclude.push(match[1]);
+  }
+
+  intent.spicy = text.includes("piccante") || text.includes("peperoncino");
+  intent.white_base = text.includes("bianca") || text.includes("senza pomodoro");
+
+  if (text.includes("vegetar")) {
+    intent.category_hint = "vegetariana";
+  } else if (text.includes("gourmet") || text.includes("particolar") || text.includes("special")) {
+    intent.category_hint = "gourmet";
+  } else if (text.includes("leggera") || text.includes("leggero")) {
+    intent.category_hint = "leggera";
+  }
+
+  intent.include = Array.from(new Set(intent.include));
+  intent.exclude = Array.from(new Set(intent.exclude));
+
+  return intent;
 }
 
 async function fetchMenu() {
@@ -156,7 +167,7 @@ async function fetchMenu() {
 
   const { data, error } = await supabase
     .from("menu_items")
-    .select("id, nome, Nome, Categoria, categoria, Prezzo, prezzo, ingredienti, disponibile")
+    .select("id, nome, Nome, Categoria, categoria, Prezzo, prezzo, ingredienti, disponibile, tags, weight_profile")
     .eq("disponibile", true);
 
   if (error) {
@@ -167,12 +178,19 @@ async function fetchMenu() {
 }
 
 function mapMenuItem(raw = {}) {
+  const weightProfile =
+    raw.weight_profile ||
+    raw.weightProfile ||
+    (raw.categoria && normalize(raw.categoria).includes("leggera") ? "leggera" : null);
+
   return {
     id: raw.id || null,
     nome: raw.nome || raw.Nome || DEFAULT_PIZZA_FALLBACK.nome,
     categoria: raw.categoria || raw.Categoria || "pizza",
     prezzo: Number(raw.prezzo ?? raw.Prezzo ?? DEFAULT_PIZZA_FALLBACK.prezzo) || 0,
-    ingredienti: Array.isArray(raw.ingredienti) ? raw.ingredienti : DEFAULT_PIZZA_FALLBACK.ingredienti
+    ingredienti: Array.isArray(raw.ingredienti) ? raw.ingredienti : DEFAULT_PIZZA_FALLBACK.ingredienti,
+    tags: Array.isArray(raw.tags) ? raw.tags : [],
+    weight_profile: weightProfile
   };
 }
 
@@ -213,8 +231,10 @@ function scorePizza(intent, pizza) {
   return score;
 }
 
-async function handlePizza(message) {
-  const intent = await interpretPizzaIntent(message);
+async function handlePizza(message, sessionId) {
+  const userMessage = message || "";
+  const intentType = routeIntent(userMessage, PANINO_WHITELIST);
+  const parsedIntent = await interpretPizzaIntent(userMessage);
   let menu = [];
 
   try {
@@ -225,28 +245,71 @@ async function handlePizza(message) {
   }
 
   const availableMenu = menu.length ? menu : [DEFAULT_PIZZA_FALLBACK];
+  let scoredMenu = availableMenu;
 
-  const scored = availableMenu.map((pizza) => ({
-    ...pizza,
-    score: scorePizza(intent, pizza)
-  }));
+  if (intentType === "ingredient") {
+    scoredMenu = availableMenu.map((pizza) => ({
+      ...pizza,
+      score: scorePizza(parsedIntent, pizza)
+    }));
+  } else if (intentType === "descriptive") {
+    scoredMenu = scoreMenuByTags(userMessage, availableMenu);
+  } else {
+    scoredMenu = availableMenu.map((pizza) => ({ ...pizza, score: pizza.score ?? 0 }));
+  }
 
-  scored.sort((a, b) => b.score - a.score || Number(a.prezzo) - Number(b.prezzo));
+  const candidate = pickRecommendation(scoredMenu, sessionId) || scoredMenu[0] || DEFAULT_PIZZA_FALLBACK;
 
-  const best = scored[0] && scored[0].score > 0 ? scored[0] : availableMenu[0] || DEFAULT_PIZZA_FALLBACK;
   const item = {
-    id: best.id || null,
-    nome: best.nome || DEFAULT_PIZZA_FALLBACK.nome,
-    prezzo: Number(best.prezzo) || DEFAULT_PIZZA_FALLBACK.prezzo,
-    ingredienti: Array.isArray(best.ingredienti) ? best.ingredienti : DEFAULT_PIZZA_FALLBACK.ingredienti
+    id: candidate.id || null,
+    nome: candidate.nome || candidate.Nome || DEFAULT_PIZZA_FALLBACK.nome,
+    categoria: candidate.categoria || candidate.Categoria || "pizza",
+    prezzo: Number(candidate.prezzo ?? candidate.Prezzo ?? DEFAULT_PIZZA_FALLBACK.prezzo) || 0,
+    ingredienti: Array.isArray(candidate.ingredienti) ? candidate.ingredienti : DEFAULT_PIZZA_FALLBACK.ingredienti
   };
+
+  const reply = await buildMarketingCopy(item, userMessage);
 
   return {
     ok: true,
     type: "pizza",
-    reply: `Ti consiglio la ${item.nome} (€${item.prezzo.toFixed(2)}). Vuoi aggiungerla al carrello?`,
+    reply,
     item
   };
+}
+
+async function buildMarketingCopy(item, originalMessage) {
+  const fallback = `Ti consiglio la ${item.nome}, molto apprezzata dai nostri clienti.`;
+
+  if (!openai) {
+    return fallback;
+  }
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      temperature: 0.4,
+      messages: [
+        {
+          role: "system",
+          content:
+            "Sei un copywriter per una pizzeria. Raffina il testo, non cambiare il prodotto scelto. Massimo 40 parole, tono persuasivo ma conciso, in italiano. Non suggerire altri prodotti."
+        },
+        {
+          role: "user",
+          content: `Suggerisci ${item.nome} con ingredienti ${item.ingredienti.join(
+            ", "
+          )}. Contesto utente: ${originalMessage || "richiesta generica"}.`
+        }
+      ]
+    });
+
+    const text = completion.choices[0]?.message?.content?.trim();
+    return text || fallback;
+  } catch (error) {
+    console.error("[AI_ENGINE][COPY_ERROR]", { message: error.message });
+    return fallback;
+  }
 }
 
 async function extractPaninoIngredients(message) {
@@ -320,19 +383,19 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { message } = JSON.parse(event.body || "{}");
+    const { message, sessionId: bodySessionId } = JSON.parse(event.body || "{}");
     domain = determineDomain(message || "");
-
-    if (!message) {
-      return json(400, { ok: false, type: domain, reply: "Devi indicare cosa vuoi ordinare.", item: null });
-    }
+    const sessionId = resolveSessionId(event.headers, bodySessionId);
 
     if (domain === "panino") {
+      if (!message) {
+        return json(400, { ok: false, type: domain, reply: "Devi indicare cosa vuoi ordinare.", item: null });
+      }
       const response = await handlePanino(message);
       return json(200, response);
     }
 
-    const response = await handlePizza(message);
+    const response = await handlePizza(message || "", sessionId);
     return json(200, response);
   } catch (error) {
     console.error("[AI_ENGINE][UNCAUGHT]", { message: error.message, stack: error.stack });
