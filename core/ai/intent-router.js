@@ -1,3 +1,4 @@
+// Lowercases and strips diacritics to make keyword comparisons reliable.
 const normalizeText = (value = "") =>
   String(value).toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "").trim();
 

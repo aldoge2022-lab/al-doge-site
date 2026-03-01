@@ -1,3 +1,9 @@
+// Ensure every candidate has a minimum weight and scores translate into extra weight.
+const MIN_WEIGHT = 1;
+const WEIGHT_OFFSET = 1;
+// Limit randomness to the best-ranked subset to keep behavior predictable.
+const TOP_CANDIDATE_COUNT = 3;
+
 const { getRecentSuggestions, rememberSuggestion, clearSuggestions } = require("./session-memory");
 
 function sortCandidates(candidates = []) {
@@ -16,7 +22,7 @@ function sortCandidates(candidates = []) {
 
 function weightedPick(items = []) {
   if (!items.length) return null;
-  const weights = items.map((item) => Math.max(1, Number(item.score || 0) + 1));
+  const weights = items.map((item) => Math.max(MIN_WEIGHT, Number(item.score || 0) + WEIGHT_OFFSET));
   const total = weights.reduce((sum, weight) => sum + weight, 0);
   const roll = Math.random() * total;
   let cumulative = 0;
@@ -49,7 +55,7 @@ function pickRecommendation(menu = [], sessionId) {
   if (!filtered.length) return null;
 
   const sorted = sortCandidates(filtered);
-  const topCandidates = sorted.slice(0, 3);
+  const topCandidates = sorted.slice(0, TOP_CANDIDATE_COUNT);
   const candidate = weightedPick(topCandidates);
 
   const identifier = candidate?.id ?? candidate?.nome ?? candidate?.Nome;

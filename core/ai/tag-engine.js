@@ -96,6 +96,7 @@ function scoreMenuByTags(prompt, menu = []) {
       }
     });
 
+    // Light and gourmet requests get a small extra nudge beyond the base match count.
     if (promptTags.includes("leggera") && itemTags.includes("leggera")) {
       score += 1;
     }

@@ -232,8 +232,9 @@ function scorePizza(intent, pizza) {
 }
 
 async function handlePizza(message, sessionId) {
-  const intentType = routeIntent(message, PANINO_WHITELIST);
-  const parsedIntent = await interpretPizzaIntent(message);
+  const userMessage = message || "";
+  const intentType = routeIntent(userMessage, PANINO_WHITELIST);
+  const parsedIntent = await interpretPizzaIntent(userMessage);
   let menu = [];
 
   try {
@@ -252,13 +253,12 @@ async function handlePizza(message, sessionId) {
       score: scorePizza(parsedIntent, pizza)
     }));
   } else if (intentType === "descriptive") {
-    scoredMenu = scoreMenuByTags(message, availableMenu);
+    scoredMenu = scoreMenuByTags(userMessage, availableMenu);
   } else {
     scoredMenu = availableMenu.map((pizza) => ({ ...pizza, score: pizza.score ?? 0 }));
   }
 
-  const candidate =
-    pickRecommendation(scoredMenu, sessionId) || scoredMenu[0] || availableMenu[0] || DEFAULT_PIZZA_FALLBACK;
+  const candidate = pickRecommendation(scoredMenu, sessionId) || scoredMenu[0] || DEFAULT_PIZZA_FALLBACK;
 
   const item = {
     id: candidate.id || null,
@@ -268,7 +268,7 @@ async function handlePizza(message, sessionId) {
     ingredienti: Array.isArray(candidate.ingredienti) ? candidate.ingredienti : DEFAULT_PIZZA_FALLBACK.ingredienti
   };
 
-  const reply = await buildMarketingCopy(item, message);
+  const reply = await buildMarketingCopy(item, userMessage);
 
   return {
     ok: true,
