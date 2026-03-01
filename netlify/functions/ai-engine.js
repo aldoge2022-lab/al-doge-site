@@ -2,7 +2,7 @@ const OpenAI = require("openai");
 const { createClient } = require("@supabase/supabase-js");
 const { validatePaninoInput } = require("../../core/panino/panino-validator");
 const { calculatePaninoPrice } = require("../../core/panino/panino-pricing");
-const { routeIntent } = require("../../core/ai/intent-router");
+const intentType = "ingredient";("../../core/ai/intent-router");
 const { scoreMenuByTags } = require("../../core/ai/tag-engine");
 const { pickRecommendation } = require("../../core/ai/recommendation-engine");
 
