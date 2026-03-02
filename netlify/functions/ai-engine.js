@@ -2,9 +2,11 @@ const OpenAI = require("openai");
 const { createClient } = require("@supabase/supabase-js");
 const { validatePaninoInput } = require("../../core/panino/panino-validator");
 const { calculatePaninoPrice } = require("../../core/panino/panino-pricing");
-const intentType = "ingredient";("../../core/ai/intent-router");
+const { routeIntent } = require("../../core/ai/intent-router");
 const { scoreMenuByTags } = require("../../core/ai/tag-engine");
 const { pickRecommendation } = require("../../core/ai/recommendation-engine");
+
+const ORCHESTRATOR_PATH = "/.netlify/functions/ai-orchestrator";
 
 let lastSuggestedId = null;
 
@@ -90,6 +92,10 @@ function normalize(text = "") {
 
 function normalizeIngredient(value = "") {
   return normalize(value);
+}
+
+function normalizePathname(value = "") {
+  return value.replace(/\/+/g, "/").replace(/\/+$/, "");
 }
 
 function determineDomain(message = "") {
@@ -395,6 +401,28 @@ async function handlePanino(message) {
 
 exports.handler = async (event) => {
   let domain = "pizza";
+
+  const rawPathname = (() => {
+    if (event?.rawUrl) {
+      try {
+        return new URL(event.rawUrl).pathname;
+      } catch (error) {
+        console.warn("[AI_ENGINE][PATH_PARSE] Failed to parse rawUrl:", event.rawUrl, error.message);
+      }
+    }
+    return event?.path || "";
+  })();
+
+  const normalizedPath = normalizePathname(rawPathname);
+  const isDirectEngineCall = normalizedPath === "/.netlify/functions/ai-engine";
+  if (!event?.__orchestratorInternal && isDirectEngineCall) {
+    return json(403, {
+      ok: false,
+      type: "blocked",
+      reply: `Accesso diretto disabilitato. Usa ${ORCHESTRATOR_PATH} per questo servizio.`,
+      item: null
+    });
+  }
 
   if (event.httpMethod !== "POST") {
     return json(405, { ok: false, type: domain, reply: "Metodo non consentito", item: null });
