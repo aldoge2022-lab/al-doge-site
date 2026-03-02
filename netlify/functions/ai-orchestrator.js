@@ -1,5 +1,11 @@
 const aiEngine = require("./ai-engine");
 
-exports.handler = (event, context) => {
-  return aiEngine.handler(event, context);
+exports.handler = async (event, context) => {
+  return aiEngine.handler(
+    {
+      ...event,
+      __orchestratorInternal: true
+    },
+    context
+  );
 };
