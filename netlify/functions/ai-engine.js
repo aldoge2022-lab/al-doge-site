@@ -396,6 +396,16 @@ async function handlePanino(message) {
 exports.handler = async (event) => {
   let domain = "pizza";
 
+  const path = event?.path || "";
+  if (path.includes("/ai-engine")) {
+    return json(410, {
+      ok: false,
+      type: domain,
+      reply: "Endpoint disabilitato. Usa /.netlify/functions/ai-orchestrator.",
+      item: null
+    });
+  }
+
   if (event.httpMethod !== "POST") {
     return json(405, { ok: false, type: domain, reply: "Metodo non consentito", item: null });
   }

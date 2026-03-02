@@ -393,7 +393,7 @@
       showLoading();
 
       try {
-        const response = await fetch('/.netlify/functions/ai-engine', {
+        const response = await fetch('/.netlify/functions/ai-orchestrator', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: `panino ${type}` })
@@ -418,7 +418,7 @@
       showLoading();
       
       try {
-        const response = await fetch('/.netlify/functions/ai-engine', {
+        const response = await fetch('/.netlify/functions/ai-orchestrator', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: `panino personalizzato: ${input}` })
