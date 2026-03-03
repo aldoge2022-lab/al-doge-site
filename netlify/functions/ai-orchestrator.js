@@ -14,7 +14,10 @@ const {
   normalizeIngredientId
 } = require('./orchestrator-v3/schemas/orderSchemas');
 const { buildOrderItem, CATALOG_ITEMS } = require('./orchestrator-v3/services/orderBuilder');
-const { extractValidIngredients } = require('./orchestrator-v3/services/ingredientExtractor');
+const {
+  extractValidIngredients,
+  extractExcludedIngredients
+} = require('./orchestrator-v3/services/ingredientExtractor');
 const { findBestMatches } = require('./orchestrator-v3/services/ingredientMatchEngine');
 
 const JSON_HEADERS = {
@@ -198,12 +201,13 @@ function detectRecommendationIntent(message, domain) {
   const normalizedMessage = String(message);
   const hasPrimaryToken = PRIMARY_RECOMMENDATION_REGEX.test(normalizedMessage);
   const hasQuestionTone = normalizedMessage.includes('?');
+  const hasExclusionToken = normalizedMessage.includes('senza');
 
   if (!RECOMMENDATION_REGEX.test(normalizedMessage)) {
     return false;
   }
 
-  return hasPrimaryToken || hasQuestionTone;
+  return hasPrimaryToken || hasQuestionTone || hasExclusionToken;
 }
 
 function normalizeCatalogIngredients(item) {
@@ -221,6 +225,10 @@ function buildRecommendationResponse(message) {
   const wantsVegetariana = normalizedMessage.includes('vegetar');
   const wantsLeggera = normalizedMessage.includes('legger');
   const desiredIngredients = extractValidIngredients(message);
+  const excludedIngredients = extractExcludedIngredients(message);
+  const desiredWithoutExcluded = desiredIngredients.filter(
+    (ingredient) => !excludedIngredients.includes(ingredient)
+  );
   const catalogItems = Array.from(CATALOG_ITEMS.values());
 
   if (catalogItems.length === 0) {
@@ -230,7 +238,17 @@ function buildRecommendationResponse(message) {
   const scored = catalogItems.map((item) => {
     const ingredients = normalizeCatalogIngredients(item);
     const tags = Array.isArray(item?.tags) ? item.tags.map((tag) => String(tag).toLowerCase()) : [];
-    const ingredientMatches = desiredIngredients.filter((ingredient) => ingredients.includes(ingredient));
+    const ingredientMatches = desiredWithoutExcluded.filter((ingredient) => ingredients.includes(ingredient));
+    const excludedMatches = excludedIngredients.filter((ingredient) => ingredients.includes(ingredient));
+
+    if (excludedMatches.length > 0) {
+      return {
+        item,
+        score: Number.NEGATIVE_INFINITY,
+        reason: `Esclusa: contiene ${excludedMatches.join(', ')}`,
+        price: Number(item?.price_cents ?? item?.price ?? item?.base_price_cents ?? 0) || 0
+      };
+    }
 
     let score = ingredientMatches.length * 2;
     const reasonParts = [];
@@ -260,7 +278,7 @@ function buildRecommendationResponse(message) {
 
     if (
       score === 0 &&
-      (desiredIngredients.length === 0 || wantsPiccante || wantsVegetariana || wantsLeggera)
+      (desiredWithoutExcluded.length === 0 || wantsPiccante || wantsVegetariana || wantsLeggera)
     ) {
       score = DEFAULT_RECOMMENDATION_SCORE;
     }
@@ -275,8 +293,9 @@ function buildRecommendationResponse(message) {
     };
   });
 
-  const scoredWithPositive = scored.filter((entry) => entry.score > 0);
-  const candidates = scoredWithPositive.length > 0 ? scoredWithPositive : scored;
+  const scoredWithoutExcluded = scored.filter((entry) => Number.isFinite(entry.score));
+  const scoredWithPositive = scoredWithoutExcluded.filter((entry) => entry.score > 0);
+  const candidates = scoredWithPositive.length > 0 ? scoredWithPositive : scoredWithoutExcluded;
 
   const top = candidates
     .sort((a, b) => {
