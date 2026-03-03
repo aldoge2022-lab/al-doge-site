@@ -1,0 +1,16 @@
+{
+  "ingredients": [
+    { "id": "pomodoro", "name": "Pomodoro", "supplement": 0, "paninoAllowed": true },
+    { "id": "mozzarella", "name": "Mozzarella", "supplement": 0, "paninoAllowed": true },
+    { "id": "mozzarella di bufala", "name": "Mozzarella di bufala", "supplement": 1, "paninoAllowed": true },
+    { "id": "origano", "name": "Origano", "supplement": 0, "paninoAllowed": true },
+    { "id": "salame piccante", "name": "Salame piccante", "supplement": 0.5, "paninoAllowed": true },
+    { "id": "prosciutto", "name": "Prosciutto", "supplement": 0.5, "paninoAllowed": true },
+    { "id": "funghi", "name": "Funghi", "supplement": 0.5, "paninoAllowed": true },
+    { "id": "gorgonzola", "name": "Gorgonzola", "supplement": 0.5, "paninoAllowed": true },
+    { "id": "parmigiano", "name": "Parmigiano", "supplement": 0.5, "paninoAllowed": true },
+    { "id": "provola", "name": "Provola", "supplement": 0.5, "paninoAllowed": true },
+    { "id": "rucola", "name": "Rucola", "supplement": 0.3, "paninoAllowed": true },
+    { "id": "margherita base", "name": "Base Margherita", "supplement": 0, "paninoAllowed": false }
+  ]
+}
