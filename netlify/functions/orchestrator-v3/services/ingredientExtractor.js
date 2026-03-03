@@ -9,6 +9,8 @@ function normalizeText(value) {
 }
 
 const TOKEN_SPLIT_REGEX = /\s+/;
+const EXCLUSION_SEGMENT_REGEX = /\bsenza\b([^,.;!?]*)/giu;
+const EXCLUSION_STOP_REGEX = /\b(ma|pero|però|tranne|esclus[oa]|con)\b/iu;
 
 function extractValidIngredients(text) {
   const normalizedText = normalizeText(text);
@@ -36,6 +38,28 @@ function extractValidIngredients(text) {
   return Array.from(found);
 }
 
+function extractExcludedIngredients(text) {
+  const normalizedText = normalizeText(text);
+  if (!normalizedText) {
+    return [];
+  }
+
+  const excluded = new Set();
+
+  for (const match of normalizedText.matchAll(EXCLUSION_SEGMENT_REGEX)) {
+    const segment = String(match[1] || '');
+    const stopMatch = segment.match(EXCLUSION_STOP_REGEX);
+    const scopedSegment = stopMatch ? segment.slice(0, stopMatch.index) : segment;
+
+    extractValidIngredients(scopedSegment).forEach((ingredient) => {
+      excluded.add(ingredient);
+    });
+  }
+
+  return Array.from(excluded);
+}
+
 module.exports = {
-  extractValidIngredients
+  extractValidIngredients,
+  extractExcludedIngredients
 };
