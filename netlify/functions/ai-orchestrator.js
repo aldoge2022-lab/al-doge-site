@@ -11,7 +11,8 @@ const {
   SuggestItemsSchema,
   parseWith,
   toToolParameters,
-  normalizeIngredientId
+  normalizeIngredientId,
+  VALID_INGREDIENTS
 } = require('./orchestrator-v3/schemas/orderSchemas');
 const { buildOrderItem, CATALOG_ITEMS } = require('./orchestrator-v3/services/orderBuilder');
 const {
@@ -19,6 +20,7 @@ const {
   extractExcludedIngredients
 } = require('./orchestrator-v3/services/ingredientExtractor');
 const { findBestMatches } = require('./orchestrator-v3/services/ingredientMatchEngine');
+const { extractIngredientsByCategory } = require('./orchestrator-v3/services/customIngredientParser');
 
 const JSON_HEADERS = {
   'Content-Type': 'application/json',
@@ -149,8 +151,32 @@ function buildCustomPizzaFromIngredients({ ingredients, message }) {
 }
 
 function runDeterministicIngredientMatch(message) {
-  const ingredients = extractValidIngredients(message);
+  const knownIngredients = Array.from(VALID_INGREDIENTS);
+  const parsed = extractIngredientsByCategory({
+    message,
+    knownIngredients,
+    allowedIngredients: knownIngredients
+  });
+  const ingredients = (parsed.recognizedIngredients || [])
+    .map((ingredient) => normalizeIngredientId(ingredient))
+    .filter(Boolean);
+
   if (ingredients.length === 0) {
+    const normalizedMessage = String(parsed.normalizedMessage || '').trim();
+    const isPizzaCustomRequest =
+      /\bpizza\b/i.test(normalizedMessage) && /\b(con|senza|personalizzat|aggiungi|metti|voglio|vorrei|fammi)\b/i.test(normalizedMessage);
+
+    if (isPizzaCustomRequest || normalizedMessage === 'pizza') {
+      return enrichWithLegacyFields(
+        {
+          ok: true,
+          cartUpdates: [],
+          reply: 'Per personalizzare la pizza indicami almeno un ingrediente valido.'
+        },
+        'pizza'
+      );
+    }
+
     return null;
   }
 

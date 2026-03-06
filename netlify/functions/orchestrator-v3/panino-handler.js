@@ -1,4 +1,5 @@
 const { calculateSupplements, getIngredients } = require('../../../core/menu/food-engine');
+const { parseCustomIngredients } = require('./services/customIngredientParser');
 
 const BASE_PRICE = Number(process.env.PANINO_BASE_PRICE || 5);
 
@@ -18,25 +19,26 @@ function getPaninoWhitelist() {
 }
 
 function extractIngredients(message) {
-  const normalizedMessage = normalizeText(message);
   const whitelist = getPaninoWhitelist();
-  const mapByName = new Map();
+  const canonicalToIngredientId = new Map();
+  const knownIngredients = [];
 
   whitelist.forEach((ingredient) => {
-    const key = normalizeText(ingredient.name || ingredient.id);
-    if (key) {
-      mapByName.set(key, ingredient.id);
-    }
+    const canonical = String(ingredient?.name || ingredient?.id || '').trim();
+    if (!canonical || !ingredient?.id) return;
+    knownIngredients.push(canonical);
+    canonicalToIngredientId.set(canonical, ingredient.id);
   });
 
-  const foundIngredientIds = [];
-  mapByName.forEach((ingredientId, normalizedName) => {
-    if (normalizedMessage.includes(normalizedName)) {
-      foundIngredientIds.push(ingredientId);
-    }
+  const parsed = parseCustomIngredients({
+    message,
+    knownIngredients,
+    allowedIngredients: knownIngredients
   });
 
-  return Array.from(new Set(foundIngredientIds));
+  return parsed.recognizedIngredients
+    .map((canonical) => canonicalToIngredientId.get(canonical))
+    .filter(Boolean);
 }
 
 function buildPaninoItem(ingredients, qty) {
@@ -76,6 +78,15 @@ function handlePanino({ message, intent }) {
       ok: true,
       cartUpdates: [],
       reply: 'Posso creare un panino custom: dimmi "aggiungi panino" con gli ingredienti desiderati.',
+      type: 'panino'
+    };
+  }
+
+  if (ingredients.length === 0) {
+    return {
+      ok: true,
+      cartUpdates: [],
+      reply: 'Per creare un panino custom indicami almeno un ingrediente valido.',
       type: 'panino'
     };
   }
