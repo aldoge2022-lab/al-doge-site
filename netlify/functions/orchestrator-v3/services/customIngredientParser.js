@@ -77,7 +77,10 @@ function buildAliasMap(knownIngredients = []) {
     }
 
     if (normalizedCanonical === 'prosciutto cotto' || normalizedCanonical === 'prosciutto crudo' || normalizedCanonical === 'prosciutto') {
-      addAlias('prosciutto', resolveProsciuttoAlias('prosciutto', canonicalLookup) || canonical);
+      const genericResolved = resolveProsciuttoAlias('prosciutto', canonicalLookup);
+      if (genericResolved) {
+        addAlias('prosciutto', genericResolved);
+      }
       const cottoResolved = resolveProsciuttoAlias('cotto', canonicalLookup);
       const crudoResolved = resolveProsciuttoAlias('crudo', canonicalLookup);
 
