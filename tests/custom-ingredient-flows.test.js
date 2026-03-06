@@ -74,4 +74,13 @@ test('parser deduplicates aliases and keeps prosciutto cotto/crudo distinction w
   });
 
   assert.deepEqual(toSet(prosciuttoSplit.recognizedIngredients), new Set(['prosciutto cotto', 'prosciutto crudo']));
+
+  // Generic 'prosciutto' must not be arbitrarily mapped to either variant when both exist
+  const prosciuttoAmbiguous = parseCustomIngredients({
+    message: 'pizza con prosciutto',
+    knownIngredients: ['prosciutto cotto', 'prosciutto crudo'],
+    allowedIngredients: ['prosciutto cotto', 'prosciutto crudo']
+  });
+
+  assert.deepEqual(prosciuttoAmbiguous.recognizedIngredients, []);
 });
