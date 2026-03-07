@@ -314,7 +314,7 @@
   <div class="page-shell">
     <header class="topbar">
       <a class="brand-link" href="home.html" aria-label="Vai alla home AL DOGE">
-        <img src="logo-al-doge.png" class="brand-logo" alt="Logo AL DOGE" />
+        <img src="/logo-al-doge.png" class="brand-logo" alt="Logo AL DOGE" />
         <div class="brand-copy">
           <strong>AL DOGE</strong>
           <span>Assistente ordini</span>
@@ -354,7 +354,7 @@
     </main>
   </div>
 
-  <script src="cart-utils.js"></script>
+  <script src="cart-utils.js" onerror="console.warn('cart-utils.js non disponibile: badge carrello disattivato')"></script>
   <script>
     const chatContainer = document.getElementById("chat");
     const input = document.getElementById("user-input");
@@ -415,7 +415,9 @@
     });
 
     addMessage("Benvenuto da AL DOGE. Dimmi cosa desideri e ti guiderò nella scelta.", "bot");
-    CartManager.updateBadge();
+    if (window.CartManager && typeof window.CartManager.updateBadge === "function") {
+      window.CartManager.updateBadge();
+    }
   </script>
 </body>
 </html>
