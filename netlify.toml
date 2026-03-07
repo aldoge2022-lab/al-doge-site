@@ -7,4 +7,14 @@
 [build.environment]
   NODE_VERSION = "20"
 
-#
+[[redirects]]
+  from = "/panini-custom"
+  to = "/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/panini-custom.html"
+  to = "/"
+  status = 301
+  force = true
