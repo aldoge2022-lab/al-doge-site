@@ -1,23 +1,31 @@
 const Stripe = require("stripe");
 
+let cachedStripe = null;
+let cachedSecretKey = null;
+
 exports.handler = async (event) => {
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  const publishableKey = process.env.STRIPE_PUBLIC_KEY;
+
   try {
     if (event.httpMethod !== "POST") {
       return { statusCode: 405, body: "Method Not Allowed" };
     }
 
-    const secretKey = process.env.STRIPE_SECRET_KEY;
-    const publishableKey = process.env.STRIPE_PUBLIC_KEY;
-
     if (!secretKey) {
-      throw new Error("Missing STRIPE_SECRET_KEY");
+      throw new Error("Missing or empty STRIPE_SECRET_KEY");
     }
 
     if (!publishableKey) {
-      throw new Error("Missing STRIPE_PUBLIC_KEY");
+      throw new Error("Missing or empty STRIPE_PUBLIC_KEY");
     }
 
-    const stripe = Stripe(secretKey);
+    if (!cachedStripe || cachedSecretKey !== secretKey) {
+      cachedStripe = Stripe(secretKey);
+      cachedSecretKey = secretKey;
+    }
+
+    const stripe = cachedStripe;
     const data = JSON.parse(event.body);
 
     const line_items = data.items.map((item) => ({
@@ -61,8 +69,6 @@ exports.handler = async (event) => {
       code: err?.code,
       type: err?.type,
       requestId: err?.requestId,
-      hasSecretKey: Boolean(process.env.STRIPE_SECRET_KEY),
-      hasPublicKey: Boolean(process.env.STRIPE_PUBLIC_KEY),
     });
     return {
       statusCode: 500,
