@@ -14,9 +14,18 @@ Sistema completo di ordini online per pizzeria con menu pizze, creatore panini A
 - **35 pizze** tradizionali con prezzi (€5.50 - €10.00)
 - Filtri per categoria (Classiche, Speciali, Piccanti)
 - Ricerca per nome o ingredienti
-- Controlli quantità integrati
+- Varianti prodotto reali per pizza:
+  - Formato: Normale / Maxi (Maxi attivo solo dove è presente `prezzo_maxi` in `menu.json`)
+  - Impasto: Standard / Farina di riso (+€1.50) / Kamut (+€1.50)
+  - Mozzarella: Normale / Senza lattosio
+  - Extra: Verdure (+€1.50), Affettati (+€2.00), Burrata/Bufala (+€3.00)
+- Prezzo finale aggiornato in tempo reale in base alle scelte
 - Visualizzazione allergeni
-- Aggiungi al carrello con feedback visivo
+- Aggiungi al carrello con variante completa salvata (formato, impasto, mozzarella, extra)
+
+#### Dati mancanti formato Maxi
+- Ad oggi in `menu.json` manca `prezzo_maxi` su tutte le 35 pizze.
+- Per abilitare il Maxi per una pizza specifica, aggiungere il campo numerico `prezzo_maxi` sul relativo item.
 
 ### 3. **Panini Custom AI** (`panini-custom.html`)
 - Chatbot AI per suggerimenti personalizzati
