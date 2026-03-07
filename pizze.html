@@ -214,6 +214,59 @@
       margin-top: auto;
     }
 
+    .pizza-variants {
+      margin-bottom: 14px;
+      padding: 12px;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(212, 175, 55, 0.15);
+    }
+
+    .variant-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .variant-group label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .variant-group select {
+      width: 100%;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      background: var(--dark);
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .variant-extras {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .variant-extra-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .variant-total {
+      color: var(--gold);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
     .quantity-control {
       display: flex;
       align-items: center;
@@ -322,6 +375,7 @@
     Nessuna pizza trovata con i criteri selezionati.
   </div>
 
+  <script src="pizza-pricing.js"></script>
   <script>
     let allPizzas = [];
     let currentFilter = 'all';
@@ -368,33 +422,109 @@
       }
       
       noResults.style.display = 'none';
-      container.innerHTML = filtered.map(pizza => `
-        <div class="pizza-card" data-pizza-id="${pizza.nome}">
-          <div class="pizza-header">
-            <h3 class="pizza-name">${pizza.nome}</h3>
-            <div class="pizza-price">€${pizza.prezzo.toFixed(2)}</div>
-          </div>
-          <div class="pizza-ingredients">${pizza.ingredienti.join(', ')}</div>
-          <div class="pizza-allergeni">⚠️ Allergeni: ${pizza.allergeni.join(', ')}</div>
-          <div class="pizza-actions">
-            <div class="quantity-control">
-              <button class="qty-btn" onclick="changeQuantity('${pizza.nome}', -1)">−</button>
-              <span class="qty-display" id="qty-${pizza.nome.replace(/\s/g, '-')}">1</span>
-              <button class="qty-btn" onclick="changeQuantity('${pizza.nome}', 1)">+</button>
+      container.innerHTML = filtered.map((pizza) => {
+        const pizzaKey = getPizzaKey(pizza.nome);
+        return `
+          <div class="pizza-card" data-pizza-id="${pizza.nome}">
+            <div class="pizza-header">
+              <h3 class="pizza-name">${pizza.nome}</h3>
+              <div class="pizza-price" id="price-${pizzaKey}">€${pizza.prezzo.toFixed(2)}</div>
             </div>
-            <button class="add-to-cart-btn" onclick="addToCart('${pizza.nome}', event)">
-              🛒 Aggiungi
-            </button>
+            <div class="pizza-ingredients">${pizza.ingredienti.join(', ')}</div>
+            <div class="pizza-allergeni">⚠️ Allergeni: ${pizza.allergeni.join(', ')}</div>
+            <div class="pizza-variants">
+              <div class="variant-grid">
+                <div class="variant-group">
+                  <label for="format-${pizzaKey}">Formato</label>
+                  <select id="format-${pizzaKey}" onchange="updatePizzaSelectionPrice('${pizza.nome}')">
+                    <option value="normale">Normale (prezzo base)</option>
+                    <option value="maxi">Maxi (+€5,00)</option>
+                  </select>
+                </div>
+                <div class="variant-group">
+                  <label for="dough-${pizzaKey}">Impasto</label>
+                  <select id="dough-${pizzaKey}" onchange="updatePizzaSelectionPrice('${pizza.nome}')">
+                    <option value="normale">Normale (+€0,00)</option>
+                    <option value="farina-di-riso">Farina di riso (+€1,50)</option>
+                    <option value="kamut">Kamut (+€1,50)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="variant-extras">
+                <label class="variant-extra-option">
+                  <input type="checkbox" value="verdure" data-extra-for="${pizzaKey}" onchange="updatePizzaSelectionPrice('${pizza.nome}')">
+                  Verdure (+€1,50)
+                </label>
+                <label class="variant-extra-option">
+                  <input type="checkbox" value="affettati" data-extra-for="${pizzaKey}" onchange="updatePizzaSelectionPrice('${pizza.nome}')">
+                  Affettati (+€2,00)
+                </label>
+                <label class="variant-extra-option">
+                  <input type="checkbox" value="burrata-bufala" data-extra-for="${pizzaKey}" onchange="updatePizzaSelectionPrice('${pizza.nome}')">
+                  Burrata / bufala (+€3,00)
+                </label>
+              </div>
+              <div class="variant-total" id="variant-total-${pizzaKey}">Prezzo selezione: €${pizza.prezzo.toFixed(2)}</div>
+            </div>
+            <div class="pizza-actions">
+              <div class="quantity-control">
+                <button class="qty-btn" onclick="changeQuantity('${pizza.nome}', -1)">−</button>
+                <span class="qty-display" id="qty-${pizzaKey}">1</span>
+                <button class="qty-btn" onclick="changeQuantity('${pizza.nome}', 1)">+</button>
+              </div>
+              <button class="add-to-cart-btn" onclick="addToCart('${pizza.nome}', event)">
+                🛒 Aggiungi
+              </button>
+            </div>
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
+
+      filtered.forEach((pizza) => updatePizzaSelectionPrice(pizza.nome));
     }
 
     // Gestione quantità
     const quantities = {};
+
+    function getPizzaKey(pizzaName) {
+      return btoa(encodeURIComponent(pizzaName)).replace(/=+$/g, '');
+    }
+
+    function getSelectedVariant(pizzaName) {
+      const pizzaKey = getPizzaKey(pizzaName);
+      const formatSelect = document.getElementById(`format-${pizzaKey}`);
+      const doughSelect = document.getElementById(`dough-${pizzaKey}`);
+      const extraInputs = document.querySelectorAll(`input[data-extra-for="${pizzaKey}"]:checked`);
+      const extras = Array.from(extraInputs).map(input => input.value);
+
+      return {
+        format: formatSelect ? formatSelect.value : 'normale',
+        dough: doughSelect ? doughSelect.value : 'normale',
+        extras
+      };
+    }
+
+    function updatePizzaSelectionPrice(pizzaName) {
+      const pizza = allPizzas.find((item) => item.nome === pizzaName);
+      if (!pizza || !window.PizzaPricing) return;
+
+      const pizzaKey = getPizzaKey(pizzaName);
+      const selectedVariant = getSelectedVariant(pizzaName);
+      const finalPrice = PizzaPricing.calculateFinalPizzaPrice(pizza.prezzo, selectedVariant);
+      const headerPrice = document.getElementById(`price-${pizzaKey}`);
+      const variantPrice = document.getElementById(`variant-total-${pizzaKey}`);
+
+      if (headerPrice) {
+        headerPrice.textContent = `€${finalPrice.toFixed(2)}`;
+      }
+
+      if (variantPrice) {
+        variantPrice.textContent = `Prezzo selezione: €${finalPrice.toFixed(2)}`;
+      }
+    }
     
     function changeQuantity(pizzaName, delta) {
-      const id = pizzaName.replace(/\s/g, '-');
+      const id = getPizzaKey(pizzaName);
       if (!quantities[pizzaName]) quantities[pizzaName] = 1;
       
       quantities[pizzaName] = Math.max(1, Math.min(99, quantities[pizzaName] + delta));
@@ -407,12 +537,20 @@
       if (!pizza) return;
       
       const quantity = quantities[pizzaName] || 1;
+      const selectedVariant = getSelectedVariant(pizzaName);
+      const variantLabels = PizzaPricing.getVariantLabels(selectedVariant);
+      const finalPrice = PizzaPricing.calculateFinalPizzaPrice(pizza.prezzo, selectedVariant);
+      const variantSignature = PizzaPricing.getVariantSignature(selectedVariant);
       
       // Recupera carrello esistente
       let cart = JSON.parse(localStorage.getItem('aldoge_cart') || '[]');
       
       // Cerca se la pizza è già nel carrello
-      const existingIndex = cart.findIndex(item => item.type === 'pizza' && item.name === pizzaName);
+      const existingIndex = cart.findIndex(item =>
+        item.type === 'pizza' &&
+        item.name === pizzaName &&
+        (item.variantSignature || PizzaPricing.DEFAULT_VARIANT_SIGNATURE) === variantSignature
+      );
       
       if (existingIndex !== -1) {
         // Aggiorna quantità
@@ -422,7 +560,12 @@
         cart.push({
           type: 'pizza',
           name: pizzaName,
-          price: pizza.prezzo,
+          basePrice: pizza.prezzo,
+          format: variantLabels.format,
+          dough: variantLabels.dough,
+          extras: variantLabels.extras,
+          variantSignature,
+          price: finalPrice,
           ingredients: pizza.ingredienti,
           allergeni: pizza.allergeni,
           quantity: quantity
@@ -434,7 +577,7 @@
       
       // Reset quantità
       quantities[pizzaName] = 1;
-      const id = pizzaName.replace(/\s/g, '-');
+      const id = getPizzaKey(pizzaName);
       document.getElementById(`qty-${id}`).textContent = '1';
       
       // Feedback visivo
