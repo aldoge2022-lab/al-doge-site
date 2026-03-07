@@ -229,10 +229,7 @@
 <script src="cart-utils.js"></script>
 
 <script>
-  // ⚠️ Sostituisci questa stringa con la tua publishable key Stripe
-  const STRIPE_PUBLISHABLE_KEY = "pk_test_SOSTITUISCI_QUI";
-
-  const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+  let stripeClient = null;
 
   document.addEventListener("DOMContentLoaded", () => {
     const summary = document.getElementById("order-summary");
@@ -388,7 +385,7 @@
       payWithCardBtn.textContent = "Reindirizzamento a Stripe...";
 
       try {
-        const response = await fetch("/.netlify/functions/create-stripe-session", {
+        const response = await fetch("/.netlify/functions/stripe-session", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(orderData)
@@ -398,8 +395,16 @@
           throw new Error("Errore creazione sessione Stripe");
         }
 
-        const { sessionId } = await response.json();
-        const { error } = await stripe.redirectToCheckout({ sessionId });
+        const { sessionId, publishableKey } = await response.json();
+        if (!sessionId || !publishableKey) {
+          throw new Error("Dati Stripe incompleti");
+        }
+
+        if (!stripeClient) {
+          stripeClient = Stripe(publishableKey);
+        }
+
+        const { error } = await stripeClient.redirectToCheckout({ sessionId });
 
         if (error) {
           alert("Errore nel reindirizzamento al pagamento.");
