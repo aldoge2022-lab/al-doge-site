@@ -153,6 +153,64 @@
       font-size: 32px;
     }
 
+    .panini-spotlight {
+      margin: 34px auto 0;
+      max-width: 680px;
+      background: linear-gradient(140deg, rgba(10, 18, 33, 0.95), rgba(27, 27, 27, 0.92));
+      border: 1px solid rgba(212, 175, 55, 0.5);
+      border-radius: 20px;
+      padding: 22px 24px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .panini-spotlight:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 22px 44px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+    }
+
+    .panini-copy h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(24px, 3.4vw, 34px);
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .panini-copy p {
+      color: #ececec;
+      font-size: 15px;
+      line-height: 1.5;
+      max-width: 420px;
+    }
+
+    .panini-cta {
+      background: var(--gold);
+      color: #111;
+      text-decoration: none;
+      border-radius: 999px;
+      padding: 12px 24px;
+      font-weight: 600;
+      white-space: nowrap;
+      box-shadow: 0 6px 18px rgba(212, 175, 55, 0.35);
+      transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+    }
+
+    .panini-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 22px rgba(212, 175, 55, 0.45);
+      background: #e6c157;
+    }
+
+    .panini-cta:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 4px;
+    }
+
     .info-section {
       background: var(--soft);
       padding: 60px 20px;
@@ -223,6 +281,17 @@
         max-width: 350px;
       }
 
+      .panini-spotlight {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 20px;
+      }
+
+      .panini-cta {
+        width: 100%;
+        text-align: center;
+      }
+
       .cart-fixed, .logo-fixed {
         width: 50px;
         height: 50px;
@@ -252,7 +321,7 @@
     <div class="overlay"></div>
     <div class="hero-content">
       <h1>AL DOGE</h1>
-      <p class="subtitle">Ordina Online - Pizza Tradizionale</p>
+      <p class="subtitle">Ordina online - pizza tradizionale e panini gourmet</p>
       
       <div class="main-buttons">
         <a href="pizze.html" class="btn-main">
@@ -260,6 +329,14 @@
           <span>MENU PIZZE</span>
         </a>
       </div>
+
+      <section class="panini-spotlight" aria-label="Spotlight panini premium">
+        <div class="panini-copy">
+          <h2>Panini gourmet firmati AL DOGE</h2>
+          <p>Un morso, e capisci la differenza: ingredienti selezionati e gusto che resta in mente.</p>
+        </div>
+        <a href="chatbot.html" class="panini-cta">Scopri i nostri panini</a>
+      </section>
     </div>
   </div>
 
