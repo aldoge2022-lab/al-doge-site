@@ -15,6 +15,8 @@ test('index homepage does not promote legacy panini custom flow', () => {
   assert.ok(!indexHtml.includes('href="panini-custom.html"'));
   assert.ok(!indexHtml.includes('🥖 Panini Custom AI'));
   assert.ok(!indexHtml.includes('/panini-custom'));
+  assert.ok(indexHtml.includes('Panini gourmet firmati AL DOGE'));
+  assert.ok(indexHtml.includes('href="chatbot.html" class="panini-cta"'));
 });
 
 test('home homepage variant does not promote legacy panini custom flow', () => {
@@ -24,4 +26,6 @@ test('home homepage variant does not promote legacy panini custom flow', () => {
   assert.ok(!homeHtml.includes('<span>PANINI CUSTOM AI</span>'));
   assert.ok(!homeHtml.includes('<h3>Panini AI</h3>'));
   assert.ok(!homeHtml.includes('/panini-custom'));
+  assert.ok(homeHtml.includes('Panini gourmet firmati AL DOGE'));
+  assert.ok(homeHtml.includes('href="chatbot.html" class="panini-cta"'));
 });
