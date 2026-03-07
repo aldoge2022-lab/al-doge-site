@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Consulente Ordini AL DOGE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
   <style>
@@ -14,6 +16,15 @@
       --white: #f7f7f5;
       --muted: #c9ccd3;
       --line: rgba(201, 163, 77, 0.28);
+      --surface-main: rgba(31, 35, 44, 0.97);
+      --surface-secondary: rgba(15, 27, 45, 0.95);
+      --body-glow: #18253b;
+      --body-base: #101821;
+      --body-deep: #0b121a;
+      --body-glow-stop: 0%;
+      --body-base-stop: 45%;
+      --body-deep-stop: 100%;
+      --shell-gradient-angle: 160deg;
     }
 
     * {
@@ -23,7 +34,12 @@
     body {
       margin: 0;
       font-family: 'Inter', sans-serif;
-      background: radial-gradient(circle at top, #18253b 0%, #101821 45%, #0b121a 100%);
+      background: radial-gradient(
+        circle at top,
+        var(--body-glow) var(--body-glow-stop),
+        var(--body-base) var(--body-base-stop),
+        var(--body-deep) var(--body-deep-stop)
+      );
       color: var(--white);
       min-height: 100vh;
       display: grid;
@@ -34,7 +50,7 @@
     .chat-shell {
       width: min(940px, 100%);
       height: min(900px, calc(100vh - 40px));
-      background: linear-gradient(160deg, rgba(31, 35, 44, 0.97), rgba(15, 27, 45, 0.95));
+      background: linear-gradient(var(--shell-gradient-angle), var(--surface-main), var(--surface-secondary));
       border: 1px solid var(--line);
       border-radius: 20px;
       box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
