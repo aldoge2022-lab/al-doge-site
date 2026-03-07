@@ -148,6 +148,12 @@
       color: #ff9999;
     }
 
+    .item-variant {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
     .item-remove {
       background: #ff4444;
       color: white;
@@ -403,6 +409,14 @@
       container.innerHTML = cart.map((item, index) => {
         const itemTotal = item.price * item.quantity;
         const typeLabel = item.type === 'pizza' ? '🍕 PIZZA' : '🥖 PANINO';
+        const extrasLabel = Array.isArray(item.extras) && item.extras.length ? item.extras.join(', ') : 'Nessuno';
+        const formatLabel = item.format || 'Normale';
+        const doughLabel = item.dough || 'Normale';
+        const variantMarkup = item.type === 'pizza' ? `
+          <div class="item-variant">Formato: ${formatLabel}</div>
+          <div class="item-variant">Impasto: ${doughLabel}</div>
+          <div class="item-variant">Extra: ${extrasLabel}</div>
+        ` : '';
         
         return `
           <div class="cart-item">
@@ -410,6 +424,7 @@
               <div class="item-info">
                 <span class="item-type">${typeLabel}</span>
                 <div class="item-name">${item.name}</div>
+                ${variantMarkup}
                 <div class="item-ingredients">${item.ingredients.join(', ')}</div>
                 ${item.allergeni ? `<div class="item-allergeni">⚠️ Allergeni: ${item.allergeni.join(', ')}</div>` : ''}
               </div>
