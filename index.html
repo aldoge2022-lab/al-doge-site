@@ -333,6 +333,68 @@
       font-size: 0.95rem;
     }
 
+
+    .v3-assistant {
+      background: linear-gradient(160deg, rgba(11, 15, 26, 0.96), rgba(18, 21, 31, 0.96));
+      border: 1px solid rgba(201, 162, 106, 0.22);
+      border-radius: 14px;
+      padding: clamp(1.5rem, 2.8vw, 2.3rem);
+      display: grid;
+      gap: 1.2rem;
+    }
+
+    .v3-assistant h3 {
+      margin: 0;
+      font-family: 'Cormorant Garamond', serif;
+      color: var(--gold);
+      font-size: clamp(2rem, 3.4vw, 2.7rem);
+      letter-spacing: 0.03em;
+      text-align: center;
+    }
+
+    .v3-assistant p {
+      margin: 0;
+      color: var(--muted);
+      text-align: center;
+      max-width: 860px;
+      margin-inline: auto;
+    }
+
+    .v3-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.9rem;
+      margin-top: 0.8rem;
+    }
+
+    .v3-grid article {
+      padding: 0.95rem;
+      border: 1px solid rgba(201, 162, 106, 0.2);
+      border-radius: 10px;
+      background: rgba(11, 15, 26, 0.7);
+    }
+
+    .v3-grid h4 {
+      margin: 0 0 0.35rem;
+      color: var(--ivory);
+      font-size: 1rem;
+      font-weight: 400;
+    }
+
+    .v3-grid p {
+      text-align: left;
+      font-size: 0.9rem;
+      margin: 0;
+    }
+
+    .v3-cta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      justify-content: center;
+      margin-top: 0.5rem;
+    }
+
     footer {
       background: var(--anthracite);
       border-top: 1px solid rgba(201, 162, 106, 0.16);
@@ -445,6 +507,31 @@
 
   <section class="section identity" aria-label="Identità del brand">
     Tradizione italiana, standard costanti e un servizio digitale essenziale: ogni ordine nasce per offrire qualità, puntualità e continuità.
+  </section>
+
+  <section class="section" id="assistente-v3">
+    <div class="v3-assistant" aria-label="Assistente commerciale V3 AL DOGE">
+      <h3>Assistente AL DOGE V3</h3>
+      <p>La V3 è il percorso guidato per scegliere più velocemente tra pizze, panini gourmet e proposte complete: fa domande brevi, capisce i gusti e suggerisce abbinamenti utili per un ordine più soddisfacente.</p>
+      <div class="v3-grid">
+        <article>
+          <h4>Scelta guidata</h4>
+          <p>Ti orienta tra pizza, panino o proposta completa in base a preferenze reali.</p>
+        </article>
+        <article>
+          <h4>Consigli mirati</h4>
+          <p>Offre una proposta principale, un'alternativa e una motivazione sintetica.</p>
+        </article>
+        <article>
+          <h4>Upsell coerente</h4>
+          <p>Suggerisce aggiunte o bevande pertinenti senza tono invasivo.</p>
+        </article>
+      </div>
+      <div class="v3-cta">
+        <a href="/chatbot.html" class="btn btn-primary">Avvia assistente V3</a>
+        <a href="/pizze.html" class="btn">Esplora il menu in autonomia</a>
+      </div>
+    </div>
   </section>
 
   <section class="section" id="menu-pizze-home">

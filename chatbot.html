@@ -3,100 +3,203 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Assistente AL DOGE</title>
-
+  <title>Assistente AL DOGE V3</title>
+  <meta name="description" content="Assistente commerciale AL DOGE V3: ti guida tra pizze, panini gourmet e proposte complete con consigli mirati e aggiunte coerenti." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Libre+Baskerville:wght@400&display=swap" rel="stylesheet" />
   <style>
+    :root {
+      --bg: #0b0f1a;
+      --card: #12151f;
+      --gold: #c9a26a;
+      --ivory: #f0e9d9;
+      --text: #e8dfc9;
+      --muted: #d4c9b8;
+      --line: rgba(201, 162, 106, 0.18);
+    }
+
+    * { box-sizing: border-box; }
+
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      background: radial-gradient(circle at 20% 0%, #151a28 0%, var(--bg) 48%);
+      color: var(--text);
+      font-family: 'Libre Baskerville', serif;
     }
 
-    header {
-      background: #111;
-      color: white;
-      padding: 15px;
-      text-align: center;
-      font-size: 20px;
-      font-weight: bold;
+    .topbar {
+      padding: 1rem 5%;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
     }
 
-    #chat {
-      flex: 1;
-      overflow-y: auto;
-      padding: 15px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      list-style: none;
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      color: var(--gold);
+      text-decoration: none;
+      font-family: 'Cormorant Garamond', serif;
+      letter-spacing: 0.06em;
+      font-size: clamp(1.4rem, 3vw, 2rem);
+    }
+
+    .brand img { width: 34px; height: 34px; object-fit: contain; }
+
+    .top-actions { display: flex; gap: 0.7rem; flex-wrap: wrap; }
+
+    .btn-link {
+      text-decoration: none;
+      border: 1px solid var(--line);
+      color: var(--ivory);
+      padding: 0.55rem 0.95rem;
+      border-radius: 8px;
+      font-size: 0.88rem;
+    }
+
+    .btn-link:hover { border-color: var(--gold); color: var(--gold); }
+
+    .intro {
+      padding: 1.2rem 5% 1rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .intro h1 {
       margin: 0;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      color: var(--gold);
+      letter-spacing: 0.04em;
     }
 
-    .message {
-      max-width: 80%;
-      padding: 12px 15px;
-      border-radius: 12px;
-      line-height: 1.4;
-      font-size: 16px;
+    .intro p {
+      margin: 0.45rem 0 0;
+      color: var(--muted);
+      max-width: 900px;
+      font-size: 0.95rem;
     }
 
-    .user {
-      align-self: flex-end;
-      background: #d1e7ff;
-    }
-
-    .bot {
-      align-self: flex-start;
-      background: white;
-      border: 1px solid #ddd;
-    }
-
-    #input-area {
+    .quick-questions {
       display: flex;
-      padding: 10px;
-      background: white;
-      border-top: 1px solid #ccc;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      margin-top: 0.8rem;
     }
 
-    #user-input {
-      flex: 1;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 16px;
-    }
-
-    #send-btn {
-      margin-left: 10px;
-      padding: 12px 18px;
-      background: #111;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
+    .quick-questions button {
+      background: rgba(201, 162, 106, 0.08);
+      border: 1px solid var(--line);
+      color: var(--ivory);
+      border-radius: 999px;
+      padding: 0.45rem 0.8rem;
+      font-size: 0.82rem;
       cursor: pointer;
     }
 
-    #send-btn:hover {
-      background: #333;
+    .quick-questions button:hover { border-color: var(--gold); color: var(--gold); }
+
+    #chat {
+      margin: 0;
+      padding: 1.2rem 5%;
+      list-style: none;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .message {
+      max-width: min(760px, 92%);
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      padding: 0.8rem 0.95rem;
+      line-height: 1.45;
+      font-size: 0.95rem;
+      white-space: pre-line;
+    }
+
+    .user { align-self: flex-end; background: rgba(201, 162, 106, 0.14); }
+    .bot { align-self: flex-start; background: var(--card); }
+
+    #input-area {
+      border-top: 1px solid var(--line);
+      padding: 0.9rem 5%;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.6rem;
+      align-items: center;
+      background: rgba(11, 15, 26, 0.96);
+    }
+
+    #user-input {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #0f1320;
+      color: var(--ivory);
+      padding: 0.75rem 0.85rem;
+      font-size: 0.95rem;
+      font-family: inherit;
+    }
+
+    #user-input:focus-visible,
+    #send-btn:focus-visible,
+    .quick-questions button:focus-visible,
+    .btn-link:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+    }
+
+    #send-btn {
+      border: 1px solid var(--gold);
+      background: var(--gold);
+      color: var(--bg);
+      border-radius: 8px;
+      padding: 0.72rem 1rem;
+      font-size: 0.92rem;
+      font-family: 'Cormorant Garamond', serif;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    @media (max-width: 700px) {
+      #input-area { grid-template-columns: 1fr; }
+      #send-btn { width: 100%; }
     }
   </style>
 </head>
-
 <body>
-  <header>Assistente AL DOGE</header>
+  <header class="topbar">
+    <a class="brand" href="/index.html"><img src="./logo-al-doge.png" alt="Logo AL DOGE" /> <span>AL DOGE</span></a>
+    <div class="top-actions">
+      <a class="btn-link" href="/pizze.html">Menu Pizze</a>
+      <a class="btn-link" href="/carrello.html">Carrello</a>
+    </div>
+  </header>
 
-  <ul id="chat"></ul>
+  <section class="intro">
+    <h1>Assistente AL DOGE V3</h1>
+    <p>Ti guida nella scelta con domande brevi e consigli utili: proposta principale, alternativa, motivazione rapida e aggiunta coerente per completare l'ordine.</p>
+    <div class="quick-questions" aria-label="Domande suggerite">
+      <button type="button" data-q="Preferisco pizza: cerco un gusto deciso ma equilibrato.">Pizza, gusto deciso</button>
+      <button type="button" data-q="Oggi preferisco un panino gourmet con salumi e qualcosa di fresco.">Panino gourmet</button>
+      <button type="button" data-q="Voglio una proposta completa: pizza o panino più aggiunta consigliata.">Proposta completa</button>
+      <button type="button" data-q="Cerco qualcosa di leggero con verdure e pochi formaggi.">Scelta leggera</button>
+    </div>
+  </section>
+
+  <ul id="chat" aria-live="polite"></ul>
 
   <div id="input-area">
-    <input
-      type="text"
-      id="user-input"
-      placeholder="Scrivi un messaggio... (es. “Sono a dieta, cosa mi consigli?”)"
-    />
+    <input type="text" id="user-input" placeholder="Scrivi qui (es. Preferisci pizza o panino?)" />
     <button id="send-btn">Invia</button>
   </div>
 
@@ -104,6 +207,7 @@
     const chatContainer = document.getElementById("chat");
     const input = document.getElementById("user-input");
     const sendBtn = document.getElementById("send-btn");
+    const quickButtons = document.querySelectorAll(".quick-questions button");
     const AI_ENGINE_ENDPOINT = "/.netlify/functions/ai-orchestrator";
 
     function addMessage(text, sender) {
@@ -114,14 +218,22 @@
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
-    async function sendMessage() {
-      const text = input.value.trim();
+    function addWelcome() {
+      addMessage(
+`Benvenuto in AL DOGE V3.
+Ti aiuto a scegliere tra pizza, panino gourmet o proposta completa.
+Dimmi in una riga cosa preferisci e preparo una proposta mirata.`,
+      "bot"
+      );
+    }
+
+    async function sendMessage(prefilledText) {
+      const text = (prefilledText || input.value).trim();
       if (!text) return;
 
       addMessage(text, "user");
       input.value = "";
-
-      addMessage("Sto pensando...", "bot");
+      addMessage("Un attimo, preparo la proposta migliore...", "bot");
 
       try {
         const response = await fetch(AI_ENGINE_ENDPOINT, {
@@ -131,20 +243,26 @@
         });
 
         const data = await response.json();
-
         chatContainer.removeChild(chatContainer.lastChild);
-
-        addMessage(data.reply || "Non riesco a rispondere in questo momento.", "bot");
-      } catch (e) {
+        addMessage(data.reply || "In questo momento non riesco a completare il suggerimento.", "bot");
+      } catch {
         chatContainer.removeChild(chatContainer.lastChild);
         addMessage("Si è verificato un errore, riprova tra poco.", "bot");
       }
     }
 
-    sendBtn.addEventListener("click", sendMessage);
+    sendBtn.addEventListener("click", () => sendMessage());
     input.addEventListener("keypress", (e) => {
       if (e.key === "Enter") sendMessage();
     });
+
+    quickButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        sendMessage(button.dataset.q || "");
+      });
+    });
+
+    addWelcome();
   </script>
 </body>
 </html>
