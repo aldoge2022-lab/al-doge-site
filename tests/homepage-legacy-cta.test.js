@@ -17,6 +17,7 @@ test('index homepage does not promote legacy panini custom flow', () => {
   assert.ok(!indexHtml.includes('/panini-custom'));
   assert.ok(indexHtml.includes('Panini gourmet firmati AL DOGE'));
   assert.ok(indexHtml.includes('href="chatbot.html" class="panini-cta"'));
+  assert.ok(!indexHtml.includes('🍕'));
 });
 
 test('home homepage variant does not promote legacy panini custom flow', () => {
@@ -28,4 +29,9 @@ test('home homepage variant does not promote legacy panini custom flow', () => {
   assert.ok(!homeHtml.includes('/panini-custom'));
   assert.ok(homeHtml.includes('Panini gourmet firmati AL DOGE'));
   assert.ok(homeHtml.includes('href="chatbot.html" class="panini-cta"'));
+  assert.ok(!homeHtml.includes('🍕'));
+  assert.ok(!homeHtml.includes('🛒'));
+  assert.ok(!homeHtml.includes('💳'));
+  assert.ok(!homeHtml.includes('⏰'));
+  assert.ok(!homeHtml.includes('class="feature-icon"'));
 });

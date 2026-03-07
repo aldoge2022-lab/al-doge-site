@@ -48,37 +48,40 @@
       right: 20px;
       z-index: 999;
       background: var(--gold);
-      color: black;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
+      color: #111;
+      min-width: 140px;
+      height: 56px;
+      border-radius: 999px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 28px;
+      font-size: 16px;
+      font-weight: 600;
       cursor: pointer;
       box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
-      transition: transform 0.3s;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      transition: transform 0.3s, box-shadow 0.3s;
+      padding: 0 18px;
+      gap: 8px;
     }
 
     .cart-fixed:hover {
-      transform: scale(1.1);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(212, 175, 55, 0.45);
     }
 
     .cart-badge {
-      position: absolute;
-      top: -5px;
-      right: -5px;
-      background: #ff4444;
-      color: white;
-      border-radius: 50%;
-      width: 24px;
-      height: 24px;
+      background: #111;
+      color: var(--text);
+      border-radius: 999px;
+      min-width: 28px;
+      height: 28px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 600;
+      padding: 0 8px;
     }
 
     .hero {
@@ -147,10 +150,6 @@
     .btn-main:hover {
       transform: translateY(-5px);
       box-shadow: 0 8px 25px rgba(212, 175, 55, 0.5);
-    }
-
-    .btn-main .emoji {
-      font-size: 32px;
     }
 
     .panini-spotlight {
@@ -240,11 +239,6 @@
       border: 1px solid rgba(212, 175, 55, 0.2);
     }
 
-    .feature-icon {
-      font-size: 48px;
-      margin-bottom: 15px;
-    }
-
     .feature h3 {
       color: var(--gold);
       margin-bottom: 10px;
@@ -292,13 +286,16 @@
         text-align: center;
       }
 
-      .cart-fixed, .logo-fixed {
+      .logo-fixed {
         width: 50px;
         height: 50px;
       }
 
       .cart-fixed {
-        font-size: 24px;
+        min-width: 120px;
+        height: 50px;
+        font-size: 14px;
+        padding: 0 14px;
       }
     }
   </style>
@@ -312,7 +309,7 @@
 
   <!-- Carrello fisso -->
   <div class="cart-fixed" onclick="window.location.href='carrello.html'" id="cart-icon">
-    🛒
+    Carrello
     <span class="cart-badge" id="cart-badge" style="display: none;">0</span>
   </div>
 
@@ -325,8 +322,7 @@
       
       <div class="main-buttons">
         <a href="pizze.html" class="btn-main">
-          <span class="emoji">🍕</span>
-          <span>MENU PIZZE</span>
+          <span>Menu Pizze</span>
         </a>
       </div>
 
@@ -345,23 +341,19 @@
     <h2>Come Funziona</h2>
     <div class="features">
       <div class="feature">
-        <div class="feature-icon">🍕</div>
-        <h3>Menu Pizze</h3>
+        <h3>Menu Pizze Selezionate</h3>
         <p>35 pizze tradizionali cotte al forno a legna. Scegli le tue preferite e aggiungi al carrello.</p>
       </div>
       <div class="feature">
-        <div class="feature-icon">🛒</div>
-        <h3>Carrello Smart</h3>
+        <h3>Riepilogo Ordine</h3>
         <p>Aggiungi le pizze al carrello e rivedi tutto prima del pagamento, in modo semplice e veloce.</p>
       </div>
       <div class="feature">
-        <div class="feature-icon">💳</div>
-        <h3>Paga Online</h3>
+        <h3>Pagamento Sicuro</h3>
         <p>Pagamento sicuro con Stripe. Scegli l'orario di ritiro e paga comodamente online.</p>
       </div>
       <div class="feature">
-        <div class="feature-icon">⏰</div>
-        <h3>Ritira Quando Vuoi</h3>
+        <h3>Ritiro Programmato</h3>
         <p>Seleziona l'orario di ritiro (18:30-23:00). Il tuo ordine sarà pronto!</p>
       </div>
     </div>
