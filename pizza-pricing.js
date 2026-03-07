@@ -33,6 +33,8 @@
     'burrata-bufala': 'Burrata / bufala'
   });
 
+  const DEFAULT_VARIANT_SIGNATURE = 'Normale::Normale::Nessuno';
+
   function toMoneyCents(value) {
     return Math.round((Number(value) || 0) * 100);
   }
@@ -92,6 +94,7 @@
     FORMAT_SURCHARGES,
     DOUGH_SURCHARGES,
     EXTRA_SURCHARGES,
+    DEFAULT_VARIANT_SIGNATURE,
     calculateFinalPizzaPrice,
     getVariantLabels,
     getVariantSignature
@@ -104,4 +107,4 @@
   if (globalScope && typeof globalScope === 'object') {
     globalScope.PizzaPricing = PizzaPricing;
   }
-})(typeof globalThis !== 'undefined' ? globalThis : window);
+})(typeof globalThis !== 'undefined' ? globalThis : (typeof window !== 'undefined' ? window : this));
