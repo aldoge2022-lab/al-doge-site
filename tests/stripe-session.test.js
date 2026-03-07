@@ -81,3 +81,41 @@ test("stripe-session returns session id and publishable key for checkout", async
     process.env.STRIPE_PUBLIC_KEY = previousPublicKey;
   }
 });
+
+test("stripe-session returns 500 when STRIPE_SECRET_KEY is missing", async () => {
+  const previousSecretKey = process.env.STRIPE_SECRET_KEY;
+  const previousPublicKey = process.env.STRIPE_PUBLIC_KEY;
+  delete process.env.STRIPE_SECRET_KEY;
+  process.env.STRIPE_PUBLIC_KEY = "pk_test_123";
+
+  let stripeFactoryCalls = 0;
+  const stripeFactoryMock = () => {
+    stripeFactoryCalls += 1;
+    return {
+      checkout: {
+        sessions: {
+          create: async () => ({ id: "cs_test_should_not_happen" }),
+        },
+      },
+    };
+  };
+
+  const { handler, restore } = loadStripeSessionHandler(stripeFactoryMock);
+
+  try {
+    const response = await handler({
+      httpMethod: "POST",
+      body: JSON.stringify({
+        items: [{ name: "Pizza Margherita", qty: 1, price: 8 }],
+      }),
+    });
+
+    assert.equal(response.statusCode, 500);
+    assert.equal(response.body, "Stripe session error");
+    assert.equal(stripeFactoryCalls, 0);
+  } finally {
+    restore();
+    process.env.STRIPE_SECRET_KEY = previousSecretKey;
+    process.env.STRIPE_PUBLIC_KEY = previousPublicKey;
+  }
+});
