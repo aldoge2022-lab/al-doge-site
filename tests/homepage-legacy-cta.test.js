@@ -10,18 +10,19 @@ function readPage(fileName) {
 }
 
 test('index homepage does not promote legacy panini custom flow', () => {
-  const indexHtml = readPage('index.html').toLowerCase();
+  const indexHtml = readPage('index.html');
 
-  assert.ok(!indexHtml.includes('panini custom ai'));
+  assert.ok(!/panini custom ai/i.test(indexHtml));
+  assert.ok(!/panini ai/i.test(indexHtml));
   assert.ok(!indexHtml.includes('panini-custom.html'));
   assert.ok(!indexHtml.includes('/panini-custom'));
 });
 
 test('home homepage variant does not promote legacy panini custom flow', () => {
-  const homeHtml = readPage('home.html').toLowerCase();
+  const homeHtml = readPage('home.html');
 
-  assert.ok(!homeHtml.includes('panini custom ai'));
-  assert.ok(!homeHtml.includes('panini ai'));
+  assert.ok(!/panini custom ai/i.test(homeHtml));
+  assert.ok(!/panini ai/i.test(homeHtml));
   assert.ok(!homeHtml.includes('panini-custom.html'));
   assert.ok(!homeHtml.includes('/panini-custom'));
 });
