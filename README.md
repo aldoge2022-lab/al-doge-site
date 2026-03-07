@@ -1,12 +1,12 @@
 # 🍕 AL DOGE - Sistema Ordini Online Completo
 
-Sistema completo di ordini online per pizzeria con menu pizze, creatore panini AI, pagamento Stripe, notifiche Telegram e dashboard admin.
+Sistema completo di ordini online per pizzeria con homepage canonica, menu pizze, carrello/checkout, pagamento Stripe, notifiche Telegram e dashboard admin.
 
 ## 📋 Funzionalità Principali
 
 ### 1. **Homepage Moderna** (`home.html`)
 - Design responsive con colori brand AL DOGE
-- 2 bottoni principali: 🍕 PIZZE e 🥖 PANINI CUSTOM
+- 2 bottoni principali: 🍕 MENU PIZZE e 🛒 CARRELLO
 - Carrello badge con counter articoli
 - Sezione informativa features
 
@@ -18,7 +18,7 @@ Sistema completo di ordini online per pizzeria con menu pizze, creatore panini A
 - Visualizzazione allergeni
 - Aggiungi al carrello con feedback visivo
 
-### 3. **Panini Custom AI** (`panini-custom.html`)
+### 3. **Panini Custom AI (legacy deprecato)** (`panini-custom.html`)
 - Chatbot AI per suggerimenti personalizzati
 - 4 preset veloci:
   - 🥒 **Leggero** - verdure e formaggi leggeri
@@ -150,8 +150,8 @@ Per salvare ordini su database cloud invece che localStorage:
    - Seleziona quantità e aggiungi al carrello
    - Procedi al checkout
 
-2. **Creare Panino Custom:**
-   - Vai su `home.html` → "PANINI CUSTOM AI"
+   2. **Flusso Panini Legacy (deprecato):**
+   - La route `/panini-custom` è deprecata e redirectata alla homepage canonica
    - Scegli un preset o descrivi cosa vuoi
    - L'AI suggerisce ingredienti
    - Modifica a piacere ingredienti
