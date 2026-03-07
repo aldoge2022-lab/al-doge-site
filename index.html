@@ -110,15 +110,24 @@
     }
 
     .hero {
-      min-height: 92vh;
+      min-height: 95vh;
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 7rem 6% 5rem;
+      padding: 7.5rem 6% 5.4rem;
+      position: relative;
       background:
-        linear-gradient(rgba(11, 15, 26, 0.72), rgba(11, 15, 26, 0.9)),
+        linear-gradient(rgba(11, 15, 26, 0.55), rgba(11, 15, 26, 0.86)),
         url('./forno-a-legna-pizze-al-doge-majano.jpg') center/cover no-repeat;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 18%, rgba(201, 162, 106, 0.26), rgba(201, 162, 106, 0) 52%);
+      pointer-events: none;
     }
 
     .hero-content {
@@ -137,16 +146,17 @@
       font-size: clamp(4.2rem, 12vw, 10rem);
       font-weight: 300;
       letter-spacing: 0.36em;
-      color: var(--gold);
+      color: #d8b27a;
+      text-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
       line-height: 0.88;
     }
 
     .hero-sub {
       margin: 2.3rem auto 3rem;
       max-width: 800px;
-      color: var(--ivory);
-      font-size: clamp(1.05rem, 2.35vw, 1.85rem);
-      letter-spacing: 0.06em;
+      color: #f6eedf;
+      font-size: clamp(1.05rem, 2.35vw, 1.9rem);
+      letter-spacing: 0.05em;
       font-style: italic;
     }
 
@@ -307,30 +317,16 @@
       text-align: center;
     }
 
-    .menu-categories {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1rem;
-      margin-top: 2rem;
-    }
-
-    .menu-categories article {
-      padding: 1rem;
-      border: 1px solid rgba(201, 162, 106, 0.18);
-      border-radius: 10px;
-      background: rgba(11, 15, 26, 0.75);
-    }
-
-    .menu-categories h4 {
-      margin: 0 0 0.3rem;
-      color: var(--ivory);
-      font-size: 1rem;
-      font-weight: 400;
-    }
-
-    .menu-categories span {
-      color: var(--gold);
-      font-size: 0.95rem;
+    .menu-note {
+      margin: 1.4rem auto 0;
+      max-width: 720px;
+      padding: 0.95rem 1rem;
+      border-radius: 9px;
+      background: rgba(11, 15, 26, 0.62);
+      border: 1px solid rgba(201, 162, 106, 0.14);
+      color: var(--muted);
+      font-size: 0.92rem;
+      text-align: center;
     }
 
 
@@ -482,13 +478,38 @@
       <h1>AL DOGE</h1>
       <p class="hero-sub">Pizza cotta nel forno a legna, panini gourmet e un ordine online pensato per essere rapido, chiaro e affidabile.</p>
       <div class="btn-group">
-        <a href="/pizze.html" class="btn btn-primary">Vedi il menu pizze</a>
-        <a href="/chatbot.html" class="btn">Scopri i panini</a>
+        <a href="/pizze.html" class="btn btn-primary">Esplora il menu</a>
+        <a href="/chatbot.html" class="btn">Lasciati guidare</a>
       </div>
     </div>
   </section>
 
-  <section class="section">
+  <section class="section" id="assistente-v3">
+    <div class="v3-assistant" aria-label="Assistente commerciale V3 AL DOGE">
+      <h3>Assistente AL DOGE V3</h3>
+      <p>La V3 ti accompagna nella scelta tra pizze, panini gourmet e proposte complete: riduce la confusione, interpreta le preferenze e suggerisce abbinamenti utili per un ordine più soddisfacente.</p>
+      <div class="v3-grid">
+        <article>
+          <h4>Scelta guidata</h4>
+          <p>Ti orienta tra pizza, panino o proposta completa in base a preferenze reali.</p>
+        </article>
+        <article>
+          <h4>Consigli mirati</h4>
+          <p>Offre una proposta principale, un'alternativa e una motivazione sintetica.</p>
+        </article>
+        <article>
+          <h4>Upsell coerente</h4>
+          <p>Suggerisce aggiunte o bevande pertinenti senza tono invasivo.</p>
+        </article>
+      </div>
+      <div class="v3-cta">
+        <a href="/chatbot.html" class="btn btn-primary">Lasciati guidare</a>
+        <a href="/pizze.html" class="btn">Esplora il menu</a>
+      </div>
+    </div>
+  </section>
+
+<section class="section">
     <div class="panini-spotlight" aria-label="Sezione panini">
       <div class="panini-media">
         <img src="./panino-prosciutto-rucola-al-doge-majano.jpg" alt="Panino AL DOGE con prosciutto e rucola" loading="lazy" />
@@ -505,48 +526,16 @@
     </div>
   </section>
 
-  <section class="section identity" aria-label="Identità del brand">
-    Tradizione italiana, standard costanti e un servizio digitale essenziale: ogni ordine nasce per offrire qualità, puntualità e continuità.
-  </section>
 
-  <section class="section" id="assistente-v3">
-    <div class="v3-assistant" aria-label="Assistente commerciale V3 AL DOGE">
-      <h3>Assistente AL DOGE V3</h3>
-      <p>La V3 è il percorso guidato per scegliere più velocemente tra pizze, panini gourmet e proposte complete: fa domande brevi, capisce i gusti e suggerisce abbinamenti utili per un ordine più soddisfacente.</p>
-      <div class="v3-grid">
-        <article>
-          <h4>Scelta guidata</h4>
-          <p>Ti orienta tra pizza, panino o proposta completa in base a preferenze reali.</p>
-        </article>
-        <article>
-          <h4>Consigli mirati</h4>
-          <p>Offre una proposta principale, un'alternativa e una motivazione sintetica.</p>
-        </article>
-        <article>
-          <h4>Upsell coerente</h4>
-          <p>Suggerisce aggiunte o bevande pertinenti senza tono invasivo.</p>
-        </article>
-      </div>
-      <div class="v3-cta">
-        <a href="/chatbot.html" class="btn btn-primary">Avvia assistente V3</a>
-        <a href="/pizze.html" class="btn">Esplora il menu in autonomia</a>
-      </div>
-    </div>
-  </section>
+  
 
   <section class="section" id="menu-pizze-home">
     <div class="menu-home">
       <h3>Menu Pizze</h3>
       <p>In homepage presentiamo una vista sintetica per mantenere il focus sul brand. Il catalogo completo con tutte le 72 pizze è disponibile nella pagina menu dedicata.</p>
-      <div class="menu-categories" aria-label="Categorie pizze">
-        <article><h4>Classiche</h4><span>35 varianti</span></article>
-        <article><h4>Speciali</h4><span>24 varianti</span></article>
-        <article><h4>Verdure</h4><span>4 varianti</span></article>
-        <article><h4>Pesce</h4><span>4 varianti</span></article>
-        <article><h4>Bianche</h4><span>5 varianti</span></article>
-      </div>
-      <div style="text-align:center; margin-top:2rem;">
-        <a href="/pizze.html" class="btn btn-primary">Apri il menu completo</a>
+      <p class="menu-note">Il catalogo completo resta nella pagina dedicata, così qui trovi subito il percorso più rapido per scegliere bene e ordinare senza incertezze.</p>
+      <div style="text-align:center; margin-top:1.6rem;">
+        <a href="/pizze.html" class="btn btn-primary">Esplora il menu</a>
       </div>
     </div>
   </section>

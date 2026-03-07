@@ -18,15 +18,17 @@ function assertHomepageGuards(html) {
   assert.ok(html.includes('href="/pizze.html"'));
   assert.ok(html.includes('href="/chatbot.html"'));
   assert.ok(html.includes('href="/carrello.html"'));
-  assert.ok(html.includes('Apri il menu completo'));
+  assert.ok(html.includes('Lasciati guidare'));
+  assert.ok(html.includes('Esplora il menu'));
+  assert.ok(html.includes('id="assistente-v3"'));
 }
 
-test('index homepage keeps canonical routes and no legacy placeholders', () => {
+test('index homepage keeps canonical routes and V3-first CTA strategy', () => {
   const indexHtml = readPage('index.html');
   assertHomepageGuards(indexHtml);
 });
 
-test('home homepage variant keeps canonical routes and no legacy placeholders', () => {
+test('home homepage variant keeps canonical routes and V3-first CTA strategy', () => {
   const homeHtml = readPage('home.html');
   assertHomepageGuards(homeHtml);
 });
