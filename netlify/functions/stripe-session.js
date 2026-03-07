@@ -1,7 +1,11 @@
 const Stripe = require("stripe");
 
-let cachedStripe = null;
-let cachedSecretKey = null;
+function sanitizeErrorMessage(message) {
+  return String(message || "").replace(
+    /\b(?:sk|pk)_(?:test|live)_[A-Za-z0-9]+\b/g,
+    "[REDACTED_STRIPE_KEY]"
+  );
+}
 
 exports.handler = async (event) => {
   const secretKey = process.env.STRIPE_SECRET_KEY;
@@ -20,12 +24,7 @@ exports.handler = async (event) => {
       throw new Error("Missing or empty STRIPE_PUBLIC_KEY");
     }
 
-    if (!cachedStripe || cachedSecretKey !== secretKey) {
-      cachedStripe = Stripe(secretKey);
-      cachedSecretKey = secretKey;
-    }
-
-    const stripe = cachedStripe;
+    const stripe = Stripe(secretKey);
     const data = JSON.parse(event.body);
 
     const line_items = data.items.map((item) => ({
@@ -65,7 +64,7 @@ exports.handler = async (event) => {
     };
   } catch (err) {
     console.error("Stripe session error", {
-      message: err?.message,
+      message: sanitizeErrorMessage(err?.message),
       code: err?.code,
       type: err?.type,
       requestId: err?.requestId,
