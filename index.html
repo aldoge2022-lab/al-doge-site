@@ -13,23 +13,28 @@
 <style>
 :root{
 --gold:#d4af37;
---dark:#0b0b0b;
---soft:#1a1a1a;
---text:#f5f5f5;
+--dark:#090909;
+--soft:#151515;
+--text:#f3efe3;
+--ivory:#efe6cf;
+--line:rgba(212,175,55,.28);
 }
 
 body{
 margin:0;
-background:var(--dark);
+background:radial-gradient(circle at top,#1a1a1a 0%,var(--dark) 42%,#050505 100%);
 color:var(--text);
 font-family:'Inter',sans-serif;
+letter-spacing:.01em;
 }
 
 h1{
 font-family:'Playfair Display',serif;
-color:var(--gold);
-font-size:64px;
+color:var(--ivory);
+font-size:clamp(52px,9vw,88px);
 margin:0;
+letter-spacing:.15em;
+font-weight:600;
 }
 
 .hero{
@@ -43,7 +48,7 @@ text-align:center;
 }
 
 .overlay{
-background:rgba(0,0,0,0.65);
+background:linear-gradient(180deg,rgba(0,0,0,.74) 10%,rgba(0,0,0,.86) 80%);
 position:absolute;
 inset:0;
 }
@@ -51,41 +56,78 @@ inset:0;
 .hero-content{
 position:relative;
 z-index:2;
+max-width:760px;
+padding:24px;
+}
+
+.hero-kicker{
+font-size:13px;
+letter-spacing:.22em;
+text-transform:uppercase;
+color:var(--gold);
+margin-bottom:14px;
 }
 
 .subtitle{
-margin-top:15px;
+margin-top:16px;
 font-size:18px;
-opacity:0.9;
+line-height:1.65;
+opacity:.92;
+max-width:630px;
+margin-inline:auto;
 }
 
 .btn{
 display:inline-block;
-margin:15px 10px 0 10px;
-padding:14px 30px;
-border-radius:30px;
-font-weight:500;
+margin:0;
+padding:14px 28px;
+border-radius:999px;
+font-weight:600;
 text-decoration:none;
+text-transform:uppercase;
+font-size:13px;
+letter-spacing:.12em;
+border:1px solid transparent;
+transition:background-color .25s ease,color .25s ease,border-color .25s ease,transform .25s ease;
 }
 
 .btn-gold{
 background:var(--gold);
-color:black;
+color:#131313;
+box-shadow:0 10px 26px rgba(212,175,55,.35);
 }
 
 .btn-white{
-background:white;
-color:black;
+background:transparent;
+color:var(--ivory);
+border-color:rgba(239,230,207,.62);
+}
+
+.btn:hover{
+transform:translateY(-2px);
+}
+
+.btn-white:hover{
+border-color:var(--gold);
+color:var(--gold);
+}
+
+.hero-actions{
+display:flex;
+justify-content:center;
+gap:12px;
+margin-top:24px;
+flex-wrap:wrap;
 }
 
 .panini-spotlight{
-margin:28px auto 0;
-max-width:640px;
-background:linear-gradient(140deg,rgba(10,18,33,.95),rgba(27,27,27,.92));
-border:1px solid rgba(212,175,55,.5);
-border-radius:20px;
-padding:20px 22px;
-box-shadow:0 16px 36px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.06) inset;
+margin:30px auto 0;
+max-width:670px;
+background:linear-gradient(135deg,rgba(16,16,16,.95),rgba(7,7,7,.92));
+border:1px solid var(--line);
+border-radius:18px;
+padding:20px 24px;
+box-shadow:0 20px 42px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.04) inset;
 text-align:left;
 display:flex;
 align-items:center;
@@ -101,34 +143,37 @@ box-shadow:0 22px 44px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.08) inset;
 
 .panini-copy h2{
 font-family:'Playfair Display',serif;
-font-size:clamp(22px,3vw,32px);
-color:#fff;
+font-size:clamp(24px,3.2vw,34px);
+color:var(--ivory);
 margin:0 0 8px 0;
 }
 
 .panini-copy p{
 margin:0;
-color:#ececec;
-font-size:15px;
-line-height:1.45;
+color:#dbd2bf;
+font-size:14px;
+line-height:1.55;
 }
 
 .panini-cta{
-background:var(--gold);
-color:#111;
+background:transparent;
+color:var(--gold);
 text-decoration:none;
 border-radius:999px;
-padding:12px 20px;
+padding:12px 18px;
 font-weight:600;
 white-space:nowrap;
-box-shadow:0 6px 18px rgba(212,175,55,.35);
-transition:transform .25s ease,box-shadow .25s ease,background-color .25s ease;
+text-transform:uppercase;
+letter-spacing:.1em;
+border:1px solid rgba(212,175,55,.52);
+transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease,color .25s ease;
 }
 
 .panini-cta:hover{
 transform:translateY(-2px);
-box-shadow:0 10px 22px rgba(212,175,55,.45);
-background:#e6c157;
+box-shadow:0 10px 22px rgba(0,0,0,.44);
+border-color:var(--gold);
+color:var(--ivory);
 }
 
 .panini-cta:focus-visible{
@@ -150,12 +195,14 @@ box-shadow:0 0 20px rgba(0,0,0,0.6);
 position:fixed;
 top:20px;
 right:20px;
-background:var(--gold);
-color:black;
+background:rgba(9,9,9,.88);
+color:var(--ivory);
 padding:10px 15px;
 border-radius:30px;
 font-weight:600;
 text-decoration:none;
+border:1px solid var(--line);
+backdrop-filter:blur(2px);
 }
 
 footer{
@@ -163,8 +210,10 @@ position:absolute;
 bottom:20px;
 width:100%;
 text-align:center;
-font-size:13px;
-opacity:0.6;
+font-size:12px;
+opacity:0.75;
+letter-spacing:.1em;
+text-transform:uppercase;
 }
 
 @media (max-width:768px){
@@ -196,21 +245,23 @@ Carrello <span id="cart-count">0</span>
 <div class="overlay"></div>
 
 <div class="hero-content">
+<div class="hero-kicker">Pizzeria Premium Contemporanea</div>
 <h1>AL DOGE</h1>
 <div class="subtitle">
-Ordina online. pizza tradizionale e panini gourmet.
+Pizza d’autore, panini gourmet e ordine digitale elegante in un’unica esperienza firmata AL DOGE.
 </div>
 
-<a href="pizze.html" class="btn btn-gold">
-🍕 Ordina Pizze
-</a>
+<div class="hero-actions">
+<a href="pizze.html" class="btn btn-gold">Ordina Pizze</a>
+<a href="carrello.html" class="btn btn-white">Vai al Carrello</a>
+</div>
 
 <section class="panini-spotlight" aria-label="Spotlight panini premium">
 <div class="panini-copy">
 <h2>Panini gourmet firmati AL DOGE</h2>
-<p>Un morso, e capisci la differenza: ingredienti selezionati e gusto che resta in mente.</p>
+<p>Combinazioni contemporanee, ingredienti selezionati e personalità netta. Ogni panino comunica stile, non rumore.</p>
 </div>
-<a href="chatbot.html" class="panini-cta">Scopri i nostri panini</a>
+<a href="chatbot.html" class="panini-cta">Scopri i Panini</a>
 </section>
 
 </div>
@@ -222,7 +273,9 @@ Ordina online. pizza tradizionale e panini gourmet.
 
 <script src="cart-utils.js"></script>
 <script>
-updateCartBadge();
+if (typeof CartManager !== 'undefined' && typeof CartManager.updateBadge === 'function') {
+CartManager.updateBadge();
+}
 </script>
 
 </body>

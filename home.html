@@ -11,10 +11,12 @@
   <style>
     :root {
       --gold: #d4af37;
-      --dark: #0b0b0b;
-      --soft: #1a1a1a;
-      --text: #f5f5f5;
-      --muted: #b3b3b3;
+      --dark: #090909;
+      --soft: #121212;
+      --text: #f3efe3;
+      --muted: #cfc6b2;
+      --ivory: #efe6cf;
+      --line: rgba(212, 175, 55, 0.26);
     }
 
     * {
@@ -25,10 +27,11 @@
 
     body {
       margin: 0;
-      background: var(--dark);
+      background: radial-gradient(circle at top, #1a1a1a 0%, var(--dark) 43%, #050505 100%);
       color: var(--text);
       font-family: 'Inter', sans-serif;
       min-height: 100vh;
+      letter-spacing: 0.01em;
     }
 
     .logo-fixed {
@@ -47,17 +50,20 @@
       top: 20px;
       right: 20px;
       z-index: 999;
-      background: var(--gold);
-      color: black;
+      background: rgba(9, 9, 9, 0.88);
+      color: var(--ivory);
       width: 60px;
       height: 60px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 28px;
+      font-size: 18px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--line);
       transition: transform 0.3s;
     }
 
@@ -69,8 +75,8 @@
       position: absolute;
       top: -5px;
       right: -5px;
-      background: #ff4444;
-      color: white;
+      background: var(--gold);
+      color: #171717;
       border-radius: 50%;
       width: 24px;
       height: 24px;
@@ -92,7 +98,7 @@
     }
 
     .overlay {
-      background: rgba(0,0,0,0.7);
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.72) 10%, rgba(0, 0, 0, 0.88) 80%);
       position: absolute;
       inset: 0;
     }
@@ -106,9 +112,10 @@
 
     h1 {
       font-family: 'Playfair Display', serif;
-      color: var(--gold);
+      color: var(--ivory);
       font-size: clamp(48px, 8vw, 80px);
       margin-bottom: 20px;
+      letter-spacing: 0.16em;
       text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
     }
 
@@ -117,6 +124,7 @@
       color: var(--text);
       margin-bottom: 50px;
       font-weight: 300;
+      line-height: 1.6;
     }
 
     .main-buttons {
@@ -129,11 +137,11 @@
 
     .btn-main {
       background: var(--gold);
-      color: black;
-      padding: 25px 50px;
-      border-radius: 15px;
+      color: #121212;
+      padding: 17px 34px;
+      border-radius: 999px;
       text-decoration: none;
-      font-size: 20px;
+      font-size: 13px;
       font-weight: 600;
       display: flex;
       align-items: center;
@@ -142,6 +150,8 @@
       box-shadow: 0 5px 20px rgba(212, 175, 55, 0.3);
       min-width: 280px;
       justify-content: center;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
     }
 
     .btn-main:hover {
@@ -149,18 +159,14 @@
       box-shadow: 0 8px 25px rgba(212, 175, 55, 0.5);
     }
 
-    .btn-main .emoji {
-      font-size: 32px;
-    }
-
     .panini-spotlight {
       margin: 34px auto 0;
       max-width: 680px;
-      background: linear-gradient(140deg, rgba(10, 18, 33, 0.95), rgba(27, 27, 27, 0.92));
-      border: 1px solid rgba(212, 175, 55, 0.5);
+      background: linear-gradient(140deg, rgba(16, 16, 16, 0.96), rgba(7, 7, 7, 0.92));
+      border: 1px solid var(--line);
       border-radius: 20px;
       padding: 22px 24px;
-      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
       text-align: left;
       display: flex;
       align-items: center;
@@ -177,33 +183,36 @@
     .panini-copy h2 {
       font-family: 'Playfair Display', serif;
       font-size: clamp(24px, 3.4vw, 34px);
-      color: #fff;
+      color: var(--ivory);
       margin-bottom: 8px;
     }
 
     .panini-copy p {
-      color: #ececec;
+      color: #dbd2bf;
       font-size: 15px;
       line-height: 1.5;
       max-width: 420px;
     }
 
     .panini-cta {
-      background: var(--gold);
-      color: #111;
+      background: transparent;
+      color: var(--gold);
       text-decoration: none;
       border-radius: 999px;
       padding: 12px 24px;
       font-weight: 600;
       white-space: nowrap;
-      box-shadow: 0 6px 18px rgba(212, 175, 55, 0.35);
-      transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+      border: 1px solid rgba(212, 175, 55, 0.52);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, color 0.25s ease;
     }
 
     .panini-cta:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 22px rgba(212, 175, 55, 0.45);
-      background: #e6c157;
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.45);
+      border-color: var(--gold);
+      color: var(--ivory);
     }
 
     .panini-cta:focus-visible {
@@ -215,6 +224,7 @@
       background: var(--soft);
       padding: 60px 20px;
       text-align: center;
+      border-top: 1px solid var(--line);
     }
 
     .info-section h2 {
@@ -234,15 +244,10 @@
     }
 
     .feature {
-      background: var(--dark);
+      background: #0b0b0b;
       padding: 30px;
       border-radius: 15px;
-      border: 1px solid rgba(212, 175, 55, 0.2);
-    }
-
-    .feature-icon {
-      font-size: 48px;
-      margin-bottom: 15px;
+      border: 1px solid var(--line);
     }
 
     .feature h3 {
@@ -262,7 +267,7 @@
       padding: 40px 20px;
       text-align: center;
       color: var(--muted);
-      border-top: 1px solid rgba(212, 175, 55, 0.2);
+      border-top: 1px solid var(--line);
     }
 
     footer a {
@@ -298,7 +303,7 @@
       }
 
       .cart-fixed {
-        font-size: 24px;
+        font-size: 14px;
       }
     }
   </style>
@@ -311,8 +316,8 @@
   </video>
 
   <!-- Carrello fisso -->
-  <div class="cart-fixed" onclick="window.location.href='carrello.html'" id="cart-icon">
-    🛒
+  <div class="cart-fixed" onclick="window.location.href='carrello.html'" id="cart-icon" aria-label="Apri carrello">
+    Cart
     <span class="cart-badge" id="cart-badge" style="display: none;">0</span>
   </div>
 
@@ -321,11 +326,10 @@
     <div class="overlay"></div>
     <div class="hero-content">
       <h1>AL DOGE</h1>
-      <p class="subtitle">Ordina online - pizza tradizionale e panini gourmet</p>
+      <p class="subtitle">Pizza d’autore, panini gourmet e ordine digitale elegante in uno stile deciso e contemporaneo.</p>
       
       <div class="main-buttons">
         <a href="pizze.html" class="btn-main">
-          <span class="emoji">🍕</span>
           <span>MENU PIZZE</span>
         </a>
       </div>
@@ -333,9 +337,9 @@
       <section class="panini-spotlight" aria-label="Spotlight panini premium">
         <div class="panini-copy">
           <h2>Panini gourmet firmati AL DOGE</h2>
-          <p>Un morso, e capisci la differenza: ingredienti selezionati e gusto che resta in mente.</p>
+          <p>Ingredienti selezionati, combinazioni contemporanee e una firma di gusto autorevole.</p>
         </div>
-        <a href="chatbot.html" class="panini-cta">Scopri i nostri panini</a>
+        <a href="chatbot.html" class="panini-cta">Scopri i Panini</a>
       </section>
     </div>
   </div>
@@ -345,22 +349,18 @@
     <h2>Come Funziona</h2>
     <div class="features">
       <div class="feature">
-        <div class="feature-icon">🍕</div>
         <h3>Menu Pizze</h3>
         <p>35 pizze tradizionali cotte al forno a legna. Scegli le tue preferite e aggiungi al carrello.</p>
       </div>
       <div class="feature">
-        <div class="feature-icon">🛒</div>
-        <h3>Carrello Smart</h3>
-        <p>Aggiungi le pizze al carrello e rivedi tutto prima del pagamento, in modo semplice e veloce.</p>
+        <h3>Carrello Digitale</h3>
+        <p>Aggiungi i prodotti al carrello e rivedi tutto prima del pagamento con un flusso pulito e veloce.</p>
       </div>
       <div class="feature">
-        <div class="feature-icon">💳</div>
-        <h3>Paga Online</h3>
+        <h3>Pagamento Sicuro</h3>
         <p>Pagamento sicuro con Stripe. Scegli l'orario di ritiro e paga comodamente online.</p>
       </div>
       <div class="feature">
-        <div class="feature-icon">⏰</div>
         <h3>Ritira Quando Vuoi</h3>
         <p>Seleziona l'orario di ritiro (18:30-23:00). Il tuo ordine sarà pronto!</p>
       </div>
