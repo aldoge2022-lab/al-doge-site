@@ -9,23 +9,24 @@ function readPage(fileName) {
   return fs.readFileSync(path.join(repoRoot, fileName), 'utf8');
 }
 
-test('index homepage does not promote legacy panini custom flow', () => {
-  const indexHtml = readPage('index.html');
+function assertHomepageGuards(html) {
+  assert.ok(!html.includes('href="panini-custom.html"'));
+  assert.ok(!html.includes('/panini-custom'));
+  assert.ok(!html.includes('P.IVA IT00000000000'));
+  assert.ok(!html.includes('info@al-doge.it'));
 
-  assert.ok(!indexHtml.includes('href="panini-custom.html"'));
-  assert.ok(!indexHtml.includes('🥖 Panini Custom AI'));
-  assert.ok(!indexHtml.includes('/panini-custom'));
-  assert.ok(indexHtml.includes('Panini gourmet firmati AL DOGE'));
-  assert.ok(indexHtml.includes('href="chatbot.html" class="panini-cta"'));
+  assert.ok(html.includes('href="/pizze.html"'));
+  assert.ok(html.includes('href="/chatbot.html"'));
+  assert.ok(html.includes('href="/carrello.html"'));
+  assert.ok(html.includes('Apri il menu completo'));
+}
+
+test('index homepage keeps canonical routes and no legacy placeholders', () => {
+  const indexHtml = readPage('index.html');
+  assertHomepageGuards(indexHtml);
 });
 
-test('home homepage variant does not promote legacy panini custom flow', () => {
+test('home homepage variant keeps canonical routes and no legacy placeholders', () => {
   const homeHtml = readPage('home.html');
-
-  assert.ok(!homeHtml.includes('href="panini-custom.html"'));
-  assert.ok(!homeHtml.includes('<span>PANINI CUSTOM AI</span>'));
-  assert.ok(!homeHtml.includes('<h3>Panini AI</h3>'));
-  assert.ok(!homeHtml.includes('/panini-custom'));
-  assert.ok(homeHtml.includes('Panini gourmet firmati AL DOGE'));
-  assert.ok(homeHtml.includes('href="chatbot.html" class="panini-cta"'));
+  assertHomepageGuards(homeHtml);
 });
