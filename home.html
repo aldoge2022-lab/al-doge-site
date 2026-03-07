@@ -10,12 +10,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Libre+Baskerville:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #0b0f1a;
-      --anthracite: #12151f;
-      --gold: #c9a26a;
-      --ivory: #f0e9d9;
-      --text: #e8dfc9;
-      --muted: #d4c9b8;
+      --bg: #111521;
+      --anthracite: #1b1a17;
+      --gold: #d0a46b;
+      --ivory: #f5ecdc;
+      --text: #eee2cc;
+      --muted: #dbcab0;
       --focus: #f3d8ad;
     }
 
@@ -23,7 +23,7 @@
 
     body {
       margin: 0;
-      background: var(--bg);
+      background: radial-gradient(circle at 50% -10%, #2a2218 0%, var(--bg) 42%, #0f1420 100%);
       color: var(--text);
       font-family: 'Libre Baskerville', serif;
       line-height: 1.7;
@@ -40,7 +40,7 @@
       position: fixed;
       inset: 0 0 auto;
       height: 88px;
-      background: rgba(11, 15, 26, 0.95);
+      background: rgba(16, 19, 28, 0.95);
       border-bottom: 1px solid rgba(201, 162, 106, 0.16);
       backdrop-filter: blur(12px);
       display: flex;
@@ -118,7 +118,7 @@
       padding: 7.5rem 6% 5.4rem;
       position: relative;
       background:
-        linear-gradient(rgba(11, 15, 26, 0.55), rgba(11, 15, 26, 0.86)),
+        linear-gradient(rgba(18, 14, 10, 0.42), rgba(15, 17, 26, 0.74)),
         url('./forno-a-legna-pizze-al-doge-majano.jpg') center/cover no-repeat;
     }
 
@@ -126,7 +126,7 @@
       content: "";
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at 50% 18%, rgba(201, 162, 106, 0.26), rgba(201, 162, 106, 0) 52%);
+      background: radial-gradient(circle at 50% 18%, rgba(232, 171, 103, 0.32), rgba(232, 171, 103, 0) 53%);
       pointer-events: none;
     }
 
@@ -146,7 +146,7 @@
       font-size: clamp(4.2rem, 12vw, 10rem);
       font-weight: 300;
       letter-spacing: 0.36em;
-      color: #d8b27a;
+      color: #e1b77b;
       text-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
       line-height: 0.88;
     }
@@ -154,7 +154,7 @@
     .hero-sub {
       margin: 2.3rem auto 3rem;
       max-width: 800px;
-      color: #f6eedf;
+      color: #fbf2df;
       font-size: clamp(1.05rem, 2.35vw, 1.9rem);
       letter-spacing: 0.05em;
       font-style: italic;
@@ -229,8 +229,8 @@
     }
 
     .panini-spotlight {
-      border: 1px solid rgba(201, 162, 106, 0.22);
-      background: linear-gradient(155deg, rgba(18, 21, 31, 0.98), rgba(11, 15, 26, 0.95));
+      border: 1px solid rgba(214, 168, 109, 0.26);
+      background: linear-gradient(155deg, rgba(41, 30, 21, 0.92), rgba(18, 21, 31, 0.94));
       padding: clamp(1.2rem, 2.4vw, 1.8rem);
       display: grid;
       grid-template-columns: minmax(220px, 320px) 1fr;
@@ -252,7 +252,7 @@
       height: 100%;
       object-fit: cover;
       display: block;
-      filter: saturate(1.04) contrast(1.04);
+      filter: saturate(1.08) contrast(1.04) brightness(1.03);
     }
 
     .panini-media::after {
@@ -295,7 +295,7 @@
     }
 
     .menu-home {
-      background: var(--anthracite);
+      background: linear-gradient(160deg, rgba(36, 31, 24, 0.96), rgba(20, 22, 30, 0.96));
       border: 1px solid rgba(201, 162, 106, 0.12);
       border-radius: 14px;
       padding: clamp(1.4rem, 2.8vw, 2.2rem);
@@ -323,7 +323,7 @@
       padding: 0.95rem 1rem;
       border-radius: 9px;
       background: rgba(11, 15, 26, 0.62);
-      border: 1px solid rgba(201, 162, 106, 0.14);
+      border: 1px solid rgba(214, 168, 109, 0.2);
       color: var(--muted);
       font-size: 0.92rem;
       text-align: center;
@@ -331,8 +331,8 @@
 
 
     .v3-assistant {
-      background: linear-gradient(160deg, rgba(11, 15, 26, 0.96), rgba(18, 21, 31, 0.96));
-      border: 1px solid rgba(201, 162, 106, 0.22);
+      background: linear-gradient(160deg, rgba(42, 31, 22, 0.8), rgba(18, 21, 31, 0.95));
+      border: 1px solid rgba(214, 168, 109, 0.26);
       border-radius: 14px;
       padding: clamp(1.5rem, 2.8vw, 2.3rem);
       display: grid;
@@ -365,9 +365,9 @@
 
     .v3-grid article {
       padding: 0.95rem;
-      border: 1px solid rgba(201, 162, 106, 0.2);
+      border: 1px solid rgba(214, 168, 109, 0.24);
       border-radius: 10px;
-      background: rgba(11, 15, 26, 0.7);
+      background: rgba(33, 27, 21, 0.56);
     }
 
     .v3-grid h4 {
@@ -392,7 +392,7 @@
     }
 
     footer {
-      background: var(--anthracite);
+      background: linear-gradient(160deg, rgba(36, 31, 24, 0.96), rgba(20, 22, 30, 0.96));
       border-top: 1px solid rgba(201, 162, 106, 0.16);
       text-align: center;
       padding: 3.4rem 8% 2.4rem;
@@ -476,7 +476,7 @@
   <section class="hero">
     <div class="hero-content">
       <h1>AL DOGE</h1>
-      <p class="hero-sub">Pizza cotta nel forno a legna, panini gourmet e un ordine online pensato per essere rapido, chiaro e affidabile.</p>
+      <p class="hero-sub">Dal forno a legna alla scelta finale: pizze e panini preparati con cura, con un percorso semplice che ti accompagna all'ordine giusto.</p>
       <div class="btn-group">
         <a href="/pizze.html" class="btn btn-primary">Esplora il menu</a>
         <a href="/chatbot.html" class="btn">Lasciati guidare</a>
@@ -487,7 +487,7 @@
   <section class="section" id="assistente-v3">
     <div class="v3-assistant" aria-label="Assistente commerciale V3 AL DOGE">
       <h3>Assistente AL DOGE V3</h3>
-      <p>La V3 ti accompagna nella scelta tra pizze, panini gourmet e proposte complete: riduce la confusione, interpreta le preferenze e suggerisce abbinamenti utili per un ordine più soddisfacente.</p>
+      <p>La V3 ti accompagna con domande brevi e consigli chiari tra pizze, panini gourmet e proposte complete, così scegli con più facilità e con più gusto.</p>
       <div class="v3-grid">
         <article>
           <h4>Scelta guidata</h4>
@@ -517,23 +517,20 @@
       <div class="panini-copy-wrap">
         <h2>Panini AL DOGE</h2>
         <p>Panini preparati al momento, con pane appena sfornato dal forno a legna.</p>
-        <p>Una linea dedicata che valorizza ingredienti freschi e abbinamenti equilibrati, con la stessa cura artigianale della cucina AL DOGE.</p>
+        <p>Una proposta calda e concreta, fatta di ingredienti freschi e abbinamenti equilibrati, con la stessa cura artigianale che trovi in ogni forno AL DOGE.</p>
         <div class="spotlight-footer">
-          <small style="color:var(--muted);">Disponibili nel percorso dedicato con supporto alla scelta.</small>
+          <small style="color:var(--muted);">Disponibili anche nel percorso guidato, per scegliere con più tranquillità.</small>
           <a href="/chatbot.html" class="btn" style="padding:0.8rem 2rem;">Vai ai panini</a>
         </div>
       </div>
     </div>
   </section>
 
-
-  
-
   <section class="section" id="menu-pizze-home">
     <div class="menu-home">
       <h3>Menu Pizze</h3>
-      <p>In homepage presentiamo una vista sintetica per mantenere il focus sul brand. Il catalogo completo con tutte le 72 pizze è disponibile nella pagina menu dedicata.</p>
-      <p class="menu-note">Il catalogo completo resta nella pagina dedicata, così qui trovi subito il percorso più rapido per scegliere bene e ordinare senza incertezze.</p>
+      <p>Qui trovi solo l'essenziale per orientarti subito: il menu completo resta nella pagina dedicata, ordinato e facile da consultare.</p>
+      <p class="menu-note">Se vuoi, puoi farti guidare dalla V3 oppure entrare direttamente nel menu completo: in entrambi i casi arrivi più velocemente alla scelta giusta.</p>
       <div style="text-align:center; margin-top:1.6rem;">
         <a href="/pizze.html" class="btn btn-primary">Esplora il menu</a>
       </div>
