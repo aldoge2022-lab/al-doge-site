@@ -393,12 +393,7 @@
     const quantities = {};
 
     function getPizzaId(name) {
-      return String(name || '')
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/\p{Diacritic}/gu, '')
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '');
+      return PizzaOptionEngine.toId(name);
     }
 
     function formatEuro(value) {
@@ -410,9 +405,9 @@
     }
 
     function getSelectionFromCard(pizzaId, pizza) {
-      const selectedFormat = document.querySelector(`input[name="format-${pizzaId}"]:checked`)?.value || 'normale';
-      const selectedDough = document.getElementById(`dough-${pizzaId}`)?.value || 'standard';
-      const selectedMozzarella = document.getElementById(`mozzarella-${pizzaId}`)?.value || 'normale';
+      const selectedFormat = document.querySelector(`input[name="format-${pizzaId}"]:checked`)?.value || PizzaOptionEngine.config.defaults.format;
+      const selectedDough = document.getElementById(`dough-${pizzaId}`)?.value || PizzaOptionEngine.config.defaults.dough;
+      const selectedMozzarella = document.getElementById(`mozzarella-${pizzaId}`)?.value || PizzaOptionEngine.config.defaults.mozzarella;
       const selectedExtras = Array.from(document.querySelectorAll(`input[data-extra-for="${pizzaId}"]:checked`)).map((el) => el.value);
 
       return PizzaOptionEngine.normalizeSelection({
@@ -507,7 +502,7 @@
             <div class="pizza-price pizza-price-current" data-price-for="${pizzaId}">${formatEuro(price)}</div>
           </div>
           <div class="pizza-base-prices">
-            Normale ${formatEuro(pizza.prezzo)} · Maxi ${maxiPrice !== null ? formatEuro(maxiPrice) : 'n.d.'}
+            Normale ${formatEuro(pizza.prezzo)} · Maxi ${maxiPrice !== null ? formatEuro(maxiPrice) : 'non disponibile'}
           </div>
           <div class="pizza-ingredients">${pizza.ingredienti.join(', ')}</div>
           <div class="pizza-allergeni">⚠️ Allergeni: ${pizza.allergeni.join(', ')}</div>

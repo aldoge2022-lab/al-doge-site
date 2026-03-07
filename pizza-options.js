@@ -1,4 +1,9 @@
 const PIZZA_OPTION_CONFIG = {
+  defaults: {
+    format: 'normale',
+    dough: 'standard',
+    mozzarella: 'normale'
+  },
   formats: [
     { key: 'normale', label: 'Normale' },
     { key: 'maxi', label: 'Maxi' }
@@ -32,16 +37,30 @@ function findOption(options, key, fallbackKey) {
   return options.find((item) => item.key === key) || options.find((item) => item.key === fallbackKey) || options[0];
 }
 
+function toId(value = '') {
+  return String(value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 function normalizeSelection(selection = {}, pizza = {}) {
   const normalizedExtras = Array.isArray(selection.extras) ? selection.extras : [];
-  const format = selection.format === 'maxi' && getMaxiPrice(pizza) !== null ? 'maxi' : 'normale';
+  const seenExtras = new Set();
+  const format = selection.format === 'maxi' && getMaxiPrice(pizza) !== null ? 'maxi' : PIZZA_OPTION_CONFIG.defaults.format;
   return {
     format,
-    dough: findOption(PIZZA_OPTION_CONFIG.doughs, selection.dough, 'standard').key,
-    mozzarella: findOption(PIZZA_OPTION_CONFIG.mozzarellas, selection.mozzarella, 'normale').key,
+    dough: findOption(PIZZA_OPTION_CONFIG.doughs, selection.dough, PIZZA_OPTION_CONFIG.defaults.dough).key,
+    mozzarella: findOption(PIZZA_OPTION_CONFIG.mozzarellas, selection.mozzarella, PIZZA_OPTION_CONFIG.defaults.mozzarella).key,
     extras: normalizedExtras
       .map((extraKey) => findOption(PIZZA_OPTION_CONFIG.extras, extraKey))
-      .filter((extra, index, all) => extra && all.findIndex((item) => item.key === extra.key) === index)
+      .filter((extra) => {
+        if (!extra || seenExtras.has(extra.key)) return false;
+        seenExtras.add(extra.key);
+        return true;
+      })
       .map((extra) => extra.key)
   };
 }
@@ -119,6 +138,7 @@ function createPizzaCartItem(pizza = {}, quantity = 1, selection = {}) {
 
 const PizzaOptionEngine = {
   config: PIZZA_OPTION_CONFIG,
+  toId,
   getMaxiPrice,
   normalizeSelection,
   calculatePizzaPrice,

@@ -52,3 +52,7 @@ test("createPizzaCartItem stores the selected product options", () => {
   assert.deepEqual(cartItem.extras, ["Burrata / bufala"]);
   assert.ok(cartItem.signature.includes("maxi"));
 });
+
+test("pizza option engine normalizes italian names for stable ids", () => {
+  assert.equal(PizzaOptionEngine.toId("Nicolò Speciale"), "nicolo-speciale");
+});
