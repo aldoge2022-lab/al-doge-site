@@ -1,229 +1,556 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AL DOGE – Ordina Online | Farla di Majano</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AL DOGE – Ordina Online | Farla di Majano</title>
+  <meta name="description" content="AL DOGE a Farla di Majano: pizze cotte nel forno a legna e panini gourmet, con ordine online semplice e sicuro." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Libre+Baskerville:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #111521;
+      --anthracite: #1b1a17;
+      --gold: #d0a46b;
+      --ivory: #f5ecdc;
+      --text: #eee2cc;
+      --muted: #dbcab0;
+      --focus: #f3d8ad;
+    }
 
-<meta name="description" content="Ordina online da AL DOGE. Pizze, pagamento veloce e sicuro.">
-<meta name="keywords" content="pizzeria Majano, ordina pizza online, AL DOGE">
+    * { box-sizing: border-box; }
 
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    body {
+      margin: 0;
+      background: radial-gradient(circle at 50% -10%, #2a2218 0%, var(--bg) 42%, #0f1420 100%);
+      color: var(--text);
+      font-family: 'Libre Baskerville', serif;
+      line-height: 1.7;
+    }
 
-<style>
-:root{
---gold:#d4af37;
---dark:#0b0b0b;
---soft:#1a1a1a;
---text:#f5f5f5;
-}
+    a:focus-visible,
+    summary:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 4px;
+      border-radius: 4px;
+    }
 
-body{
-margin:0;
-background:var(--dark);
-color:var(--text);
-font-family:'Inter',sans-serif;
-}
+    nav {
+      position: fixed;
+      inset: 0 0 auto;
+      height: 88px;
+      background: rgba(16, 19, 28, 0.95);
+      border-bottom: 1px solid rgba(201, 162, 106, 0.16);
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 6%;
+      z-index: 1000;
+    }
 
-h1{
-font-family:'Playfair Display',serif;
-color:var(--gold);
-font-size:64px;
-margin:0;
-}
+    .logo-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.7rem;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.8rem, 2.8vw, 2.2rem);
+      letter-spacing: 0.08em;
+      color: var(--gold);
+      text-decoration: none;
+    }
 
-.hero{
-position:relative;
-height:100vh;
-background:url('hero-image.jpg') center/cover no-repeat;
-display:flex;
-align-items:center;
-justify-content:center;
-text-align:center;
-}
+    .logo-mark {
+      width: 42px;
+      height: 42px;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.35));
+    }
 
-.overlay{
-background:rgba(0,0,0,0.65);
-position:absolute;
-inset:0;
-}
+    .nav-links {
+      display: flex;
+      gap: clamp(1.2rem, 4vw, 3rem);
+      font-size: 1rem;
+      letter-spacing: 0.06em;
+    }
 
-.hero-content{
-position:relative;
-z-index:2;
-}
+    .nav-links a,
+    #cart-btn {
+      color: var(--ivory);
+      text-decoration: none;
+      transition: color 0.35s ease;
+    }
 
-.subtitle{
-margin-top:15px;
-font-size:18px;
-opacity:0.9;
-}
+    .nav-links a:hover,
+    #cart-btn:hover { color: var(--gold); }
 
-.btn{
-display:inline-block;
-margin:15px 10px 0 10px;
-padding:14px 30px;
-border-radius:30px;
-font-weight:500;
-text-decoration:none;
-}
+    #cart-btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1rem;
+    }
 
-.btn-gold{
-background:var(--gold);
-color:black;
-}
+    #cart-badge {
+      position: absolute;
+      top: -6px;
+      right: -10px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.74rem;
+      background: var(--gold);
+      color: var(--bg);
+      font-weight: 600;
+    }
 
-.btn-white{
-background:white;
-color:black;
-}
+    .hero {
+      min-height: 95vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 7.5rem 6% 5.4rem;
+      position: relative;
+      background:
+        linear-gradient(rgba(18, 14, 10, 0.42), rgba(15, 17, 26, 0.74)),
+        url('./forno-a-legna-pizze-al-doge-majano.jpg') center/cover no-repeat;
+    }
 
-.panini-spotlight{
-margin:28px auto 0;
-max-width:640px;
-background:linear-gradient(140deg,rgba(10,18,33,.95),rgba(27,27,27,.92));
-border:1px solid rgba(212,175,55,.5);
-border-radius:20px;
-padding:20px 22px;
-box-shadow:0 16px 36px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.06) inset;
-text-align:left;
-display:flex;
-align-items:center;
-justify-content:space-between;
-gap:16px;
-transition:transform .3s ease,box-shadow .3s ease;
-}
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 18%, rgba(232, 171, 103, 0.32), rgba(232, 171, 103, 0) 53%);
+      pointer-events: none;
+    }
 
-.panini-spotlight:hover{
-transform:translateY(-3px);
-box-shadow:0 22px 44px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.08) inset;
-}
+    .hero-content {
+      max-width: 920px;
+      animation: fadeUp 0.9s ease-out both;
+    }
 
-.panini-copy h2{
-font-family:'Playfair Display',serif;
-font-size:clamp(22px,3vw,32px);
-color:#fff;
-margin:0 0 8px 0;
-}
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-.panini-copy p{
-margin:0;
-color:#ececec;
-font-size:15px;
-line-height:1.45;
-}
+    h1 {
+      margin: 0;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(4.2rem, 12vw, 10rem);
+      font-weight: 300;
+      letter-spacing: 0.36em;
+      color: #e1b77b;
+      text-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
+      line-height: 0.88;
+    }
 
-.panini-cta{
-background:var(--gold);
-color:#111;
-text-decoration:none;
-border-radius:999px;
-padding:12px 20px;
-font-weight:600;
-white-space:nowrap;
-box-shadow:0 6px 18px rgba(212,175,55,.35);
-transition:transform .25s ease,box-shadow .25s ease,background-color .25s ease;
-}
+    .hero-sub {
+      margin: 2.3rem auto 3rem;
+      max-width: 800px;
+      color: #fbf2df;
+      font-size: clamp(1.05rem, 2.35vw, 1.9rem);
+      letter-spacing: 0.05em;
+      font-style: italic;
+    }
 
-.panini-cta:hover{
-transform:translateY(-2px);
-box-shadow:0 10px 22px rgba(212,175,55,.45);
-background:#e6c157;
-}
+    .btn-group {
+      display: flex;
+      gap: 1.2rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
 
-.panini-cta:focus-visible{
-outline:2px solid #fff;
-outline-offset:4px;
-}
+    .btn {
+      font-family: 'Cormorant Garamond', serif;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      text-decoration: none;
+      font-size: 1.01rem;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      padding: 0.95rem 2.4rem;
+      position: relative;
+      overflow: hidden;
+      transition: color 0.5s ease, transform 0.45s ease, box-shadow 0.45s ease;
+      z-index: 1;
+    }
 
-.logo-fixed{
-position:fixed;
-top:20px;
-left:20px;
-z-index:999;
-width:70px;
-border-radius:12px;
-box-shadow:0 0 20px rgba(0,0,0,0.6);
-}
+    .btn::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      left: -100%;
+      background: var(--gold);
+      transition: left 0.55s ease;
+      z-index: -1;
+    }
 
-.cart-badge{
-position:fixed;
-top:20px;
-right:20px;
-background:var(--gold);
-color:black;
-padding:10px 15px;
-border-radius:30px;
-font-weight:600;
-text-decoration:none;
-}
+    .btn:hover::before { left: 0; }
 
-footer{
-position:absolute;
-bottom:20px;
-width:100%;
-text-align:center;
-font-size:13px;
-opacity:0.6;
-}
+    .btn:hover {
+      color: var(--bg);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(201, 162, 106, 0.2);
+    }
 
-@media (max-width:768px){
-.panini-spotlight{
-flex-direction:column;
-align-items:flex-start;
-padding:18px;
-}
+    .btn-primary {
+      background: var(--gold);
+      color: var(--bg);
+      border-color: transparent;
+    }
 
-.panini-cta{
-width:100%;
-text-align:center;
-}
-}
-</style>
+    .btn-primary::before { background: transparent; }
+
+    .btn-primary:hover {
+      color: var(--gold);
+      border-color: var(--gold);
+      background: transparent;
+    }
+
+    .section {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 5.3rem 8%;
+    }
+
+    .identity {
+      text-align: center;
+      font-size: clamp(1rem, 1.8vw, 1.2rem);
+      color: var(--muted);
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .panini-spotlight {
+      border: 1px solid rgba(214, 168, 109, 0.26);
+      background: linear-gradient(155deg, rgba(41, 30, 21, 0.92), rgba(18, 21, 31, 0.94));
+      padding: clamp(1.2rem, 2.4vw, 1.8rem);
+      display: grid;
+      grid-template-columns: minmax(220px, 320px) 1fr;
+      gap: clamp(1.2rem, 2.8vw, 2rem);
+      border-radius: 14px;
+      align-items: stretch;
+      text-align: left;
+    }
+
+    .panini-media {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      min-height: 260px;
+    }
+
+    .panini-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: saturate(1.08) contrast(1.04) brightness(1.03);
+    }
+
+    .panini-media::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(11, 15, 26, 0.05), rgba(11, 15, 26, 0.4));
+      pointer-events: none;
+    }
+
+    .panini-copy-wrap {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0.85rem;
+    }
+
+    .panini-spotlight h2 {
+      margin: 0;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      color: var(--gold);
+      letter-spacing: 0.04em;
+      font-weight: 500;
+    }
+
+    .panini-spotlight p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 760px;
+    }
+
+    .spotlight-footer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 0.5rem;
+    }
+
+    .menu-home {
+      background: linear-gradient(160deg, rgba(36, 31, 24, 0.96), rgba(20, 22, 30, 0.96));
+      border: 1px solid rgba(201, 162, 106, 0.12);
+      border-radius: 14px;
+      padding: clamp(1.4rem, 2.8vw, 2.2rem);
+    }
+
+    .menu-home h3 {
+      margin: 0 0 0.8rem;
+      font-family: 'Cormorant Garamond', serif;
+      color: var(--gold);
+      font-size: clamp(2rem, 3.5vw, 2.8rem);
+      letter-spacing: 0.04em;
+      text-align: center;
+    }
+
+    .menu-home p {
+      margin: 0 auto;
+      max-width: 780px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .menu-note {
+      margin: 1.4rem auto 0;
+      max-width: 720px;
+      padding: 0.95rem 1rem;
+      border-radius: 9px;
+      background: rgba(11, 15, 26, 0.62);
+      border: 1px solid rgba(214, 168, 109, 0.2);
+      color: var(--muted);
+      font-size: 0.92rem;
+      text-align: center;
+    }
+
+
+    .v3-assistant {
+      background: linear-gradient(160deg, rgba(42, 31, 22, 0.8), rgba(18, 21, 31, 0.95));
+      border: 1px solid rgba(214, 168, 109, 0.26);
+      border-radius: 14px;
+      padding: clamp(1.5rem, 2.8vw, 2.3rem);
+      display: grid;
+      gap: 1.2rem;
+    }
+
+    .v3-assistant h3 {
+      margin: 0;
+      font-family: 'Cormorant Garamond', serif;
+      color: var(--gold);
+      font-size: clamp(2rem, 3.4vw, 2.7rem);
+      letter-spacing: 0.03em;
+      text-align: center;
+    }
+
+    .v3-assistant p {
+      margin: 0;
+      color: var(--muted);
+      text-align: center;
+      max-width: 860px;
+      margin-inline: auto;
+    }
+
+    .v3-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.9rem;
+      margin-top: 0.8rem;
+    }
+
+    .v3-grid article {
+      padding: 0.95rem;
+      border: 1px solid rgba(214, 168, 109, 0.24);
+      border-radius: 10px;
+      background: rgba(33, 27, 21, 0.56);
+    }
+
+    .v3-grid h4 {
+      margin: 0 0 0.35rem;
+      color: var(--ivory);
+      font-size: 1rem;
+      font-weight: 400;
+    }
+
+    .v3-grid p {
+      text-align: left;
+      font-size: 0.9rem;
+      margin: 0;
+    }
+
+    .v3-cta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      justify-content: center;
+      margin-top: 0.5rem;
+    }
+
+    footer {
+      background: linear-gradient(160deg, rgba(36, 31, 24, 0.96), rgba(20, 22, 30, 0.96));
+      border-top: 1px solid rgba(201, 162, 106, 0.16);
+      text-align: center;
+      padding: 3.4rem 8% 2.4rem;
+      color: var(--muted);
+    }
+
+    footer .logo-foot {
+      font-family: 'Cormorant Garamond', serif;
+      color: var(--gold);
+      font-size: 2rem;
+      margin-bottom: 0.65rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+
+    .logo-foot img {
+      width: 30px;
+      height: 30px;
+      object-fit: contain;
+    }
+
+    footer a {
+      color: var(--ivory);
+      text-decoration: none;
+    }
+
+    footer a:hover { color: var(--gold); }
+
+    @media (max-width: 780px) {
+      nav {
+        height: auto;
+        padding: 0.9rem 5%;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }
+
+      .hero {
+        min-height: 88vh;
+        padding-top: 9.5rem;
+      }
+
+      .hero-sub {
+        margin: 1.8rem auto 2.3rem;
+      }
+
+      .panini-spotlight {
+        grid-template-columns: 1fr;
+      }
+
+      .panini-media {
+        min-height: 220px;
+      }
+
+      .spotlight-footer {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .btn,
+      .btn-primary {
+        width: 100%;
+        text-align: center;
+      }
+    }
+  </style>
 </head>
-
 <body>
+  <nav aria-label="Navigazione principale">
+    <a href="/" class="logo-nav"><img src="./logo-al-doge.png" alt="Logo AL DOGE" class="logo-mark" /> <span>AL DOGE</span></a>
+    <div class="nav-links">
+      <a href="/pizze.html">Pizze</a>
+      <a href="/chatbot.html">Panini</a>
+    </div>
+    <a href="/carrello.html" id="cart-btn" aria-label="Apri carrello">
+      Carrello
+      <span id="cart-badge">0</span>
+    </a>
+  </nav>
 
-<video class="logo-fixed" autoplay loop muted playsinline>
-<source src="logo-animato.mp4" type="video/mp4">
-</video>
+  <section class="hero">
+    <div class="hero-content">
+      <h1>AL DOGE</h1>
+      <p class="hero-sub">Dal forno a legna alla scelta finale: pizze e panini preparati con cura, con un percorso semplice che ti accompagna all'ordine giusto.</p>
+      <div class="btn-group">
+        <a href="/pizze.html" class="btn btn-primary">Esplora il menu</a>
+        <a href="/chatbot.html" class="btn">Lasciati guidare</a>
+      </div>
+    </div>
+  </section>
 
-<a href="carrello.html" class="cart-badge">
-Carrello <span id="cart-count">0</span>
-</a>
+  <section class="section" id="assistente-v3">
+    <div class="v3-assistant" aria-label="Assistente commerciale V3 AL DOGE">
+      <h3>Assistente AL DOGE V3</h3>
+      <p>La V3 ti accompagna con domande brevi e consigli chiari tra pizze, panini gourmet e proposte complete, così scegli con più facilità e con più gusto.</p>
+      <div class="v3-grid">
+        <article>
+          <h4>Scelta guidata</h4>
+          <p>Ti orienta tra pizza, panino o proposta completa in base a preferenze reali.</p>
+        </article>
+        <article>
+          <h4>Consigli mirati</h4>
+          <p>Offre una proposta principale, un'alternativa e una motivazione sintetica.</p>
+        </article>
+        <article>
+          <h4>Upsell coerente</h4>
+          <p>Suggerisce aggiunte o bevande pertinenti senza tono invasivo.</p>
+        </article>
+      </div>
+      <div class="v3-cta">
+        <a href="/chatbot.html" class="btn btn-primary">Lasciati guidare</a>
+        <a href="/pizze.html" class="btn">Esplora il menu</a>
+      </div>
+    </div>
+  </section>
 
-<div class="hero">
-<div class="overlay"></div>
+<section class="section">
+    <div class="panini-spotlight" aria-label="Sezione panini">
+      <div class="panini-media">
+        <img src="./panino-prosciutto-rucola-al-doge-majano.jpg" alt="Panino AL DOGE con prosciutto e rucola" loading="lazy" />
+      </div>
+      <div class="panini-copy-wrap">
+        <h2>Panini AL DOGE</h2>
+        <p>Panini preparati al momento, con pane appena sfornato dal forno a legna.</p>
+        <p>Una proposta calda e concreta, fatta di ingredienti freschi e abbinamenti equilibrati, con la stessa cura artigianale che trovi in ogni forno AL DOGE.</p>
+        <div class="spotlight-footer">
+          <small style="color:var(--muted);">Disponibili anche nel percorso guidato, per scegliere con più tranquillità.</small>
+          <a href="/chatbot.html" class="btn" style="padding:0.8rem 2rem;">Vai ai panini</a>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<div class="hero-content">
-<h1>AL DOGE</h1>
-<div class="subtitle">
-Ordina online. pizza tradizionale e panini gourmet.
-</div>
+  <section class="section" id="menu-pizze-home">
+    <div class="menu-home">
+      <h3>Menu Pizze</h3>
+      <p>Qui trovi solo l'essenziale per orientarti subito: il menu completo resta nella pagina dedicata, ordinato e facile da consultare.</p>
+      <p class="menu-note">Se vuoi, puoi farti guidare dalla V3 oppure entrare direttamente nel menu completo: in entrambi i casi arrivi più velocemente alla scelta giusta.</p>
+      <div style="text-align:center; margin-top:1.6rem;">
+        <a href="/pizze.html" class="btn btn-primary">Esplora il menu</a>
+      </div>
+    </div>
+  </section>
 
-<a href="pizze.html" class="btn btn-gold">
-🍕 Ordina Pizze
-</a>
+  <footer>
+    <div class="logo-foot"><img src="./logo-al-doge.png" alt="Logo AL DOGE" /> <span>AL DOGE</span></div>
+    <p>Via S. Daniele 3, Farla di Majano (UD)</p>
+    <p><a href="tel:04321840683">0432 1840683</a></p>
+    <p style="margin-top:1.5rem; font-size:0.92rem; opacity:0.75;">© 2026 AL DOGE</p>
+  </footer>
 
-<section class="panini-spotlight" aria-label="Spotlight panini premium">
-<div class="panini-copy">
-<h2>Panini gourmet firmati AL DOGE</h2>
-<p>Un morso, e capisci la differenza: ingredienti selezionati e gusto che resta in mente.</p>
-</div>
-<a href="chatbot.html" class="panini-cta">Scopri i nostri panini</a>
-</section>
-
-</div>
-</div>
-
-<footer>
-© 2026 AL DOGE – Via S. Daniele 3, Farla di Majano
-</footer>
-
-<script src="cart-utils.js"></script>
-<script>
-updateCartBadge();
-</script>
-
+  <script src="cart-utils.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof updateCartBadge === 'function') {
+        updateCartBadge();
+      }
+    });
+  </script>
 </body>
 </html>
