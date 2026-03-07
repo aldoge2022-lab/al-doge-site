@@ -376,8 +376,26 @@
     </div>
   </div>
 
+  <script src="pizza-options.js"></script>
   <script src="cart-utils.js"></script>
   <script>
+    function renderVariantDetails(item) {
+      if (item.type !== 'pizza') return '';
+
+      if (item.variantSummary) {
+        return `<div class="item-ingredients">${item.variantSummary}</div>`;
+      }
+
+      const details = [];
+      if (item.format) details.push(`Formato: ${item.format}`);
+      if (item.dough) details.push(`Impasto: ${item.dough}`);
+      if (item.mozzarella) details.push(`Mozzarella: ${item.mozzarella}`);
+      if (Array.isArray(item.extras) && item.extras.length) {
+        details.push(`Extra: ${item.extras.join(', ')}`);
+      }
+      return details.length ? `<div class="item-ingredients">${details.join(' • ')}</div>` : '';
+    }
+
     function loadCart() {
       const cart = CartManager.getCart();
       const emptyCart = document.getElementById('empty-cart');
@@ -403,6 +421,7 @@
       container.innerHTML = cart.map((item, index) => {
         const itemTotal = item.price * item.quantity;
         const typeLabel = item.type === 'pizza' ? '🍕 PIZZA' : '🥖 PANINO';
+        const ingredients = Array.isArray(item.ingredients) ? item.ingredients : [];
         
         return `
           <div class="cart-item">
@@ -410,7 +429,8 @@
               <div class="item-info">
                 <span class="item-type">${typeLabel}</span>
                 <div class="item-name">${item.name}</div>
-                <div class="item-ingredients">${item.ingredients.join(', ')}</div>
+                ${ingredients.length ? `<div class="item-ingredients">${ingredients.join(', ')}</div>` : ''}
+                ${renderVariantDetails(item)}
                 ${item.allergeni ? `<div class="item-allergeni">⚠️ Allergeni: ${item.allergeni.join(', ')}</div>` : ''}
               </div>
               <button class="item-remove" onclick="removeItem(${index})" title="Rimuovi">✕</button>

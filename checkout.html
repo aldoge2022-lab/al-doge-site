@@ -226,11 +226,31 @@
 
 </div>
 
+<script src="pizza-options.js"></script>
 <script src="cart-utils.js"></script>
 
 <script>
   let stripeClient = null;
   let stripeClientKey = null;
+
+  function getCheckoutDisplayName(item) {
+    if (item.type === 'pizza' && item.variantSummary) {
+      return `${item.name} (${item.variantSummary})`;
+    }
+
+    if (item.type === 'pizza') {
+      const details = [];
+      if (item.format) details.push(`Formato: ${item.format}`);
+      if (item.dough) details.push(`Impasto: ${item.dough}`);
+      if (item.mozzarella) details.push(`Mozzarella: ${item.mozzarella}`);
+      if (Array.isArray(item.extras) && item.extras.length) details.push(`Extra: ${item.extras.join(', ')}`);
+      if (details.length) {
+        return `${item.name} (${details.join(' • ')})`;
+      }
+    }
+
+    return item.name;
+  }
 
   document.addEventListener("DOMContentLoaded", () => {
     const summary = document.getElementById("order-summary");
@@ -241,7 +261,7 @@
     summary.innerHTML = cart
       .map(item => `
         <div class="summary-item">
-          <span>${item.quantity}× ${item.name}</span>
+          <span>${item.quantity}× ${getCheckoutDisplayName(item)}</span>
           <span>€${(item.price * item.quantity).toFixed(2)}</span>
         </div>
       `)
@@ -335,9 +355,13 @@
         time,
         notes,
         items: cart.map(i => ({
-          name: i.name,
+          name: getCheckoutDisplayName(i),
           qty: i.quantity,
-          price: i.price
+          price: i.price,
+          format: i.format || null,
+          dough: i.dough || null,
+          mozzarella: i.mozzarella || null,
+          extras: Array.isArray(i.extras) ? i.extras : []
         })),
         total: total.toFixed(2)
       };
