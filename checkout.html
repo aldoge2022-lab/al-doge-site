@@ -230,6 +230,7 @@
 
 <script>
   let stripeClient = null;
+  let stripeClientKey = null;
 
   document.addEventListener("DOMContentLoaded", () => {
     const summary = document.getElementById("order-summary");
@@ -396,12 +397,17 @@
         }
 
         const { sessionId, publishableKey } = await response.json();
-        if (!sessionId || !publishableKey) {
-          throw new Error("Dati Stripe incompleti");
+        if (!sessionId) {
+          throw new Error("sessionId Stripe mancante");
         }
 
-        if (!stripeClient) {
+        if (!publishableKey) {
+          throw new Error("publishableKey Stripe mancante");
+        }
+
+        if (!stripeClient || stripeClientKey !== publishableKey) {
           stripeClient = Stripe(publishableKey);
+          stripeClientKey = publishableKey;
         }
 
         const { error } = await stripeClient.redirectToCheckout({ sessionId });
