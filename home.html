@@ -10,11 +10,13 @@
   
   <style>
     :root {
-      --gold: #d4af37;
-      --dark: #0b0b0b;
-      --soft: #1a1a1a;
-      --text: #f5f5f5;
-      --muted: #b3b3b3;
+      --gold: #c9a45a;
+      --dark: #101722;
+      --soft: #1d2735;
+      --surface: #2a3442;
+      --text: #f5efe3;
+      --muted: #d0c3ae;
+      --warm-white: #f8f2e6;
     }
 
     * {
@@ -25,7 +27,7 @@
 
     body {
       margin: 0;
-      background: var(--dark);
+      background: radial-gradient(circle at top, #243347 0%, #101722 55%, #0b1119 100%);
       color: var(--text);
       font-family: 'Inter', sans-serif;
       min-height: 100vh;
@@ -92,7 +94,7 @@
     }
 
     .overlay {
-      background: rgba(0,0,0,0.7);
+      background: linear-gradient(160deg, rgba(8, 12, 19, 0.78), rgba(18, 20, 23, 0.48), rgba(59, 35, 16, 0.34));
       position: absolute;
       inset: 0;
     }
@@ -114,9 +116,10 @@
 
     .subtitle {
       font-size: clamp(18px, 3vw, 24px);
-      color: var(--text);
+      color: var(--warm-white);
       margin-bottom: 50px;
-      font-weight: 300;
+      font-weight: 400;
+      line-height: 1.5;
     }
 
     .main-buttons {
@@ -128,10 +131,10 @@
     }
 
     .btn-main {
-      background: var(--gold);
-      color: black;
+      background: linear-gradient(120deg, #d6b06a, #c39a4d);
+      color: #1b1710;
       padding: 25px 50px;
-      border-radius: 15px;
+      border-radius: 999px;
       text-decoration: none;
       font-size: 20px;
       font-weight: 600;
@@ -139,7 +142,7 @@
       align-items: center;
       gap: 15px;
       transition: all 0.3s;
-      box-shadow: 0 5px 20px rgba(212, 175, 55, 0.3);
+      box-shadow: 0 8px 24px rgba(195, 154, 77, 0.32);
       min-width: 280px;
       justify-content: center;
     }
@@ -156,11 +159,11 @@
     .panini-spotlight {
       margin: 34px auto 0;
       max-width: 680px;
-      background: linear-gradient(140deg, rgba(10, 18, 33, 0.95), rgba(27, 27, 27, 0.92));
-      border: 1px solid rgba(212, 175, 55, 0.5);
+      background: linear-gradient(145deg, rgba(45, 56, 71, 0.92), rgba(51, 41, 32, 0.9));
+      border: 1px solid rgba(201, 164, 90, 0.55);
       border-radius: 20px;
       padding: 22px 24px;
-      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(255, 240, 214, 0.07) inset;
       text-align: left;
       display: flex;
       align-items: center;
@@ -177,33 +180,33 @@
     .panini-copy h2 {
       font-family: 'Playfair Display', serif;
       font-size: clamp(24px, 3.4vw, 34px);
-      color: #fff;
+      color: #fff4de;
       margin-bottom: 8px;
     }
 
     .panini-copy p {
-      color: #ececec;
+      color: #f3e8d4;
       font-size: 15px;
       line-height: 1.5;
       max-width: 420px;
     }
 
     .panini-cta {
-      background: var(--gold);
-      color: #111;
+      background: linear-gradient(120deg, #d6b06a, #c39a4d);
+      color: #1f1a12;
       text-decoration: none;
       border-radius: 999px;
       padding: 12px 24px;
       font-weight: 600;
       white-space: nowrap;
-      box-shadow: 0 6px 18px rgba(212, 175, 55, 0.35);
+      box-shadow: 0 6px 18px rgba(195, 154, 77, 0.38);
       transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
     }
 
     .panini-cta:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 22px rgba(212, 175, 55, 0.45);
-      background: #e6c157;
+      box-shadow: 0 10px 22px rgba(195, 154, 77, 0.5);
+      background: #d6b16b;
     }
 
     .panini-cta:focus-visible {
@@ -212,7 +215,7 @@
     }
 
     .info-section {
-      background: var(--soft);
+      background: linear-gradient(180deg, rgba(36, 47, 62, 0.96), rgba(25, 33, 45, 0.96));
       padding: 60px 20px;
       text-align: center;
     }
@@ -234,10 +237,10 @@
     }
 
     .feature {
-      background: var(--dark);
+      background: linear-gradient(170deg, rgba(28, 37, 50, 0.95), rgba(47, 41, 35, 0.88));
       padding: 30px;
       border-radius: 15px;
-      border: 1px solid rgba(212, 175, 55, 0.2);
+      border: 1px solid rgba(201, 164, 90, 0.28);
     }
 
     .feature-icon {
@@ -258,11 +261,11 @@
     }
 
     footer {
-      background: var(--dark);
+      background: #121a25;
       padding: 40px 20px;
       text-align: center;
       color: var(--muted);
-      border-top: 1px solid rgba(212, 175, 55, 0.2);
+      border-top: 1px solid rgba(201, 164, 90, 0.25);
     }
 
     footer a {
@@ -321,7 +324,7 @@
     <div class="overlay"></div>
     <div class="hero-content">
       <h1>AL DOGE</h1>
-      <p class="subtitle">Ordina online - pizza tradizionale e panini gourmet</p>
+      <p class="subtitle">Ordina online con la qualità AL DOGE: forno acceso, ingredienti veri e un'accoglienza che si sente dal primo click.</p>
       
       <div class="main-buttons">
         <a href="pizze.html" class="btn-main">
@@ -333,7 +336,7 @@
       <section class="panini-spotlight" aria-label="Spotlight panini premium">
         <div class="panini-copy">
           <h2>Panini gourmet firmati AL DOGE</h2>
-          <p>Un morso, e capisci la differenza: ingredienti selezionati e gusto che resta in mente.</p>
+          <p>Pane caldo, farcitura fatta al momento e gusto pieno: la nostra firma è farti venire fame davvero.</p>
         </div>
         <a href="chatbot.html" class="panini-cta">Scopri i nostri panini</a>
       </section>
@@ -342,27 +345,27 @@
 
   <!-- Info Section -->
   <section class="info-section">
-    <h2>Come Funziona</h2>
+    <h2>AL DOGE V3: scegli bene, con gusto</h2>
     <div class="features">
       <div class="feature">
+        <div class="feature-icon">🤝</div>
+        <h3>Guida Accogliente</h3>
+        <p>Il percorso V3 ti accompagna nella scelta in modo chiaro: rapido, affidabile e sempre orientato al gusto.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🥪</div>
+        <h3>Panini Espressi</h3>
+        <p>Preparati al momento, con pane fragrante e ingredienti selezionati: qualità concreta, non solo estetica.</p>
+      </div>
+      <div class="feature">
         <div class="feature-icon">🍕</div>
-        <h3>Menu Pizze</h3>
-        <p>35 pizze tradizionali cotte al forno a legna. Scegli le tue preferite e aggiungi al carrello.</p>
+        <h3>Menu Sintetico e Chiaro</h3>
+        <p>Pizze e proposte principali sempre leggibili: trovi subito quello che vuoi, senza perdite di tempo.</p>
       </div>
       <div class="feature">
-        <div class="feature-icon">🛒</div>
-        <h3>Carrello Smart</h3>
-        <p>Aggiungi le pizze al carrello e rivedi tutto prima del pagamento, in modo semplice e veloce.</p>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">💳</div>
-        <h3>Paga Online</h3>
-        <p>Pagamento sicuro con Stripe. Scegli l'orario di ritiro e paga comodamente online.</p>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">⏰</div>
-        <h3>Ritira Quando Vuoi</h3>
-        <p>Seleziona l'orario di ritiro (18:30-23:00). Il tuo ordine sarà pronto!</p>
+        <div class="feature-icon">🔥</div>
+        <h3>Forno e Affidabilità</h3>
+        <p>Dal forno al ritiro: tempi chiari, pagamento sicuro e la certezza di un prodotto fatto come si deve.</p>
       </div>
     </div>
   </section>
