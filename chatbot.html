@@ -3,25 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Assistente AL DOGE</title>
+  <title>Guida AL DOGE V3</title>
 
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
+      font-family: 'Inter', Arial, sans-serif;
+      background: radial-gradient(circle at top, #243347 0%, #101722 58%, #0b1119 100%);
+      color: #f5efe3;
       display: flex;
       flex-direction: column;
       height: 100vh;
     }
 
     header {
-      background: #111;
-      color: white;
+      background: linear-gradient(120deg, rgba(29,39,53,0.95), rgba(52,41,32,0.88));
+      color: #fff4de;
+      border-bottom: 1px solid rgba(201, 164, 90, 0.4);
       padding: 15px;
       text-align: center;
       font-size: 20px;
-      font-weight: bold;
+      font-weight: 600;
     }
 
     #chat {
@@ -45,26 +47,28 @@
 
     .user {
       align-self: flex-end;
-      background: #d1e7ff;
+      background: #d6b06a;
+      color: #1f1a12;
     }
 
     .bot {
       align-self: flex-start;
-      background: white;
-      border: 1px solid #ddd;
+      background: linear-gradient(140deg, rgba(45,56,71,0.92), rgba(51,41,32,0.9));
+      border: 1px solid rgba(201, 164, 90, 0.38);
+      color: #f5efe3;
     }
 
     #input-area {
       display: flex;
       padding: 10px;
-      background: white;
-      border-top: 1px solid #ccc;
+      background: rgba(248, 242, 230, 0.96);
+      border-top: 1px solid rgba(201, 164, 90, 0.35);
     }
 
     #user-input {
       flex: 1;
       padding: 12px;
-      border: 1px solid #ccc;
+      border: 1px solid rgba(29, 39, 53, 0.25);
       border-radius: 8px;
       font-size: 16px;
     }
@@ -72,8 +76,8 @@
     #send-btn {
       margin-left: 10px;
       padding: 12px 18px;
-      background: #111;
-      color: white;
+      background: linear-gradient(120deg, #d6b06a, #c39a4d);
+      color: #1b1710;
       border: none;
       border-radius: 8px;
       font-size: 16px;
@@ -81,13 +85,13 @@
     }
 
     #send-btn:hover {
-      background: #333;
+      background: #d0a75d;
     }
   </style>
 </head>
 
 <body>
-  <header>Assistente AL DOGE</header>
+  <header>AL DOGE V3 · Ti aiutiamo a scegliere con gusto</header>
 
   <ul id="chat"></ul>
 
@@ -95,13 +99,15 @@
     <input
       type="text"
       id="user-input"
-      placeholder="Scrivi un messaggio... (es. “Sono a dieta, cosa mi consigli?”)"
+      placeholder="Dimmi come lo vuoi: caldo, croccante, leggero, deciso..."
     />
     <button id="send-btn">Invia</button>
   </div>
 
   <script>
     const chatContainer = document.getElementById("chat");
+
+    addMessage("Benvenuto da AL DOGE. Ti accompagno nella scelta del panino giusto: ingredienti veri, equilibrio e gusto.", "bot");
     const input = document.getElementById("user-input");
     const sendBtn = document.getElementById("send-btn");
     const AI_ENGINE_ENDPOINT = "/.netlify/functions/ai-orchestrator";

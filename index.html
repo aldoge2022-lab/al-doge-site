@@ -12,15 +12,18 @@
 
 <style>
 :root{
---gold:#d4af37;
---dark:#0b0b0b;
---soft:#1a1a1a;
---text:#f5f5f5;
+--gold:#c9a45a;
+--dark:#101722;
+--soft:#1d2735;
+--surface:#2a3442;
+--text:#f5efe3;
+--muted:#d0c3ae;
+--warm-white:#f8f2e6;
 }
 
 body{
 margin:0;
-background:var(--dark);
+background:radial-gradient(circle at top,#243347 0%,#101722 55%,#0b1119 100%);
 color:var(--text);
 font-family:'Inter',sans-serif;
 }
@@ -43,7 +46,7 @@ text-align:center;
 }
 
 .overlay{
-background:rgba(0,0,0,0.65);
+background:linear-gradient(160deg,rgba(8,12,19,.78),rgba(18,20,23,.48),rgba(59,35,16,.34));
 position:absolute;
 inset:0;
 }
@@ -56,7 +59,9 @@ z-index:2;
 .subtitle{
 margin-top:15px;
 font-size:18px;
-opacity:0.9;
+color:var(--warm-white);
+font-weight:400;
+line-height:1.5;
 }
 
 .btn{
@@ -69,8 +74,8 @@ text-decoration:none;
 }
 
 .btn-gold{
-background:var(--gold);
-color:black;
+background:linear-gradient(120deg,#d6b06a,#c39a4d);
+color:#1b1710;
 }
 
 .btn-white{
@@ -81,11 +86,11 @@ color:black;
 .panini-spotlight{
 margin:28px auto 0;
 max-width:640px;
-background:linear-gradient(140deg,rgba(10,18,33,.95),rgba(27,27,27,.92));
-border:1px solid rgba(212,175,55,.5);
+background:linear-gradient(145deg,rgba(45,56,71,.92),rgba(51,41,32,.9));
+border:1px solid rgba(201,164,90,.55);
 border-radius:20px;
 padding:20px 22px;
-box-shadow:0 16px 36px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.06) inset;
+box-shadow:0 16px 36px rgba(0,0,0,.42),0 0 0 1px rgba(255,240,214,.07) inset;
 text-align:left;
 display:flex;
 align-items:center;
@@ -102,13 +107,13 @@ box-shadow:0 22px 44px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.08) inset;
 .panini-copy h2{
 font-family:'Playfair Display',serif;
 font-size:clamp(22px,3vw,32px);
-color:#fff;
+color:#fff4de;
 margin:0 0 8px 0;
 }
 
 .panini-copy p{
 margin:0;
-color:#ececec;
+color:#f3e8d4;
 font-size:15px;
 line-height:1.45;
 }
@@ -121,14 +126,14 @@ border-radius:999px;
 padding:12px 20px;
 font-weight:600;
 white-space:nowrap;
-box-shadow:0 6px 18px rgba(212,175,55,.35);
+box-shadow:0 6px 18px rgba(195,154,77,.38);
 transition:transform .25s ease,box-shadow .25s ease,background-color .25s ease;
 }
 
 .panini-cta:hover{
 transform:translateY(-2px);
-box-shadow:0 10px 22px rgba(212,175,55,.45);
-background:#e6c157;
+box-shadow:0 10px 22px rgba(195,154,77,.5);
+background:#d6b16b;
 }
 
 .panini-cta:focus-visible{
@@ -150,8 +155,8 @@ box-shadow:0 0 20px rgba(0,0,0,0.6);
 position:fixed;
 top:20px;
 right:20px;
-background:var(--gold);
-color:black;
+background:linear-gradient(120deg,#d6b06a,#c39a4d);
+color:#1b1710;
 padding:10px 15px;
 border-radius:30px;
 font-weight:600;
@@ -198,7 +203,7 @@ Carrello <span id="cart-count">0</span>
 <div class="hero-content">
 <h1>AL DOGE</h1>
 <div class="subtitle">
-Ordina online. pizza tradizionale e panini gourmet.
+Ordina online con la qualità AL DOGE: forno acceso, ingredienti veri e un'accoglienza che si sente dal primo click.
 </div>
 
 <a href="pizze.html" class="btn btn-gold">
@@ -208,7 +213,7 @@ Ordina online. pizza tradizionale e panini gourmet.
 <section class="panini-spotlight" aria-label="Spotlight panini premium">
 <div class="panini-copy">
 <h2>Panini gourmet firmati AL DOGE</h2>
-<p>Un morso, e capisci la differenza: ingredienti selezionati e gusto che resta in mente.</p>
+<p>Pane caldo, farcitura fatta al momento e gusto pieno: la nostra firma è farti venire fame davvero.</p>
 </div>
 <a href="chatbot.html" class="panini-cta">Scopri i nostri panini</a>
 </section>
