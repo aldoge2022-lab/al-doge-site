@@ -29,7 +29,7 @@ exports.handler = async (event) => {
       payment_method_types: ["card"],
       mode: "payment",
       line_items,
-      success_url: "https://al-doge.it/success.html",
+      success_url: "https://al-doge.it/checkout.html?payment=success",
       cancel_url: "https://al-doge.it/checkout.html",
       metadata: {
         name: data.name,

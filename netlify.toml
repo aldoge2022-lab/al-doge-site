@@ -18,3 +18,15 @@
   to = "/"
   status = 301
   force = true
+
+[[redirects]]
+  from = "/home.html"
+  to = "/index.html"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/home"
+  to = "/index.html"
+  status = 301
+  force = true

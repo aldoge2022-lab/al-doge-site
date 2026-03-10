@@ -7,6 +7,7 @@
 
 <meta name="description" content="Ordina online da AL DOGE. Pizze, pagamento veloce e sicuro.">
 <meta name="keywords" content="pizzeria Majano, ordina pizza online, AL DOGE">
+<link rel="canonical" href="https://al-doge.it/index.html">
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 
@@ -158,13 +159,43 @@ font-weight:600;
 text-decoration:none;
 }
 
+
+.info-section{
+background:var(--soft);
+padding:40px 20px;
+text-align:center;
+}
+
+.info-section h2{
+font-family:'Playfair Display',serif;
+color:var(--gold);
+font-size:32px;
+margin:0 0 24px 0;
+}
+
+.features{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:18px;
+max-width:1000px;
+margin:0 auto;
+}
+
+.feature{
+background:#101010;
+padding:20px;
+border-radius:14px;
+border:1px solid rgba(212,175,55,.2);
+}
+
+.feature h3{color:var(--gold);margin:0 0 8px 0;}
+.feature p{margin:0;font-size:14px;line-height:1.4;opacity:.9;}
+
 footer{
-position:absolute;
-bottom:20px;
-width:100%;
 text-align:center;
 font-size:13px;
 opacity:0.6;
+padding:22px 0 28px;
 }
 
 @media (max-width:768px){
@@ -215,6 +246,16 @@ Ordina online. pizza tradizionale e panini gourmet.
 
 </div>
 </div>
+
+
+<section class="info-section" aria-label="Come funziona l'ordine online">
+<h2>Come funziona</h2>
+<div class="features">
+<div class="feature"><h3>Menu pizze</h3><p>Scegli dal menu tradizionale e aggiungi al carrello.</p></div>
+<div class="feature"><h3>Carrello</h3><p>Controlla quantità e totale prima del checkout.</p></div>
+<div class="feature"><h3>Pagamento</h3><p>Checkout online con Stripe su flusso ufficiale.</p></div>
+</div>
+</section>
 
 <footer>
 © 2026 AL DOGE – Via S. Daniele 3, Farla di Majano
