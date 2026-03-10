@@ -19,13 +19,16 @@ test('index homepage does not promote legacy panini custom flow', () => {
   assert.ok(indexHtml.includes('href="chatbot.html" class="panini-cta"'));
 });
 
-test('home homepage variant does not promote legacy panini custom flow', () => {
+test('home.html is a deprecated legacy page that redirects to index.html', () => {
   const homeHtml = readPage('home.html');
 
+  // home.html must immediately redirect to index.html (meta refresh)
+  assert.ok(homeHtml.includes('http-equiv="refresh"'));
+  assert.ok(homeHtml.includes('url=index.html'));
+
+  // home.html must NOT contain any active homepage content
   assert.ok(!homeHtml.includes('href="panini-custom.html"'));
-  assert.ok(!homeHtml.includes('<span>PANINI CUSTOM AI</span>'));
-  assert.ok(!homeHtml.includes('<h3>Panini AI</h3>'));
   assert.ok(!homeHtml.includes('/panini-custom'));
-  assert.ok(homeHtml.includes('Panini gourmet firmati AL DOGE'));
-  assert.ok(homeHtml.includes('href="chatbot.html" class="panini-cta"'));
+  assert.ok(!homeHtml.includes('href="chatbot.html" class="panini-cta"'));
+  assert.ok(!homeHtml.includes('Panini gourmet firmati AL DOGE'));
 });
