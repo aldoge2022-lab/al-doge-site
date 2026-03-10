@@ -20,7 +20,7 @@ test('panino custom recognises rucola, bufala, and prosciutto cotto alias', () =
   assert.equal(result.cartUpdates.length, 1);
 
   const ingredients = result.cartUpdates[0].ingredients;
-  assert.deepEqual(toSet(ingredients), new Set(['rucola', 'mozzarella di bufala', 'prosciutto']));
+  assert.deepEqual(toSet(ingredients), new Set(['rucola', 'mozzarella di bufala', 'prosciutto cotto']));
 });
 
 test('panino custom with unknown ingredients returns no cart updates', () => {

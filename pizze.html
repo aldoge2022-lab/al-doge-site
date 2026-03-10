@@ -381,17 +381,17 @@
     let currentFilter = 'all';
     let searchTerm = '';
 
-    // Carica menu
+    // Carica catalogo ufficiale
     async function loadMenu() {
       try {
-        const response = await fetch('menu.json');
+        const response = await fetch('/.netlify/functions/catalog');
         const data = await response.json();
-        allPizzas = data.pizze;
+        allPizzas = Array.isArray(data.items) ? data.items : [];
         displayPizzas();
       } catch (error) {
-        console.error('Errore caricamento menu:', error);
+        console.error('Errore caricamento catalogo:', error);
         document.getElementById('menu-container').innerHTML = 
-          '<p style="text-align: center; color: var(--muted);">Errore nel caricamento del menu</p>';
+          '<p style="text-align: center; color: var(--muted);">Errore nel caricamento del catalogo</p>';
       }
     }
 
@@ -404,14 +404,14 @@
       
       // Filtra per categoria
       if (currentFilter !== 'all') {
-        filtered = filtered.filter(p => p.categoria === currentFilter);
+        filtered = filtered.filter(p => p.category === currentFilter);
       }
       
       // Filtra per ricerca
       if (searchTerm) {
         filtered = filtered.filter(p => 
-          p.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          p.ingredienti.some(ing => ing.toLowerCase().includes(searchTerm.toLowerCase()))
+          p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          p.ingredients.some(ing => ing.toLowerCase().includes(searchTerm.toLowerCase()))
         );
       }
       
@@ -423,27 +423,27 @@
       
       noResults.style.display = 'none';
       container.innerHTML = filtered.map((pizza) => {
-        const pizzaKey = getPizzaKey(pizza.nome);
+        const pizzaKey = getPizzaKey(pizza.name);
         return `
-          <div class="pizza-card" data-pizza-id="${pizza.nome}">
+          <div class="pizza-card" data-pizza-id="${pizza.id}">
             <div class="pizza-header">
-              <h3 class="pizza-name">${pizza.nome}</h3>
-              <div class="pizza-price" id="price-${pizzaKey}">€${pizza.prezzo.toFixed(2)}</div>
+              <h3 class="pizza-name">${pizza.name}</h3>
+              <div class="pizza-price" id="price-${pizzaKey}">€${pizza.price.toFixed(2)}</div>
             </div>
-            <div class="pizza-ingredients">${pizza.ingredienti.join(', ')}</div>
-            <div class="pizza-allergeni">⚠️ Allergeni: ${pizza.allergeni.join(', ')}</div>
+            <div class="pizza-ingredients">${pizza.ingredients.join(', ')}</div>
+            <div class="pizza-allergeni">⚠️ Allergeni: ${pizza.allergens.join(', ')}</div>
             <div class="pizza-variants">
               <div class="variant-grid">
                 <div class="variant-group">
                   <label for="format-${pizzaKey}">Formato</label>
-                  <select id="format-${pizzaKey}" onchange="updatePizzaSelectionPrice('${pizza.nome}')">
+                  <select id="format-${pizzaKey}" onchange="updatePizzaSelectionPrice('${pizza.name}')">
                     <option value="normale">Normale (prezzo base)</option>
                     <option value="maxi">Maxi (+€5,00)</option>
                   </select>
                 </div>
                 <div class="variant-group">
                   <label for="dough-${pizzaKey}">Impasto</label>
-                  <select id="dough-${pizzaKey}" onchange="updatePizzaSelectionPrice('${pizza.nome}')">
+                  <select id="dough-${pizzaKey}" onchange="updatePizzaSelectionPrice('${pizza.name}')">
                     <option value="normale">Normale (+€0,00)</option>
                     <option value="farina-di-riso">Farina di riso (+€1,50)</option>
                     <option value="kamut">Kamut (+€1,50)</option>
@@ -452,27 +452,27 @@
               </div>
               <div class="variant-extras">
                 <label class="variant-extra-option">
-                  <input type="checkbox" value="verdure" data-extra-for="${pizzaKey}" onchange="updatePizzaSelectionPrice('${pizza.nome}')">
+                  <input type="checkbox" value="verdure" data-extra-for="${pizzaKey}" onchange="updatePizzaSelectionPrice('${pizza.name}')">
                   Verdure (+€1,50)
                 </label>
                 <label class="variant-extra-option">
-                  <input type="checkbox" value="affettati" data-extra-for="${pizzaKey}" onchange="updatePizzaSelectionPrice('${pizza.nome}')">
+                  <input type="checkbox" value="affettati" data-extra-for="${pizzaKey}" onchange="updatePizzaSelectionPrice('${pizza.name}')">
                   Affettati (+€2,00)
                 </label>
                 <label class="variant-extra-option">
-                  <input type="checkbox" value="burrata-bufala" data-extra-for="${pizzaKey}" onchange="updatePizzaSelectionPrice('${pizza.nome}')">
+                  <input type="checkbox" value="burrata-bufala" data-extra-for="${pizzaKey}" onchange="updatePizzaSelectionPrice('${pizza.name}')">
                   Burrata / bufala (+€3,00)
                 </label>
               </div>
-              <div class="variant-total" id="variant-total-${pizzaKey}">Prezzo selezione: €${pizza.prezzo.toFixed(2)}</div>
+              <div class="variant-total" id="variant-total-${pizzaKey}">Prezzo selezione: €${pizza.price.toFixed(2)}</div>
             </div>
             <div class="pizza-actions">
               <div class="quantity-control">
-                <button class="qty-btn" onclick="changeQuantity('${pizza.nome}', -1)">−</button>
+                <button class="qty-btn" onclick="changeQuantity('${pizza.name}', -1)">−</button>
                 <span class="qty-display" id="qty-${pizzaKey}">1</span>
-                <button class="qty-btn" onclick="changeQuantity('${pizza.nome}', 1)">+</button>
+                <button class="qty-btn" onclick="changeQuantity('${pizza.name}', 1)">+</button>
               </div>
-              <button class="add-to-cart-btn" onclick="addToCart('${pizza.nome}', event)">
+              <button class="add-to-cart-btn" onclick="addToCart('${pizza.name}', event)">
                 🛒 Aggiungi
               </button>
             </div>
@@ -480,7 +480,7 @@
         `;
       }).join('');
 
-      filtered.forEach((pizza) => updatePizzaSelectionPrice(pizza.nome));
+      filtered.forEach((pizza) => updatePizzaSelectionPrice(pizza.name));
     }
 
     // Gestione quantità
@@ -505,12 +505,12 @@
     }
 
     function updatePizzaSelectionPrice(pizzaName) {
-      const pizza = allPizzas.find((item) => item.nome === pizzaName);
+      const pizza = allPizzas.find((item) => item.name === pizzaName);
       if (!pizza || !window.PizzaPricing) return;
 
       const pizzaKey = getPizzaKey(pizzaName);
       const selectedVariant = getSelectedVariant(pizzaName);
-      const finalPrice = PizzaPricing.calculateFinalPizzaPrice(pizza.prezzo, selectedVariant);
+      const finalPrice = PizzaPricing.calculateFinalPizzaPrice(pizza.price, selectedVariant);
       const headerPrice = document.getElementById(`price-${pizzaKey}`);
       const variantPrice = document.getElementById(`variant-total-${pizzaKey}`);
 
@@ -533,13 +533,13 @@
 
     // Aggiungi al carrello
     function addToCart(pizzaName, event) {
-      const pizza = allPizzas.find(p => p.nome === pizzaName);
+      const pizza = allPizzas.find(p => p.name === pizzaName);
       if (!pizza) return;
       
       const quantity = quantities[pizzaName] || 1;
       const selectedVariant = getSelectedVariant(pizzaName);
       const variantLabels = PizzaPricing.getVariantLabels(selectedVariant);
-      const finalPrice = PizzaPricing.calculateFinalPizzaPrice(pizza.prezzo, selectedVariant);
+      const finalPrice = PizzaPricing.calculateFinalPizzaPrice(pizza.price, selectedVariant);
       const variantSignature = PizzaPricing.getVariantSignature(selectedVariant);
       
       // Recupera carrello esistente
@@ -560,14 +560,14 @@
         cart.push({
           type: 'pizza',
           name: pizzaName,
-          basePrice: pizza.prezzo,
+          basePrice: pizza.price,
           format: variantLabels.format,
           dough: variantLabels.dough,
           extras: variantLabels.extras,
           variantSignature,
           price: finalPrice,
-          ingredients: pizza.ingredienti,
-          allergeni: pizza.allergeni,
+          ingredients: pizza.ingredients,
+          allergeni: pizza.allergens,
           quantity: quantity
         });
       }
