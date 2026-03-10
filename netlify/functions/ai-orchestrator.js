@@ -1,4 +1,5 @@
 const OpenAI = require('openai');
+const catalog = require('../../data/catalog');
 const { validateResponse, FALLBACK_RESPONSE } = require('./orchestrator-v3/contract-validator');
 const { routeDomain } = require('./orchestrator-v3/domain-router');
 const { handleMenu, findPizza, parseQty } = require('./orchestrator-v3/menu-handler');
@@ -29,7 +30,17 @@ const JSON_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type'
 };
 
-const PRIMARY_RECOMMENDATION_TOKENS = ['consigli', 'qualcosa', 'leggera', 'piccante', 'vegetariana'];
+const PRIMARY_RECOMMENDATION_TOKENS = [
+  'consigli',
+  'consiglio',
+  'consigliami',
+  'qualcosa',
+  'leggera',
+  'piccante',
+  'vegetariana',
+  'non so',
+  'cosa prendere'
+];
 const SECONDARY_RECOMMENDATION_TOKENS = [...PRIMARY_RECOMMENDATION_TOKENS, 'senza', 'con'];
 const PRIMARY_RECOMMENDATION_REGEX = new RegExp(
   `\\b(${PRIMARY_RECOMMENDATION_TOKENS.join('|')})\\b`,
@@ -42,6 +53,19 @@ const RECOMMENDATION_REGEX = new RegExp(
 const PICCANTE_TOKEN = 'piccante';
 const LLM_TIMEOUT_MS = 12000;
 const DEFAULT_RECOMMENDATION_SCORE = 1;
+const RECOMMENDATION_WEIGHTS = Object.freeze({
+  explicitIngredientMatch: 6,
+  missingIngredientPenalty: -4,
+  piccantePreference: 3,
+  vegetarianaPreference: 3,
+  leggeraPreference: 2,
+  genericBase: 1,
+  typeBalanceBoost: 1,
+  sameTypePenaltyWhenGeneric: -1
+});
+const DRINK_KEYWORDS = ['bevanda', 'bibita', 'drink', 'birra', 'acqua', 'coca'];
+const SANDWICH_KEYWORDS = ['panino', 'panini', 'sandwich'];
+const PIZZA_KEYWORDS = ['pizza', 'pizze'];
 
 function jsonResponse(statusCode, payload) {
   return {
@@ -228,12 +252,13 @@ function detectRecommendationIntent(message, domain) {
   const hasPrimaryToken = PRIMARY_RECOMMENDATION_REGEX.test(normalizedMessage);
   const hasQuestionTone = normalizedMessage.includes('?');
   const hasExclusionToken = normalizedMessage.includes('senza');
+  const genericAsk = /\b(non so|cosa prendere|scegli tu|sorpresa)\b/i.test(normalizedMessage);
 
   if (!RECOMMENDATION_REGEX.test(normalizedMessage)) {
     return false;
   }
 
-  return hasPrimaryToken || hasQuestionTone || hasExclusionToken;
+  return hasPrimaryToken || hasQuestionTone || hasExclusionToken || genericAsk;
 }
 
 function normalizeCatalogIngredients(item) {
@@ -245,17 +270,87 @@ function normalizeCatalogIngredients(item) {
     .filter(Boolean);
 }
 
+function getRecommendationCatalogItems() {
+  const buckets = [
+    Array.from(CATALOG_ITEMS.values()),
+    ...(Array.isArray(catalog?.drinks) ? [catalog.drinks] : []),
+    ...(Array.isArray(catalog?.bevande) ? [catalog.bevande] : []),
+    ...(Array.isArray(catalog?.panini) ? [catalog.panini] : []),
+    ...(Array.isArray(catalog?.panino_al_doge) ? [catalog.panino_al_doge] : [])
+  ];
+
+  const deduped = new Map();
+  buckets.flat().forEach((item) => {
+    if (!item || item.active === false || !item.id) return;
+    deduped.set(String(item.id), item);
+  });
+
+  return Array.from(deduped.values());
+}
+
+function detectTypeIntent(normalizedMessage) {
+  const wantsPizza = PIZZA_KEYWORDS.some((token) => normalizedMessage.includes(token));
+  const wantsPanino = SANDWICH_KEYWORDS.some((token) => normalizedMessage.includes(token));
+  const wantsDrink = DRINK_KEYWORDS.some((token) => normalizedMessage.includes(token));
+
+  return {
+    wantsPizza,
+    wantsPanino,
+    wantsDrink,
+    asksCombo: wantsDrink && (wantsPizza || wantsPanino)
+  };
+}
+
+function normalizeType(item) {
+  const raw = String(item?.type || item?.categoria || '').toLowerCase();
+  if (raw.includes('drink') || raw.includes('bevand') || raw.includes('bibit')) return 'drink';
+  if (raw.includes('panino') || raw.includes('sandwich')) return 'panino';
+  if (raw.includes('pizza') || raw.includes('pizz')) return 'pizza';
+  return 'pizza';
+}
+
+function messageHash(value) {
+  const input = String(value || '');
+  let hash = 0;
+  for (let i = 0; i < input.length; i += 1) {
+    hash = (hash * 31 + input.charCodeAt(i)) % 997;
+  }
+  return hash;
+}
+
+function extractFreeformPreferenceIngredients(normalizedMessage) {
+  const match = normalizedMessage.match(/\bcon\s+([a-zàèéìòù'\s]{2,40})/i);
+  if (!match) {
+    return [];
+  }
+
+  return match[1]
+    .split(/\s+/)
+    .map((token) => token.trim().toLowerCase())
+    .filter((token) => token && !['e', 'o', 'una', 'un', 'di', 'da', 'per', 'la', 'il', 'lo'].includes(token));
+}
+
 function buildRecommendationResponse(message) {
   const normalizedMessage = String(message || '').toLowerCase();
   const wantsPiccante = normalizedMessage.includes(PICCANTE_TOKEN);
   const wantsVegetariana = normalizedMessage.includes('vegetar');
   const wantsLeggera = normalizedMessage.includes('legger');
+  const typeIntent = detectTypeIntent(normalizedMessage);
   const desiredIngredients = extractValidIngredients(message);
   const excludedIngredients = extractExcludedIngredients(message);
   const desiredWithoutExcluded = desiredIngredients.filter(
     (ingredient) => !excludedIngredients.includes(ingredient)
   );
-  const catalogItems = Array.from(CATALOG_ITEMS.values());
+  const explicitTextIngredients = extractFreeformPreferenceIngredients(normalizedMessage);
+  const ingredientSignals =
+    desiredWithoutExcluded.length > 0 ? desiredWithoutExcluded : explicitTextIngredients;
+  const ingredientBasedRequest = ingredientSignals.length > 0;
+  const catalogItems = getRecommendationCatalogItems();
+  const typeCount = catalogItems.reduce((acc, item) => {
+    const type = normalizeType(item);
+    acc[type] = (acc[type] || 0) + 1;
+    return acc;
+  }, {});
 
   if (catalogItems.length === 0) {
     return null;
@@ -263,8 +358,13 @@ function buildRecommendationResponse(message) {
 
   const scored = catalogItems.map((item) => {
     const ingredients = normalizeCatalogIngredients(item);
-    const tags = Array.isArray(item?.tags) ? item.tags.map((tag) => String(tag).toLowerCase()) : [];
-    const ingredientMatches = desiredWithoutExcluded.filter((ingredient) => ingredients.includes(ingredient));
+    const tags = Array.isArray(item?.tags)
+      ? item.tags.map((tag) => String(tag).toLowerCase())
+      : Array.isArray(item?.tag)
+        ? item.tag.map((tag) => String(tag).toLowerCase())
+        : [];
+    const itemType = normalizeType(item);
+    const ingredientMatches = ingredientSignals.filter((ingredient) => ingredients.includes(ingredient));
     const excludedMatches = excludedIngredients.filter((ingredient) => ingredients.includes(ingredient));
 
     if (excludedMatches.length > 0) {
@@ -276,37 +376,67 @@ function buildRecommendationResponse(message) {
       };
     }
 
-    let score = ingredientMatches.length * 2;
+    let score = 0;
     const reasonParts = [];
 
+    if (typeIntent.wantsPizza && itemType === 'pizza') {
+      score += 2;
+      reasonParts.push('In linea con richiesta pizza');
+    }
+
+    if (typeIntent.wantsPanino && itemType === 'panino') {
+      score += 2;
+      reasonParts.push('In linea con richiesta panino');
+    }
+
+    if (typeIntent.wantsDrink && itemType === 'drink') {
+      score += 2;
+      reasonParts.push('In linea con richiesta bibita');
+    }
+
+    if (!typeIntent.wantsPizza && !typeIntent.wantsPanino && !typeIntent.wantsDrink) {
+      const bucketSize = typeCount[itemType] || 1;
+      score += RECOMMENDATION_WEIGHTS.typeBalanceBoost / bucketSize;
+      if (itemType === 'pizza') {
+        score += RECOMMENDATION_WEIGHTS.sameTypePenaltyWhenGeneric;
+      }
+    }
+
     if (ingredientMatches.length > 0) {
+      score += ingredientMatches.length * RECOMMENDATION_WEIGHTS.explicitIngredientMatch;
       reasonParts.push(`Contiene ${ingredientMatches.join(', ')}`);
+    } else if (ingredientBasedRequest) {
+      score += RECOMMENDATION_WEIGHTS.missingIngredientPenalty;
+      reasonParts.push('Manca ingrediente richiesto');
     }
 
     const hasPiccante =
       tags.some((tag) => tag.includes(PICCANTE_TOKEN)) ||
       ingredients.some((id) => id.includes(PICCANTE_TOKEN));
     if (wantsPiccante && hasPiccante) {
-      score += 3;
+      score += RECOMMENDATION_WEIGHTS.piccantePreference;
       reasonParts.push('Nota piccante');
     }
 
-    const hasVegetariana = tags.some((tag) => tag.includes('vegetar'));
+    const hasVegetariana =
+      tags.some((tag) => tag.includes('vegetar')) ||
+      (ingredients.length > 0 &&
+        !ingredients.some((ingredient) =>
+          /(salame|prosciutto|speck|tonno|salsiccia)/i.test(ingredient)
+        ));
     if (wantsVegetariana && hasVegetariana) {
-      score += 3;
+      score += RECOMMENDATION_WEIGHTS.vegetarianaPreference;
       reasonParts.push('Opzione vegetariana');
     }
 
     if (wantsLeggera && ingredients.length <= 3) {
-      score += 2;
+      score += RECOMMENDATION_WEIGHTS.leggeraPreference;
       reasonParts.push('Leggera con pochi ingredienti');
     }
 
-    if (
-      score === 0 &&
-      (desiredWithoutExcluded.length === 0 || wantsPiccante || wantsVegetariana || wantsLeggera)
-    ) {
-      score = DEFAULT_RECOMMENDATION_SCORE;
+    if (score <= 0 && !ingredientBasedRequest) {
+      score = DEFAULT_RECOMMENDATION_SCORE * RECOMMENDATION_WEIGHTS.genericBase;
+      reasonParts.push('Buon punto di partenza');
     }
 
     const price = Number(item?.price_cents ?? item?.price ?? item?.base_price_cents ?? 0) || 0;
@@ -314,23 +444,85 @@ function buildRecommendationResponse(message) {
     return {
       item,
       score,
+      itemType,
       reason: reasonParts.join('. ') || 'Scelta dal menu',
       price
     };
   });
 
   const scoredWithoutExcluded = scored.filter((entry) => Number.isFinite(entry.score));
+  const hasIngredientMatch = scoredWithoutExcluded.some((entry) => /Contiene /.test(entry.reason));
+
+  if (ingredientBasedRequest && !hasIngredientMatch) {
+    const ingredientList = ingredientSignals.join(', ');
+    const sortedByPrice = scoredWithoutExcluded.slice().sort((a, b) => a.price - b.price);
+    const fallbackEntries = [];
+    const fallbackPizza = sortedByPrice.find((entry) => normalizeType(entry.item) === 'pizza');
+    const fallbackDrink = sortedByPrice.find((entry) => normalizeType(entry.item) === 'drink');
+    if (fallbackPizza) fallbackEntries.push(fallbackPizza);
+    if (fallbackDrink) fallbackEntries.push(fallbackDrink);
+
+    sortedByPrice.forEach((entry) => {
+      if (fallbackEntries.length >= 2) return;
+      if (!fallbackEntries.some((selected) => selected.item.id === entry.item.id)) {
+        fallbackEntries.push(entry);
+      }
+    });
+
+    const genericTop = fallbackEntries.map(({ item }) => ({
+      id: String(item.id),
+      name: String(item.name || item.id),
+      reason: 'Alternativa vicina in catalogo'
+    }));
+
+    return {
+      ok: true,
+      mode: 'recommendation',
+      cartUpdates: [],
+      suggestions: genericTop,
+      reply:
+        genericTop.length > 0
+          ? `Non vedo opzioni con ${ingredientList} nel catalogo attuale. Posso proporti ${genericTop
+              .map((item) => item.name)
+              .join(' oppure ')} come alternative valide.`
+          : `Non vedo opzioni con ${ingredientList} nel catalogo attuale.`,
+      type: 'pizza'
+    };
+  }
+
   const scoredWithPositive = scoredWithoutExcluded.filter((entry) => entry.score > 0);
   const candidates = scoredWithPositive.length > 0 ? scoredWithPositive : scoredWithoutExcluded;
 
-  const top = candidates
+  const messageSeed = messageHash(normalizedMessage);
+  const sorted = candidates
     .sort((a, b) => {
       if (b.score !== a.score) {
         return b.score - a.score;
       }
+      const diversityA = (messageSeed + messageHash(a.item?.id)) % 7;
+      const diversityB = (messageSeed + messageHash(b.item?.id)) % 7;
+      if (diversityA !== diversityB) {
+        return diversityB - diversityA;
+      }
       return a.price - b.price;
-    })
-    .slice(0, 3);
+    });
+
+  const top = [];
+  if (typeIntent.asksCombo) {
+    const bestPizzaOrPanino = sorted.find((entry) =>
+      typeIntent.wantsPanino ? entry.itemType === 'panino' : entry.itemType === 'pizza'
+    );
+    const bestDrink = sorted.find((entry) => entry.itemType === 'drink');
+    if (bestPizzaOrPanino) top.push(bestPizzaOrPanino);
+    if (bestDrink) top.push(bestDrink);
+  }
+
+  sorted.forEach((entry) => {
+    if (top.length >= 3) return;
+    if (!top.some((selected) => selected.item.id === entry.item.id)) {
+      top.push(entry);
+    }
+  });
 
   if (top.length === 0) {
     return null;
@@ -343,9 +535,7 @@ function buildRecommendationResponse(message) {
   }));
 
   const names = suggestions.map((suggestion) => suggestion.name);
-  const replyPrompt =
-    suggestions.length > 1 ? 'Vuoi aggiungerle al carrello?' : 'Vuoi aggiungerla al carrello?';
-  const reply = `Ti consiglio ${names.join(' oppure ')}. ${replyPrompt}`;
+  const reply = `Ti consiglio ${names.join(' oppure ')}. Dimmi quale vuoi aggiungere al carrello.`;
 
   return {
     ok: true,
