@@ -39,7 +39,9 @@ const PRIMARY_RECOMMENDATION_TOKENS = [
   'piccante',
   'vegetariana',
   'non so',
-  'cosa prendere'
+  'cosa prendere',
+  'scegli tu',
+  'sorpresa'
 ];
 const SECONDARY_RECOMMENDATION_TOKENS = [...PRIMARY_RECOMMENDATION_TOKENS, 'senza', 'con'];
 const PRIMARY_RECOMMENDATION_REGEX = new RegExp(
