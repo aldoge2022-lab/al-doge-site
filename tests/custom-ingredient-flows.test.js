@@ -9,7 +9,7 @@ function toSet(values) {
   return new Set(Array.isArray(values) ? values : []);
 }
 
-test('panino custom recognises rucola, bufala, and prosciutto cotto alias', () => {
+test('panino custom recognises rucola, bufala, and prosciutto cotto alias resolves to food-core id', () => {
   const result = handlePanino({
     message: 'voglio un panino con rucola bufala e prosciutto cotto',
     intent: 'build'
@@ -20,7 +20,51 @@ test('panino custom recognises rucola, bufala, and prosciutto cotto alias', () =
   assert.equal(result.cartUpdates.length, 1);
 
   const ingredients = result.cartUpdates[0].ingredients;
+  // 'prosciutto cotto' alias resolves to food-core id 'prosciutto'
   assert.deepEqual(toSet(ingredients), new Set(['rucola', 'mozzarella di bufala', 'prosciutto']));
+});
+
+test('panino with generic prosciutto is recognised even when catalog only has variants', () => {
+  const result = handlePanino({
+    message: 'voglio un panino con prosciutto',
+    intent: 'build'
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.type, 'panino');
+  assert.equal(result.cartUpdates.length, 1);
+
+  const ingredients = result.cartUpdates[0].ingredients;
+  assert.ok(ingredients.includes('prosciutto'), 'food-core id prosciutto must be present');
+});
+
+test('panino supplement price uses food-core ingredient id so prosciutto is not silently undercharged', () => {
+  const result = handlePanino({
+    message: 'panino con prosciutto cotto',
+    intent: 'build'
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.cartUpdates.length, 1);
+
+  const item = result.cartUpdates[0];
+  // prosciutto supplement is 0.5 per food-core.json, base is 5
+  assert.deepEqual(item.ingredients, ['prosciutto']);
+  assert.equal(item.price, 5.5);
+});
+
+test('no silent undercharge: prosciutto cotto alias and generic prosciutto yield same food-core price', () => {
+  const resultCotto = handlePanino({ message: 'panino con prosciutto cotto', intent: 'build' });
+  const resultGeneric = handlePanino({ message: 'panino con prosciutto', intent: 'build' });
+
+  assert.equal(resultCotto.ok, true);
+  assert.equal(resultGeneric.ok, true);
+
+  assert.deepEqual(toSet(resultCotto.cartUpdates[0].ingredients), new Set(['prosciutto']));
+  assert.deepEqual(toSet(resultGeneric.cartUpdates[0].ingredients), new Set(['prosciutto']));
+
+  assert.ok(resultCotto.cartUpdates[0].price > 5, 'price must include supplement');
+  assert.equal(resultCotto.cartUpdates[0].price, resultGeneric.cartUpdates[0].price);
 });
 
 test('panino custom with unknown ingredients returns no cart updates', () => {
