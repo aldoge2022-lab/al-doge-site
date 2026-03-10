@@ -81,6 +81,26 @@ test('voglio qualcosa di vegetariano -> vegetarian options surfaced', async () =
   assertSuggestionsInCatalog(body);
 });
 
+test('scegli tu -> generic recommendation mode, not exact-name fallback', async () => {
+  const body = await ask('scegli tu');
+
+  assert.equal(body.ok, true);
+  assert.equal(body.mode, 'recommendation');
+  assert.equal(Array.isArray(body.suggestions) && body.suggestions.length > 0, true);
+  assert.doesNotMatch(body.reply, /nome esatto della pizza/i);
+  assertSuggestionsInCatalog(body);
+});
+
+test('fammi una sorpresa -> generic recommendation mode, not exact-name fallback', async () => {
+  const body = await ask('fammi una sorpresa');
+
+  assert.equal(body.ok, true);
+  assert.equal(body.mode, 'recommendation');
+  assert.equal(Array.isArray(body.suggestions) && body.suggestions.length > 0, true);
+  assert.doesNotMatch(body.reply, /nome esatto della pizza/i);
+  assertSuggestionsInCatalog(body);
+});
+
 test('fammi un consiglio per una pizza e una bibita -> mixed suggestion includes drink', async () => {
   const body = await ask('fammi un consiglio per una pizza e una bibita');
 
