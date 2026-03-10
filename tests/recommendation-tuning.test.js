@@ -115,3 +115,24 @@ test('fammi un consiglio per una pizza e una bibita -> mixed suggestion includes
   assert.equal(hasPizza, true);
   assertSuggestionsInCatalog(body);
 });
+
+test('consigliami una pizza con una bibita -> does not enter false ingredient path', async () => {
+  const body = await ask('consigliami una pizza con una bibita');
+
+  assert.equal(body.ok, true);
+  assert.equal(body.mode, 'recommendation');
+  assert.doesNotMatch(body.reply, /non vedo opzioni con bibita/i);
+  assert.equal(Array.isArray(body.suggestions) && body.suggestions.length > 0, true);
+  assertSuggestionsInCatalog(body);
+});
+
+test('consigliami qualcosa con birra -> does not enter false ingredient path', async () => {
+  const body = await ask('consigliami qualcosa con birra');
+
+  assert.equal(body.ok, true);
+  assert.equal(body.mode, 'recommendation');
+  assert.doesNotMatch(body.reply, /non vedo opzioni con birra/i);
+  assert.equal(Array.isArray(body.suggestions) && body.suggestions.length > 0, true);
+  assertSuggestionsInCatalog(body);
+});
+

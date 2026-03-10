@@ -320,6 +320,12 @@ function messageHash(value) {
   return hash;
 }
 
+const TYPE_CUE_TOKENS = new Set([
+  ...DRINK_KEYWORDS,
+  ...PIZZA_KEYWORDS,
+  ...SANDWICH_KEYWORDS
+]);
+
 function extractFreeformPreferenceIngredients(normalizedMessage) {
   const match = normalizedMessage.match(/\bcon\s+([a-zàèéìòù'\s]{2,40})/i);
   if (!match) {
@@ -329,7 +335,12 @@ function extractFreeformPreferenceIngredients(normalizedMessage) {
   return match[1]
     .split(/\s+/)
     .map((token) => token.trim().toLowerCase())
-    .filter((token) => token && !['e', 'o', 'una', 'un', 'di', 'da', 'per', 'la', 'il', 'lo'].includes(token));
+    .filter(
+      (token) =>
+        token &&
+        !['e', 'o', 'una', 'un', 'di', 'da', 'per', 'la', 'il', 'lo'].includes(token) &&
+        !TYPE_CUE_TOKENS.has(token)
+    );
 }
 
 function buildRecommendationResponse(message) {
