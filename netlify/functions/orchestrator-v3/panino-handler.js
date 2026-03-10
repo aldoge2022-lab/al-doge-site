@@ -1,6 +1,5 @@
-const { calculateSupplements } = require('../../../core/menu/food-engine');
+const { calculateSupplements, getIngredients } = require('../../../core/menu/food-engine');
 const { parseCustomIngredients } = require('./services/customIngredientParser');
-const { VALID_INGREDIENTS } = require('./schemas/orderSchemas');
 
 const BASE_PRICE = Number(process.env.PANINO_BASE_PRICE || 5);
 
@@ -16,18 +15,30 @@ function parseQty(message) {
 }
 
 function getPaninoWhitelist() {
-  return Array.from(VALID_INGREDIENTS);
+  return getIngredients().filter((ingredient) => ingredient?.paninoAllowed);
 }
 
 function extractIngredients(message) {
   const whitelist = getPaninoWhitelist();
-  const parsed = parseCustomIngredients({
-    message,
-    knownIngredients: whitelist,
-    allowedIngredients: whitelist
+  const canonicalToIngredientId = new Map();
+  const knownIngredients = [];
+
+  whitelist.forEach((ingredient) => {
+    const canonical = String(ingredient?.name || ingredient?.id || '').trim();
+    if (!canonical || !ingredient?.id) return;
+    knownIngredients.push(canonical);
+    canonicalToIngredientId.set(canonical, ingredient.id);
   });
 
-  return parsed.recognizedIngredients.filter(Boolean);
+  const parsed = parseCustomIngredients({
+    message,
+    knownIngredients,
+    allowedIngredients: knownIngredients
+  });
+
+  return parsed.recognizedIngredients
+    .map((canonical) => canonicalToIngredientId.get(canonical))
+    .filter(Boolean);
 }
 
 function buildPaninoItem(ingredients, qty) {
