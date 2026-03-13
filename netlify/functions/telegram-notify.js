@@ -9,7 +9,15 @@ exports.handler = async function (event, context) {
       };
     }
 
-    const data = JSON.parse(event.body);
+    let data;
+    try {
+      data = JSON.parse(event.body || "{}");
+    } catch (parseError) {
+      return {
+        statusCode: 400,
+        body: "Invalid JSON payload",
+      };
+    }
 
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
     const chatId = process.env.TELEGRAM_CHAT_ID;
@@ -21,17 +29,52 @@ exports.handler = async function (event, context) {
       };
     }
 
+    const isTablePayment = data.type === "table_payment" || Number.isFinite(Number(data.tableNumber));
+    const tableNumber = Number.isFinite(Number(data.tableNumber)) ? Number(data.tableNumber) : null;
+
+    const totalAmount = Number.parseFloat(data.total);
+    if (!Number.isFinite(totalAmount) || totalAmount <= 0) {
+      return {
+        statusCode: 400,
+        body: "Invalid total amount",
+      };
+    }
+
+    const items = Array.isArray(data.items)
+      ? data.items.filter((item) => item && typeof item.name === "string")
+      : [];
+
+    const fallbackItems = isTablePayment
+      ? [{ qty: 1, name: `Pagamento tavolo ${tableNumber ?? "-"}` }]
+      : [];
+
+    const finalItems = items.length
+      ? items.map((i) => ({ qty: Number.parseInt(i.qty, 10) || 1, name: i.name }))
+      : fallbackItems;
+
+    const name = typeof data.name === "string" && data.name.trim()
+      ? data.name.trim()
+      : (isTablePayment ? `Tavolo ${tableNumber ?? "-"}` : "Cliente non indicato");
+    const phone = typeof data.phone === "string" && data.phone.trim() ? data.phone.trim() : "-";
+    const address = typeof data.address === "string" && data.address.trim()
+      ? data.address.trim()
+      : (isTablePayment ? `Tavolo ${tableNumber ?? "-"}` : "-");
+
+    const tableLine = isTablePayment ? `\n🪑 *Tavolo:* ${tableNumber ?? "-"}` : "";
+    const statusLine = data.status ? `\n📌 *Stato:* ${String(data.status)}` : "";
+    const orderIdLine = data.orderId ? `\n🧾 *ID:* ${String(data.orderId)}` : "";
+
     const message = `
 📦 *Nuovo ordine AL DOGE!*
 
-👤 *Nome:* ${data.name}
-📞 *Telefono:* ${data.phone}
-📍 *Indirizzo:* ${data.address}
+👤 *Nome:* ${name}
+📞 *Telefono:* ${phone}
+📍 *Indirizzo:* ${address}${tableLine}${statusLine}${orderIdLine}
 
 🧾 *Ordine:*
-${data.items.map((i) => `- ${i.qty}× ${i.name}`).join("\n")}
+${finalItems.map((i) => `- ${i.qty}× ${i.name}`).join("\n")}
 
-💶 *Totale:* €${data.total}
+💶 *Totale:* €${totalAmount.toFixed(2)}
     `;
 
     const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;

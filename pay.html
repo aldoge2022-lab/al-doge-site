@@ -314,6 +314,25 @@
       return parseInt(table);
     }
 
+    // Ottieni importo iniziale da URL (amount, fallback total/price)
+    function getInitialAmount() {
+      const params = new URLSearchParams(window.location.search);
+      const rawAmount = params.get('amount') ?? params.get('total') ?? params.get('price');
+
+      if (rawAmount === null) {
+        return null;
+      }
+
+      const normalizedAmount = rawAmount.trim().replace(',', '.');
+      const amount = parseFloat(normalizedAmount);
+
+      if (!Number.isFinite(amount) || amount <= 0) {
+        return null;
+      }
+
+      return amount;
+    }
+
     function selectAmount(amount, event) {
       selectedAmount = amount;
       
@@ -366,9 +385,19 @@
           orderId: Date.now(),
           timestamp: new Date().toISOString(),
           tableNumber: tableNumber,
-          total: selectedAmount,
+          total: selectedAmount.toFixed(2),
           status: 'paid',
-          type: 'table_payment'
+          type: 'table_payment',
+          name: `Tavolo ${tableNumber}`,
+          phone: '-',
+          address: `Tavolo ${tableNumber}`,
+          items: [
+            {
+              name: `Pagamento tavolo ${tableNumber}`,
+              qty: 1,
+              price: selectedAmount
+            }
+          ]
         };
 
         // Salva ordine
@@ -377,11 +406,15 @@
         localStorage.setItem('aldoge_orders', JSON.stringify(orders));
 
         // Invia notifica Telegram
-        await fetch('/.netlify/functions/telegram-notify', {
+        const notifyResponse = await fetch('/.netlify/functions/telegram-notify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(order)
         });
+
+        if (!notifyResponse.ok) {
+          throw new Error('Errore invio notifica Telegram');
+        }
 
         // Mostra successo
         document.getElementById('paid-amount').textContent = selectedAmount.toFixed(2);
@@ -400,6 +433,23 @@
     tableNumber = getTableNumber();
     if (tableNumber) {
       document.getElementById('table-number').textContent = tableNumber;
+
+      const initialAmount = getInitialAmount();
+      if (initialAmount !== null) {
+        const matchingQuickButton = Array.from(document.querySelectorAll('.amount-btn')).find(btn => {
+          const buttonValue = parseFloat(
+            (btn.textContent || '').replace(/[^\d.,-]/g, '').replace(',', '.')
+          );
+          return Number.isFinite(buttonValue) && buttonValue === initialAmount;
+        });
+
+        if (matchingQuickButton) {
+          selectAmount(initialAmount, { target: matchingQuickButton });
+        } else {
+          document.getElementById('custom-amount').value = initialAmount.toFixed(2);
+          onAmountChange();
+        }
+      }
     } else {
       document.getElementById('payment-form').innerHTML = `
         <div style="padding: 40px; text-align: center;">
