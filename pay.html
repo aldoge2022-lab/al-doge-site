@@ -482,33 +482,12 @@
         .replace(/'/g, '&#39;');
     }
 
-    function parseItemsFromUrl() {
-      const params = new URLSearchParams(window.location.search);
-      const rawItems = params.get('items');
-
-      if (!rawItems) {
+    function normalizeConsumptionItems(rawItems) {
+      if (!Array.isArray(rawItems)) {
         return [];
       }
 
-      let decoded = rawItems;
-      try {
-        decoded = decodeURIComponent(rawItems);
-      } catch (error) {
-        decoded = rawItems;
-      }
-
-      let parsed = null;
-      try {
-        parsed = JSON.parse(decoded);
-      } catch (error) {
-        parsed = null;
-      }
-
-      if (!Array.isArray(parsed)) {
-        return [];
-      }
-
-      return parsed
+      return rawItems
         .map((item) => {
           const name = item && typeof item.name === 'string' ? item.name.trim() : '';
           if (!name) {
@@ -531,6 +510,31 @@
           };
         })
         .filter(Boolean);
+    }
+
+    function parseItemsFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const rawItems = params.get('items');
+
+      if (!rawItems) {
+        return [];
+      }
+
+      let decoded = rawItems;
+      try {
+        decoded = decodeURIComponent(rawItems);
+      } catch (error) {
+        decoded = rawItems;
+      }
+
+      let parsed = null;
+      try {
+        parsed = JSON.parse(decoded);
+      } catch (error) {
+        parsed = null;
+      }
+
+      return normalizeConsumptionItems(parsed);
     }
 
     function getItemsSubtotal() {
@@ -573,6 +577,55 @@
       }
 
       return amount;
+    }
+
+    async function getSavedTableBill(table) {
+      try {
+        const response = await fetch(`/.netlify/functions/table-bill?table=${table}`);
+        if (!response.ok) {
+          return null;
+        }
+
+        const data = await response.json();
+        if (!data || !data.ok || !data.bill) {
+          return null;
+        }
+
+        return data.bill;
+      } catch (error) {
+        console.warn('Conto tavolo non recuperabile, uso fallback URL.', error);
+        return null;
+      }
+    }
+
+    function applyAmountToUi(amount) {
+      const normalized = Number.parseFloat(amount);
+      if (!Number.isFinite(normalized) || normalized <= 0) {
+        refreshPaymentUI();
+        return;
+      }
+
+      selectedAmount = normalized;
+      const input = document.getElementById('custom-amount');
+      input.value = normalized.toFixed(2);
+
+      let selectedQuickBtn = null;
+      document.querySelectorAll('.amount-btn').forEach(btn => {
+        const buttonValue = Number.parseFloat(
+          (btn.textContent || '').replace(/[^\d.,-]/g, '').replace(',', '.')
+        );
+        const isMatch = Number.isFinite(buttonValue) && buttonValue === normalized;
+        btn.classList.toggle('selected', isMatch);
+        if (isMatch) {
+          selectedQuickBtn = btn;
+        }
+      });
+
+      if (!selectedQuickBtn) {
+        document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('selected'));
+      }
+
+      refreshPaymentUI();
     }
 
     function selectAmount(amount, event) {
@@ -756,37 +809,10 @@
       }
     }
 
-    // Inizializza
-    tableNumber = getTableNumber();
-    if (tableNumber) {
-      document.getElementById('table-number').textContent = tableNumber;
-      consumptionItems = parseItemsFromUrl();
-
-      const initialAmount = getInitialAmount();
-      if (initialAmount !== null) {
-        const matchingQuickButton = Array.from(document.querySelectorAll('.amount-btn')).find(btn => {
-          const buttonValue = parseFloat(
-            (btn.textContent || '').replace(/[^\d.,-]/g, '').replace(',', '.')
-          );
-          return Number.isFinite(buttonValue) && buttonValue === initialAmount;
-        });
-
-        if (matchingQuickButton) {
-          selectAmount(initialAmount, { target: matchingQuickButton });
-        } else {
-          document.getElementById('custom-amount').value = initialAmount.toFixed(2);
-          onAmountChange();
-        }
-      } else {
-        const subtotalFromItems = getItemsSubtotal();
-        if (subtotalFromItems > 0) {
-          selectedAmount = subtotalFromItems;
-          document.getElementById('custom-amount').value = subtotalFromItems.toFixed(2);
-        }
-        refreshPaymentUI();
-      }
-    } else {
-      document.getElementById('payment-form').innerHTML = `
+    async function initPage() {
+      tableNumber = getTableNumber();
+      if (!tableNumber) {
+        document.getElementById('payment-form').innerHTML = `
         <div style="padding: 40px; text-align: center;">
           <div style="font-size: 60px; margin-bottom: 20px;">⚠️</div>
           <div style="color: var(--muted); font-size: 18px;">
@@ -795,7 +821,54 @@
           </div>
         </div>
       `;
+        return;
+      }
+
+      document.getElementById('table-number').textContent = tableNumber;
+
+      consumptionItems = parseItemsFromUrl();
+      const initialAmount = getInitialAmount();
+      if (initialAmount !== null) {
+        applyAmountToUi(initialAmount);
+      } else {
+        const subtotalFromItems = getItemsSubtotal();
+        if (subtotalFromItems > 0) {
+          applyAmountToUi(subtotalFromItems);
+        } else {
+          refreshPaymentUI();
+        }
+      }
+
+      const savedBill = await getSavedTableBill(tableNumber);
+      if (!savedBill) {
+        return;
+      }
+
+      const normalizedSavedItems = normalizeConsumptionItems(savedBill.items);
+      if (normalizedSavedItems.length) {
+        consumptionItems = normalizedSavedItems;
+      }
+
+      if (savedBill.paymentMode === 'split' || savedBill.paymentMode === 'single') {
+        setPaymentMode(savedBill.paymentMode);
+      }
+
+      if (savedBill.paymentMode === 'split' && Number.isFinite(Number(savedBill.splitCount))) {
+        splitCount = Math.max(2, Math.min(20, Number.parseInt(savedBill.splitCount, 10) || 2));
+        document.getElementById('split-count').value = splitCount;
+      }
+
+      const savedTotal = Number.parseFloat(savedBill.total);
+      if (Number.isFinite(savedTotal) && savedTotal > 0) {
+        applyAmountToUi(savedTotal);
+      } else if (normalizedSavedItems.length) {
+        applyAmountToUi(getItemsSubtotal());
+      } else {
+        refreshPaymentUI();
+      }
     }
+
+    initPage();
   </script>
 </body>
 </html>

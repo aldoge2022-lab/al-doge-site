@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestione Tavoli - AL DOGE</title>
+  <style>
+    :root {
+      --gold: #d4af37;
+      --dark: #0b0b0b;
+      --soft: #1a1a1a;
+      --text: #f5f5f5;
+      --muted: #b3b3b3;
+      --danger: #ff6b6b;
+      --ok: #75d07b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--soft);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 28px;
+      color: var(--gold);
+      margin-bottom: 16px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .control {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    select,
+    input {
+      width: 100%;
+      background: #111;
+      color: var(--text);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 14px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    button {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--gold);
+      color: #111;
+    }
+
+    .btn-dark {
+      background: #202020;
+      color: var(--text);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: #111;
+      padding: 8px 10px;
+      font-size: 12px;
+    }
+
+    .items-head,
+    .item-row {
+      display: grid;
+      grid-template-columns: 2.2fr 0.9fr 1.1fr 1.1fr 0.8fr;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .items-head {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .item-row {
+      margin-bottom: 8px;
+    }
+
+    .totals {
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(212, 175, 55, 0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .total-value {
+      color: var(--gold);
+      font-weight: 700;
+      font-size: 22px;
+    }
+
+    .status {
+      margin-top: 12px;
+      font-size: 14px;
+      color: var(--muted);
+      min-height: 20px;
+    }
+
+    .status.ok {
+      color: var(--ok);
+    }
+
+    .status.error {
+      color: var(--danger);
+    }
+
+    .quick-link {
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .quick-link a {
+      color: var(--gold);
+    }
+
+    @media (max-width: 820px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .items-head {
+        display: none;
+      }
+
+      .item-row {
+        grid-template-columns: 1fr;
+        gap: 6px;
+        padding: 10px;
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        border-radius: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Pannello Operativo Tavoli</h1>
+
+    <div class="grid">
+      <div class="control">
+        <label for="table">Tavolo</label>
+        <select id="table"></select>
+      </div>
+      <div class="control">
+        <label for="payment-mode">Modalità pagamento predefinita</label>
+        <select id="payment-mode">
+          <option value="single">Pagamento unico</option>
+          <option value="split">Pagamento diviso</option>
+        </select>
+      </div>
+      <div class="control">
+        <label for="split-count">Numero quote (se diviso)</label>
+        <input id="split-count" type="number" min="2" max="20" value="2">
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-dark" id="load-btn">Carica conto tavolo</button>
+      <button class="btn-dark" id="add-item-btn">Aggiungi riga</button>
+      <button class="btn-primary" id="save-btn">Salva conto tavolo</button>
+    </div>
+
+    <div class="items-head">
+      <div>Articolo</div>
+      <div>Qtà</div>
+      <div>Prezzo unitario €</div>
+      <div>Subtotale €</div>
+      <div>Azioni</div>
+    </div>
+    <div id="items-container"></div>
+
+    <div class="totals">
+      <div>Totale conto tavolo</div>
+      <div class="total-value" id="total-value">€0.00</div>
+    </div>
+
+    <p class="status" id="status"></p>
+    <p class="quick-link" id="quick-link"></p>
+  </div>
+
+  <script>
+    const TABLE_MIN = 1;
+    const TABLE_MAX = 10;
+
+    const tableSelect = document.getElementById('table');
+    const paymentModeSelect = document.getElementById('payment-mode');
+    const splitCountInput = document.getElementById('split-count');
+    const itemsContainer = document.getElementById('items-container');
+    const totalValueEl = document.getElementById('total-value');
+    const statusEl = document.getElementById('status');
+    const quickLinkEl = document.getElementById('quick-link');
+
+    function showStatus(text, type) {
+      statusEl.textContent = text;
+      statusEl.className = 'status';
+      if (type) {
+        statusEl.classList.add(type);
+      }
+    }
+
+    function formatEuro(value) {
+      return `€${Number(value).toFixed(2)}`;
+    }
+
+    function createTableOptions() {
+      for (let table = TABLE_MIN; table <= TABLE_MAX; table += 1) {
+        const option = document.createElement('option');
+        option.value = String(table);
+        option.textContent = `Tavolo ${table}`;
+        tableSelect.appendChild(option);
+      }
+    }
+
+    function createItemRow(item = {}) {
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.innerHTML = `
+        <input type="text" data-field="name" placeholder="Nome articolo" value="${escapeHtml(item.name || '')}">
+        <input type="number" data-field="qty" min="1" step="1" value="${Number.isFinite(item.qty) ? item.qty : 1}">
+        <input type="number" data-field="price" min="0" step="0.01" placeholder="0.00" value="${Number.isFinite(item.price) ? item.price : ''}">
+        <input type="number" data-field="subtotal" min="0" step="0.01" placeholder="0.00" value="${Number.isFinite(item.subtotal) ? item.subtotal : ''}">
+        <button class="btn-danger" type="button">Rimuovi</button>
+      `;
+
+      row.querySelector('.btn-danger').addEventListener('click', () => {
+        row.remove();
+        updateTotal();
+      });
+
+      row.querySelectorAll('input').forEach((input) => {
+        input.addEventListener('input', updateTotal);
+      });
+
+      return row;
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function readRowItem(row) {
+      const name = row.querySelector('[data-field="name"]').value.trim();
+      const qty = Math.max(1, parseInt(row.querySelector('[data-field="qty"]').value, 10) || 1);
+      const priceRaw = parseFloat(row.querySelector('[data-field="price"]').value);
+      const subtotalRaw = parseFloat(row.querySelector('[data-field="subtotal"]').value);
+      const price = Number.isFinite(priceRaw) ? priceRaw : null;
+      const subtotal = Number.isFinite(subtotalRaw)
+        ? subtotalRaw
+        : (Number.isFinite(priceRaw) ? priceRaw * qty : null);
+
+      if (!name) {
+        return null;
+      }
+
+      return {
+        name,
+        qty,
+        price,
+        subtotal
+      };
+    }
+
+    function collectItems() {
+      return Array.from(itemsContainer.querySelectorAll('.item-row'))
+        .map(readRowItem)
+        .filter(Boolean);
+    }
+
+    function updateTotal() {
+      const items = collectItems();
+      const total = items.reduce((sum, item) => {
+        return sum + (Number.isFinite(item.subtotal) ? item.subtotal : 0);
+      }, 0);
+      totalValueEl.textContent = formatEuro(total);
+      return total;
+    }
+
+    function setQuickLink(table) {
+      quickLinkEl.innerHTML = `Anteprima cliente: <a href="/pay.html?table=${table}" target="_blank">/pay.html?table=${table}</a>`;
+    }
+
+    async function loadTableBill() {
+      const table = parseInt(tableSelect.value, 10);
+      showStatus('Caricamento conto tavolo...', '');
+
+      try {
+        const response = await fetch(`/.netlify/functions/table-bill?table=${table}`);
+        const data = await response.json();
+
+        if (!response.ok || !data.ok) {
+          throw new Error(data.error || 'LOAD_ERROR');
+        }
+
+        itemsContainer.innerHTML = '';
+        if (data.bill && Array.isArray(data.bill.items) && data.bill.items.length) {
+          data.bill.items.forEach((item) => {
+            itemsContainer.appendChild(createItemRow(item));
+          });
+          paymentModeSelect.value = data.bill.paymentMode === 'split' ? 'split' : 'single';
+          splitCountInput.value = data.bill.splitCount || 2;
+          showStatus(`Conto tavolo ${table} caricato (${data.bill.items.length} voci).`, 'ok');
+        } else {
+          itemsContainer.appendChild(createItemRow());
+          showStatus(`Nessun conto salvato per tavolo ${table}.`, '');
+        }
+
+        updateTotal();
+      } catch (error) {
+        showStatus(`Errore caricamento tavolo: ${error.message}`, 'error');
+      }
+    }
+
+    async function saveTableBill() {
+      const table = parseInt(tableSelect.value, 10);
+      const items = collectItems();
+      const total = updateTotal();
+      const paymentMode = paymentModeSelect.value === 'split' ? 'split' : 'single';
+      const splitCount = paymentMode === 'split'
+        ? Math.max(2, Math.min(20, parseInt(splitCountInput.value, 10) || 2))
+        : null;
+
+      if (!items.length) {
+        showStatus('Inserire almeno una consumazione valida (nome articolo).', 'error');
+        return;
+      }
+
+      showStatus('Salvataggio conto tavolo in corso...', '');
+
+      try {
+        const response = await fetch('/.netlify/functions/table-bill', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            table,
+            items,
+            total,
+            paymentMode,
+            splitCount
+          })
+        });
+
+        const data = await response.json();
+        if (!response.ok || !data.ok) {
+          throw new Error(data.error || 'SAVE_ERROR');
+        }
+
+        showStatus(`Conto tavolo ${table} salvato. Totale ${formatEuro(data.bill.total)}.`, 'ok');
+      } catch (error) {
+        showStatus(`Errore salvataggio tavolo: ${error.message}`, 'error');
+      }
+    }
+
+    createTableOptions();
+    setQuickLink(tableSelect.value);
+    itemsContainer.appendChild(createItemRow());
+    updateTotal();
+
+    tableSelect.addEventListener('change', () => {
+      setQuickLink(tableSelect.value);
+    });
+    document.getElementById('add-item-btn').addEventListener('click', () => {
+      itemsContainer.appendChild(createItemRow());
+    });
+    document.getElementById('load-btn').addEventListener('click', loadTableBill);
+    document.getElementById('save-btn').addEventListener('click', saveTableBill);
+  </script>
+</body>
+</html>
