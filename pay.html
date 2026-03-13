@@ -377,11 +377,26 @@
         localStorage.setItem('aldoge_orders', JSON.stringify(orders));
 
         // Invia notifica Telegram
-        await fetch('/.netlify/functions/telegram-notify', {
+        const telegramResponse = await fetch('/.netlify/functions/telegram-notify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(order)
         });
+
+        let telegramResult = null;
+        try {
+          telegramResult = await telegramResponse.json();
+        } catch (parseError) {
+          telegramResult = null;
+        }
+
+        if (!telegramResponse.ok || !telegramResult || telegramResult.ok !== true) {
+          console.error('Notifica Telegram non consegnata', {
+            status: telegramResponse.status,
+            result: telegramResult
+          });
+          throw new Error('Telegram notification failed');
+        }
 
         // Mostra successo
         document.getElementById('paid-amount').textContent = selectedAmount.toFixed(2);
