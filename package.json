@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "type": "commonjs",
   "dependencies": {
+    "@netlify/blobs": "^9.1.6",
     "@supabase/supabase-js": "^2.48.0",
     "openai": "^4.77.4",
     "stripe": "^14.0.0",

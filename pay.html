@@ -128,6 +128,141 @@
       margin-bottom: 30px;
     }
 
+    .payment-mode {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .mode-btn {
+      padding: 14px 10px;
+      border: 2px solid rgba(212, 175, 55, 0.3);
+      border-radius: 12px;
+      background: var(--dark);
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .mode-btn.active {
+      border-color: var(--gold);
+      background: rgba(212, 175, 55, 0.2);
+    }
+
+    .split-controls {
+      display: none;
+      margin-bottom: 25px;
+      text-align: left;
+      background: rgba(212, 175, 55, 0.08);
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .split-controls.show {
+      display: block;
+    }
+
+    .split-label {
+      color: var(--text);
+      font-size: 14px;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .split-input {
+      width: 100%;
+      border-radius: 10px;
+      border: 2px solid rgba(212, 175, 55, 0.3);
+      background: var(--dark);
+      color: var(--text);
+      font-size: 18px;
+      padding: 12px;
+    }
+
+    .split-result {
+      margin-top: 10px;
+      color: var(--gold);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .pay-summary {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 14px;
+      min-height: 20px;
+    }
+
+    .bill-summary {
+      text-align: left;
+      background: rgba(212, 175, 55, 0.08);
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 18px;
+    }
+
+    .bill-summary-title {
+      color: var(--gold);
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .bill-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--text);
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.12);
+    }
+
+    .bill-row:last-child {
+      border-bottom: none;
+    }
+
+    .bill-row-name {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .bill-row-price {
+      color: var(--gold);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .bill-note {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    .bill-total {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(212, 175, 55, 0.2);
+      display: flex;
+      justify-content: space-between;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .bill-share {
+      margin-top: 6px;
+      color: var(--gold);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
     .amount-input-container {
       position: relative;
       display: inline-block;
@@ -240,8 +375,13 @@
       
       <h1>AL DOGE</h1>
       <div class="table-number">Tavolo <span id="table-number">-</span></div>
-      <p class="subtitle">Seleziona l'importo o inseriscilo manualmente</p>
+      <p class="subtitle">Scegli modalità e importo totale del conto</p>
       <p class="subtitle" style="margin-top:-24px;font-size:13px;color:#ffcf6b;">Flusso legacy dimostrativo: non costituisce conferma di pagamento reale.</p>
+
+      <div class="payment-mode">
+        <button class="mode-btn active" id="mode-single" onclick="setPaymentMode('single')">Pagamento unico</button>
+        <button class="mode-btn" id="mode-split" onclick="setPaymentMode('split')">Pagamento diviso</button>
+      </div>
 
       <!-- Quick Amounts -->
       <div class="quick-amounts">
@@ -273,10 +413,31 @@
         </div>
       </div>
 
+      <div class="split-controls" id="split-controls">
+        <div class="split-label">Numero quote</div>
+        <input
+          type="number"
+          min="2"
+          max="20"
+          step="1"
+          value="2"
+          id="split-count"
+          class="split-input"
+          oninput="onSplitCountChange()"
+        >
+        <div class="split-result" id="split-result">Quota per persona: €0.00</div>
+      </div>
+
+      <div class="bill-summary" id="bill-summary">
+        <div class="bill-summary-title">Riepilogo consumazioni</div>
+        <div id="bill-summary-content"></div>
+      </div>
+
       <!-- Pay Button -->
       <button class="pay-button" onclick="processPayment()" id="pay-btn" disabled>
         💳 Paga Ora
       </button>
+      <div class="pay-summary" id="pay-summary"></div>
 
       <div class="info-box">
         ℹ️ Pagamento sicuro tramite Stripe. Il personale verrà notificato immediatamente.
@@ -300,6 +461,91 @@
   <script>
     let tableNumber = null;
     let selectedAmount = 0;
+    let paymentMode = 'single';
+    let splitCount = 2;
+    let consumptionItems = [];
+
+    function formatEuro(value) {
+      const amount = Number.parseFloat(value);
+      if (!Number.isFinite(amount)) {
+        return '-';
+      }
+      return `€${amount.toFixed(2)}`;
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function normalizeConsumptionItems(rawItems) {
+      if (!Array.isArray(rawItems)) {
+        return [];
+      }
+
+      return rawItems
+        .map((item) => {
+          const name = item && typeof item.name === 'string' ? item.name.trim() : '';
+          if (!name) {
+            return null;
+          }
+
+          const qtyRaw = item.qty ?? item.quantity;
+          const qty = Math.max(1, Number.parseInt(qtyRaw, 10) || 1);
+
+          const unitPrice = Number.parseFloat(item.price ?? item.unitPrice);
+          const rawSubtotal = Number.parseFloat(item.subtotal ?? item.total ?? item.lineTotal);
+          const subtotal = Number.isFinite(rawSubtotal)
+            ? rawSubtotal
+            : (Number.isFinite(unitPrice) ? unitPrice * qty : null);
+
+          return {
+            name,
+            qty,
+            subtotal
+          };
+        })
+        .filter(Boolean);
+    }
+
+    function parseItemsFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const rawItems = params.get('items');
+
+      if (!rawItems) {
+        return [];
+      }
+
+      let decoded = rawItems;
+      try {
+        decoded = decodeURIComponent(rawItems);
+      } catch (error) {
+        decoded = rawItems;
+      }
+
+      let parsed = null;
+      try {
+        parsed = JSON.parse(decoded);
+      } catch (error) {
+        parsed = null;
+      }
+
+      return normalizeConsumptionItems(parsed);
+    }
+
+    function getItemsSubtotal() {
+      if (!consumptionItems.length) {
+        return 0;
+      }
+
+      return consumptionItems.reduce((sum, item) => {
+        return sum + (Number.isFinite(item.subtotal) ? item.subtotal : 0);
+      }, 0);
+    }
 
     // Ottieni numero tavolo da URL
     function getTableNumber() {
@@ -333,6 +579,55 @@
       return amount;
     }
 
+    async function getSavedTableBill(table) {
+      try {
+        const response = await fetch(`/.netlify/functions/table-bill?table=${table}`);
+        if (!response.ok) {
+          return null;
+        }
+
+        const data = await response.json();
+        if (!data || !data.ok || !data.bill) {
+          return null;
+        }
+
+        return data.bill;
+      } catch (error) {
+        console.warn('Conto tavolo non recuperabile, uso fallback URL.', error);
+        return null;
+      }
+    }
+
+    function applyAmountToUi(amount) {
+      const normalized = Number.parseFloat(amount);
+      if (!Number.isFinite(normalized) || normalized <= 0) {
+        refreshPaymentUI();
+        return;
+      }
+
+      selectedAmount = normalized;
+      const input = document.getElementById('custom-amount');
+      input.value = normalized.toFixed(2);
+
+      let selectedQuickBtn = null;
+      document.querySelectorAll('.amount-btn').forEach(btn => {
+        const buttonValue = Number.parseFloat(
+          (btn.textContent || '').replace(/[^\d.,-]/g, '').replace(',', '.')
+        );
+        const isMatch = Number.isFinite(buttonValue) && buttonValue === normalized;
+        btn.classList.toggle('selected', isMatch);
+        if (isMatch) {
+          selectedQuickBtn = btn;
+        }
+      });
+
+      if (!selectedQuickBtn) {
+        document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('selected'));
+      }
+
+      refreshPaymentUI();
+    }
+
     function selectAmount(amount, event) {
       selectedAmount = amount;
       
@@ -346,9 +641,7 @@
       
       // Imposta input custom
       document.getElementById('custom-amount').value = amount.toFixed(2);
-      
-      // Abilita bottone
-      document.getElementById('pay-btn').disabled = false;
+      refreshPaymentUI();
     }
 
     function onAmountChange() {
@@ -362,12 +655,94 @@
         btn.classList.remove('selected');
       });
       
-      // Abilita/disabilita bottone
-      document.getElementById('pay-btn').disabled = amount <= 0;
+      refreshPaymentUI();
+    }
+
+    function setPaymentMode(mode) {
+      paymentMode = mode === 'split' ? 'split' : 'single';
+
+      document.getElementById('mode-single').classList.toggle('active', paymentMode === 'single');
+      document.getElementById('mode-split').classList.toggle('active', paymentMode === 'split');
+      document.getElementById('split-controls').classList.toggle('show', paymentMode === 'split');
+
+      refreshPaymentUI();
+    }
+
+    function onSplitCountChange() {
+      const input = document.getElementById('split-count');
+      const parsed = parseInt(input.value, 10);
+      splitCount = Number.isFinite(parsed) ? Math.max(2, Math.min(20, parsed)) : 2;
+      input.value = splitCount;
+      refreshPaymentUI();
+    }
+
+    function getPayableAmount() {
+      if (paymentMode === 'split') {
+        if (selectedAmount <= 0 || splitCount <= 0) {
+          return 0;
+        }
+        return selectedAmount / splitCount;
+      }
+      return selectedAmount;
+    }
+
+    function refreshPaymentUI() {
+      const payableAmount = getPayableAmount();
+      const hasValidAmount = selectedAmount > 0 && payableAmount > 0;
+      const payBtn = document.getElementById('pay-btn');
+      const paySummary = document.getElementById('pay-summary');
+      const splitResult = document.getElementById('split-result');
+
+      payBtn.disabled = !hasValidAmount;
+      payBtn.textContent = hasValidAmount
+        ? `💳 Paga €${payableAmount.toFixed(2)}`
+        : '💳 Paga Ora';
+
+      if (paymentMode === 'split') {
+        splitResult.textContent = `Totale €${selectedAmount.toFixed(2)} diviso ${splitCount}: quota €${payableAmount.toFixed(2)}`;
+        paySummary.textContent = hasValidAmount
+          ? `Stai pagando la tua quota: €${payableAmount.toFixed(2)}`
+          : '';
+      } else {
+        splitResult.textContent = 'Quota per persona: €0.00';
+        paySummary.textContent = hasValidAmount
+          ? `Stai pagando l'intero totale: €${payableAmount.toFixed(2)}`
+          : '';
+      }
+
+      renderConsumptionSummary();
+    }
+
+    function renderConsumptionSummary() {
+      const summaryContainer = document.getElementById('bill-summary-content');
+      const payableAmount = getPayableAmount();
+      const itemsHtml = consumptionItems.length
+        ? consumptionItems.map(item => `
+            <div class="bill-row">
+              <span class="bill-row-name">${item.qty}× ${escapeHtml(item.name)}</span>
+              <span class="bill-row-price">${formatEuro(item.subtotal)}</span>
+            </div>
+          `).join('')
+        : `<div class="bill-note">Dettaglio consumazioni non disponibile in questo QR. È visibile il totale del conto.</div>`;
+
+      const totalForSummary = selectedAmount > 0 ? selectedAmount : getItemsSubtotal();
+      const totalHtml = `
+        <div class="bill-total">
+          <span>Totale conto</span>
+          <span>${formatEuro(totalForSummary)}</span>
+        </div>
+      `;
+
+      const shareHtml = paymentMode === 'split' && payableAmount > 0
+        ? `<div class="bill-share">Quota da pagare ora: ${formatEuro(payableAmount)} (${splitCount} quote)</div>`
+        : '';
+
+      summaryContainer.innerHTML = `${itemsHtml}${totalHtml}${shareHtml}`;
     }
 
     async function processPayment() {
-      if (selectedAmount <= 0) {
+      const payableAmount = getPayableAmount();
+      if (selectedAmount <= 0 || payableAmount <= 0) {
         alert('Inserisci un importo valido');
         return;
       }
@@ -385,7 +760,11 @@
           orderId: Date.now(),
           timestamp: new Date().toISOString(),
           tableNumber: tableNumber,
-          total: selectedAmount.toFixed(2),
+          total: payableAmount.toFixed(2),
+          billTotal: selectedAmount.toFixed(2),
+          paymentType: paymentMode === 'split' ? 'diviso' : 'unico',
+          splitCount: paymentMode === 'split' ? splitCount : null,
+          shareAmount: paymentMode === 'split' ? payableAmount.toFixed(2) : null,
           status: 'paid',
           type: 'table_payment',
           name: `Tavolo ${tableNumber}`,
@@ -393,9 +772,11 @@
           address: `Tavolo ${tableNumber}`,
           items: [
             {
-              name: `Pagamento tavolo ${tableNumber}`,
+              name: paymentMode === 'split'
+                ? `Pagamento diviso tavolo ${tableNumber} (${splitCount} quote, quota €${payableAmount.toFixed(2)})`
+                : `Pagamento unico tavolo ${tableNumber}`,
               qty: 1,
-              price: selectedAmount
+              price: payableAmount
             }
           ]
         };
@@ -417,41 +798,21 @@
         }
 
         // Mostra successo
-        document.getElementById('paid-amount').textContent = selectedAmount.toFixed(2);
+        document.getElementById('paid-amount').textContent = payableAmount.toFixed(2);
         document.getElementById('payment-form').style.display = 'none';
         document.getElementById('success-message').classList.add('show');
 
       } catch (error) {
         console.error('Errore pagamento:', error);
         alert('Errore nel processare il pagamento. Riprova.');
-        btn.disabled = false;
-        btn.textContent = '💳 Paga Ora';
+        refreshPaymentUI();
       }
     }
 
-    // Inizializza
-    tableNumber = getTableNumber();
-    if (tableNumber) {
-      document.getElementById('table-number').textContent = tableNumber;
-
-      const initialAmount = getInitialAmount();
-      if (initialAmount !== null) {
-        const matchingQuickButton = Array.from(document.querySelectorAll('.amount-btn')).find(btn => {
-          const buttonValue = parseFloat(
-            (btn.textContent || '').replace(/[^\d.,-]/g, '').replace(',', '.')
-          );
-          return Number.isFinite(buttonValue) && buttonValue === initialAmount;
-        });
-
-        if (matchingQuickButton) {
-          selectAmount(initialAmount, { target: matchingQuickButton });
-        } else {
-          document.getElementById('custom-amount').value = initialAmount.toFixed(2);
-          onAmountChange();
-        }
-      }
-    } else {
-      document.getElementById('payment-form').innerHTML = `
+    async function initPage() {
+      tableNumber = getTableNumber();
+      if (!tableNumber) {
+        document.getElementById('payment-form').innerHTML = `
         <div style="padding: 40px; text-align: center;">
           <div style="font-size: 60px; margin-bottom: 20px;">⚠️</div>
           <div style="color: var(--muted); font-size: 18px;">
@@ -460,7 +821,54 @@
           </div>
         </div>
       `;
+        return;
+      }
+
+      document.getElementById('table-number').textContent = tableNumber;
+
+      consumptionItems = parseItemsFromUrl();
+      const initialAmount = getInitialAmount();
+      if (initialAmount !== null) {
+        applyAmountToUi(initialAmount);
+      } else {
+        const subtotalFromItems = getItemsSubtotal();
+        if (subtotalFromItems > 0) {
+          applyAmountToUi(subtotalFromItems);
+        } else {
+          refreshPaymentUI();
+        }
+      }
+
+      const savedBill = await getSavedTableBill(tableNumber);
+      if (!savedBill) {
+        return;
+      }
+
+      const normalizedSavedItems = normalizeConsumptionItems(savedBill.items);
+      if (normalizedSavedItems.length) {
+        consumptionItems = normalizedSavedItems;
+      }
+
+      if (savedBill.paymentMode === 'split' || savedBill.paymentMode === 'single') {
+        setPaymentMode(savedBill.paymentMode);
+      }
+
+      if (savedBill.paymentMode === 'split' && Number.isFinite(Number(savedBill.splitCount))) {
+        splitCount = Math.max(2, Math.min(20, Number.parseInt(savedBill.splitCount, 10) || 2));
+        document.getElementById('split-count').value = splitCount;
+      }
+
+      const savedTotal = Number.parseFloat(savedBill.total);
+      if (Number.isFinite(savedTotal) && savedTotal > 0) {
+        applyAmountToUi(savedTotal);
+      } else if (normalizedSavedItems.length) {
+        applyAmountToUi(getItemsSubtotal());
+      } else {
+        refreshPaymentUI();
+      }
     }
+
+    initPage();
   </script>
 </body>
 </html>
