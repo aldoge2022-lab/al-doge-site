@@ -152,6 +152,7 @@
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
       gap: 25px;
+      align-items: start;
     }
 
     .pizza-card {
@@ -162,6 +163,7 @@
       transition: all 0.3s;
       display: flex;
       flex-direction: column;
+      align-self: start;
     }
 
     .pizza-card:hover {
@@ -249,16 +251,106 @@
     .variant-extras {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 6px;
+      gap: 8px;
       margin-bottom: 8px;
     }
 
-    .variant-extra-option {
+    .extra-category {
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      border-radius: 10px;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    .extra-category-toggle {
+      width: 100%;
+      border: none;
+      background: transparent;
+      color: var(--text);
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 8px;
+      padding: 10px 12px;
       font-size: 13px;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .extra-category-toggle span {
       color: var(--muted);
+      font-size: 12px;
+    }
+
+    .extra-category-toggle strong {
+      font-size: 14px;
+      line-height: 1;
+      color: var(--gold);
+    }
+
+    .extra-category.open .extra-category-toggle {
+      background: rgba(212, 175, 55, 0.08);
+    }
+
+    .extra-ingredients-list {
+      display: none;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      padding: 0 10px 10px;
+    }
+
+    .extra-category.open .extra-ingredients-list {
+      display: grid;
+    }
+
+    .extra-ingredient-btn {
+      border: 1px solid rgba(212, 175, 55, 0.22);
+      background: rgba(0, 0, 0, 0.2);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 12px;
+      line-height: 1.2;
+      text-align: center;
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .selected-extras-chips {
+      margin-top: 2px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      min-height: 22px;
+    }
+
+    .extra-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      background: rgba(212, 175, 55, 0.12);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 11px;
+      line-height: 1;
+    }
+
+    .extra-chip-remove {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .selected-extras-empty {
+      color: var(--muted);
+      font-size: 12px;
     }
 
     .variant-total {
@@ -338,6 +430,10 @@
       .filter-btn {
         width: 100%;
       }
+
+      .extra-ingredients-list {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -380,6 +476,147 @@
     let allPizzas = [];
     let currentFilter = 'all';
     let searchTerm = '';
+    const pizzaExtrasState = {};
+
+    const EXTRA_CATEGORIES = Object.freeze([
+      {
+        key: 'verdure',
+        label: 'Verdure',
+        priceLabel: '+€1,50',
+        ingredients: [
+          'Funghi freschi',
+          'Funghi porcini',
+          'Carciofi',
+          'Peperoni',
+          'Cipolla',
+          'Patate al forno',
+          'Patatine',
+          'Rucola',
+          'Pomodorini',
+          'Zucchine',
+          'Spinaci',
+          'Radicchio di Treviso',
+          'Melanzane',
+          'Asparagi',
+          'Fagioli',
+          'Olive nere',
+          'Olive verdi',
+          'Olive taggiasche',
+          'Pomodori secchi',
+          'Capperi',
+          'Friarielli',
+          'Noci'
+        ]
+      },
+      {
+        key: 'affettati',
+        label: 'Affettati',
+        priceLabel: '+€2,00',
+        ingredients: [
+          'Prosciutto cotto',
+          'Prosciutto crudo San Daniele',
+          'Bresaola',
+          'Speck',
+          'Pancetta',
+          'Salamino piccante',
+          'Wurstel',
+          'Salsiccia',
+          'Salame dolce',
+          'Petto d\'oca',
+          'Acciughe',
+          'Tonno',
+          'Salmone',
+          'Salmone affumicato',
+          'Gamberetti',
+          'Frutti di mare'
+        ]
+      },
+      {
+        key: 'burrata-bufala',
+        label: 'Burrata / bufala',
+        priceLabel: '+€3,00',
+        ingredients: [
+          'Burrata',
+          'Mozzarella di bufala'
+        ]
+      }
+    ]);
+
+    const EXTRA_CATEGORY_MAP = EXTRA_CATEGORIES.reduce((acc, category) => {
+      acc[category.key] = category;
+      return acc;
+    }, {});
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function getPizzaExtrasState(pizzaName) {
+      if (!pizzaExtrasState[pizzaName]) {
+        pizzaExtrasState[pizzaName] = {
+          openCategory: null,
+          selectedExtras: [],
+          format: 'normale',
+          dough: 'normale'
+        };
+      }
+      return pizzaExtrasState[pizzaName];
+    }
+
+    function renderExtraCategories(pizzaName, pizzaKey) {
+      const state = getPizzaExtrasState(pizzaName);
+
+      return EXTRA_CATEGORIES.map((category) => {
+        const isOpen = state.openCategory === category.key;
+        return `
+          <div class="extra-category ${isOpen ? 'open' : ''}" id="extra-category-${pizzaKey}-${category.key}">
+            <button type="button" class="extra-category-toggle" onclick="toggleExtraCategory('${pizzaName}', '${category.key}')">
+              <span>${category.label} (${category.priceLabel})</span>
+              <strong>${isOpen ? '−' : '+'}</strong>
+            </button>
+            <div class="extra-ingredients-list" id="extra-list-${pizzaKey}-${category.key}">
+              ${category.ingredients.map((ingredient, index) => `
+                <button
+                  type="button"
+                  class="extra-ingredient-btn"
+                  onclick="selectExtraIngredient('${pizzaName}', '${category.key}', ${index})"
+                  title="${escapeHtml(ingredient)}"
+                >${escapeHtml(ingredient)}</button>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderSelectedExtrasChips(pizzaName) {
+      const state = getPizzaExtrasState(pizzaName);
+      if (!state.selectedExtras.length) {
+        return '<span class="selected-extras-empty">Nessuna aggiunta selezionata</span>';
+      }
+
+      return state.selectedExtras.map((extra, index) => `
+        <span class="extra-chip">
+          ${escapeHtml(extra.name)}
+          <button type="button" class="extra-chip-remove" onclick="removeExtraIngredient('${pizzaName}', ${index})" aria-label="Rimuovi ${escapeHtml(extra.name)}">×</button>
+        </span>
+      `).join('');
+    }
+
+    function calculateSelectionFinalPrice(basePrice, selectedVariant) {
+      const formatSurcharge = PizzaPricing.FORMAT_SURCHARGES[selectedVariant.format] || 0;
+      const doughSurcharge = PizzaPricing.DOUGH_SURCHARGES[selectedVariant.dough] || 0;
+      const extrasSurcharge = selectedVariant.selectedExtras.reduce((sum, extra) => {
+        return sum + (PizzaPricing.EXTRA_SURCHARGES[extra.categoryKey] || 0);
+      }, 0);
+
+      return basePrice + formatSurcharge + doughSurcharge + extrasSurcharge;
+    }
 
     // Carica catalogo ufficiale
     async function loadMenu() {
@@ -424,6 +661,7 @@
       noResults.style.display = 'none';
       container.innerHTML = filtered.map((pizza) => {
         const pizzaKey = getPizzaKey(pizza.name);
+        const state = getPizzaExtrasState(pizza.name);
         return `
           <div class="pizza-card" data-pizza-id="${pizza.id}">
             <div class="pizza-header">
@@ -436,40 +674,32 @@
               <div class="variant-grid">
                 <div class="variant-group">
                   <label for="format-${pizzaKey}">Formato</label>
-                  <select id="format-${pizzaKey}" onchange="updatePizzaSelectionPrice('${pizza.name}')">
-                    <option value="normale">Normale (prezzo base)</option>
-                    <option value="maxi">Maxi (+€5,00)</option>
+                  <select id="format-${pizzaKey}" onchange="handleFormatChange('${pizza.name}', this.value)">
+                    <option value="normale" ${state.format === 'normale' ? 'selected' : ''}>Normale (prezzo base)</option>
+                    <option value="maxi" ${state.format === 'maxi' ? 'selected' : ''}>Maxi (+€5,00)</option>
                   </select>
                 </div>
                 <div class="variant-group">
                   <label for="dough-${pizzaKey}">Impasto</label>
-                  <select id="dough-${pizzaKey}" onchange="updatePizzaSelectionPrice('${pizza.name}')">
-                    <option value="normale">Normale (+€0,00)</option>
-                    <option value="farina-di-riso">Farina di riso (+€1,50)</option>
-                    <option value="kamut">Kamut (+€1,50)</option>
+                  <select id="dough-${pizzaKey}" onchange="handleDoughChange('${pizza.name}', this.value)">
+                    <option value="normale" ${state.dough === 'normale' ? 'selected' : ''}>Normale (+€0,00)</option>
+                    <option value="farina-di-riso" ${state.dough === 'farina-di-riso' ? 'selected' : ''}>Farina di riso (+€1,50)</option>
+                    <option value="kamut" ${state.dough === 'kamut' ? 'selected' : ''}>Kamut (+€1,50)</option>
                   </select>
                 </div>
               </div>
               <div class="variant-extras">
-                <label class="variant-extra-option">
-                  <input type="checkbox" value="verdure" data-extra-for="${pizzaKey}" onchange="updatePizzaSelectionPrice('${pizza.name}')">
-                  Verdure (+€1,50)
-                </label>
-                <label class="variant-extra-option">
-                  <input type="checkbox" value="affettati" data-extra-for="${pizzaKey}" onchange="updatePizzaSelectionPrice('${pizza.name}')">
-                  Affettati (+€2,00)
-                </label>
-                <label class="variant-extra-option">
-                  <input type="checkbox" value="burrata-bufala" data-extra-for="${pizzaKey}" onchange="updatePizzaSelectionPrice('${pizza.name}')">
-                  Burrata / bufala (+€3,00)
-                </label>
+                ${renderExtraCategories(pizza.name, pizzaKey)}
+                <div class="selected-extras-chips" id="selected-extras-${pizzaKey}">
+                  ${renderSelectedExtrasChips(pizza.name)}
+                </div>
               </div>
               <div class="variant-total" id="variant-total-${pizzaKey}">Prezzo selezione: €${pizza.price.toFixed(2)}</div>
             </div>
             <div class="pizza-actions">
               <div class="quantity-control">
                 <button class="qty-btn" onclick="changeQuantity('${pizza.name}', -1)">−</button>
-                <span class="qty-display" id="qty-${pizzaKey}">1</span>
+                <span class="qty-display" id="qty-${pizzaKey}">${quantities[pizza.name] || 1}</span>
                 <button class="qty-btn" onclick="changeQuantity('${pizza.name}', 1)">+</button>
               </div>
               <button class="add-to-cart-btn" onclick="addToCart('${pizza.name}', event)">
@@ -491,16 +721,14 @@
     }
 
     function getSelectedVariant(pizzaName) {
-      const pizzaKey = getPizzaKey(pizzaName);
-      const formatSelect = document.getElementById(`format-${pizzaKey}`);
-      const doughSelect = document.getElementById(`dough-${pizzaKey}`);
-      const extraInputs = document.querySelectorAll(`input[data-extra-for="${pizzaKey}"]:checked`);
-      const extras = Array.from(extraInputs).map(input => input.value);
+      const state = getPizzaExtrasState(pizzaName);
 
       return {
-        format: formatSelect ? formatSelect.value : 'normale',
-        dough: doughSelect ? doughSelect.value : 'normale',
-        extras
+        format: state.format || 'normale',
+        dough: state.dough || 'normale',
+        extras: state.selectedExtras.map((extra) => extra.categoryKey),
+        selectedExtras: state.selectedExtras.map((extra) => ({ ...extra })),
+        extraIngredients: state.selectedExtras.map((extra) => extra.name)
       };
     }
 
@@ -510,7 +738,7 @@
 
       const pizzaKey = getPizzaKey(pizzaName);
       const selectedVariant = getSelectedVariant(pizzaName);
-      const finalPrice = PizzaPricing.calculateFinalPizzaPrice(pizza.price, selectedVariant);
+      const finalPrice = calculateSelectionFinalPrice(pizza.price, selectedVariant);
       const headerPrice = document.getElementById(`price-${pizzaKey}`);
       const variantPrice = document.getElementById(`variant-total-${pizzaKey}`);
 
@@ -521,6 +749,51 @@
       if (variantPrice) {
         variantPrice.textContent = `Prezzo selezione: €${finalPrice.toFixed(2)}`;
       }
+    }
+
+    function toggleExtraCategory(pizzaName, categoryKey) {
+      const state = getPizzaExtrasState(pizzaName);
+      state.openCategory = state.openCategory === categoryKey ? null : categoryKey;
+      displayPizzas();
+    }
+
+    function handleFormatChange(pizzaName, formatValue) {
+      const state = getPizzaExtrasState(pizzaName);
+      state.format = formatValue || 'normale';
+      updatePizzaSelectionPrice(pizzaName);
+    }
+
+    function handleDoughChange(pizzaName, doughValue) {
+      const state = getPizzaExtrasState(pizzaName);
+      state.dough = doughValue || 'normale';
+      updatePizzaSelectionPrice(pizzaName);
+    }
+
+    function selectExtraIngredient(pizzaName, categoryKey, ingredientIndex) {
+      const category = EXTRA_CATEGORY_MAP[categoryKey];
+      if (!category) return;
+
+      const ingredientName = category.ingredients[ingredientIndex];
+      if (!ingredientName) return;
+
+      const state = getPizzaExtrasState(pizzaName);
+      const alreadySelected = state.selectedExtras.some((extra) => extra.name === ingredientName);
+
+      if (!alreadySelected) {
+        state.selectedExtras.push({
+          categoryKey,
+          name: ingredientName
+        });
+      }
+
+      state.openCategory = null;
+      displayPizzas();
+    }
+
+    function removeExtraIngredient(pizzaName, extraIndex) {
+      const state = getPizzaExtrasState(pizzaName);
+      state.selectedExtras = state.selectedExtras.filter((_, index) => index !== extraIndex);
+      displayPizzas();
     }
     
     function changeQuantity(pizzaName, delta) {
@@ -538,9 +811,16 @@
       
       const quantity = quantities[pizzaName] || 1;
       const selectedVariant = getSelectedVariant(pizzaName);
-      const variantLabels = PizzaPricing.getVariantLabels(selectedVariant);
-      const finalPrice = PizzaPricing.calculateFinalPizzaPrice(pizza.price, selectedVariant);
-      const variantSignature = PizzaPricing.getVariantSignature(selectedVariant);
+      const variantLabels = PizzaPricing.getVariantLabels({
+        format: selectedVariant.format,
+        dough: selectedVariant.dough,
+        extras: []
+      });
+      const finalPrice = calculateSelectionFinalPrice(pizza.price, selectedVariant);
+      const extrasSignature = selectedVariant.selectedExtras
+        .map((extra) => `${extra.categoryKey}:${extra.name}`)
+        .join('|') || 'Nessuno';
+      const variantSignature = `${variantLabels.format}::${variantLabels.dough}::${extrasSignature}`;
       
       // Recupera carrello esistente
       let cart = JSON.parse(localStorage.getItem('aldoge_cart') || '[]');
@@ -563,7 +843,7 @@
           basePrice: pizza.price,
           format: variantLabels.format,
           dough: variantLabels.dough,
-          extras: variantLabels.extras,
+          extras: selectedVariant.extraIngredients,
           variantSignature,
           price: finalPrice,
           ingredients: pizza.ingredients,
