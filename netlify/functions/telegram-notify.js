@@ -48,8 +48,23 @@ exports.handler = async function (event, context) {
       ? [{ qty: 1, name: `Pagamento tavolo ${tableNumber ?? "-"}` }]
       : [];
 
+    const normalizeExtras = (extras) => {
+      if (!Array.isArray(extras)) return [];
+      return extras
+        .map((extra) => {
+          if (typeof extra === "string") return extra.trim();
+          if (extra && typeof extra.name === "string") return extra.name.trim();
+          return "";
+        })
+        .filter(Boolean);
+    };
+
     const finalItems = items.length
-      ? items.map((i) => ({ qty: Number.parseInt(i.qty, 10) || 1, name: i.name }))
+      ? items.map((i) => ({
+          qty: Number.parseInt(i.qty, 10) || 1,
+          name: i.name,
+          extras: normalizeExtras(i.extras),
+        }))
       : fallbackItems;
 
     const name = typeof data.name === "string" && data.name.trim()
@@ -59,20 +74,39 @@ exports.handler = async function (event, context) {
     const address = typeof data.address === "string" && data.address.trim()
       ? data.address.trim()
       : (isTablePayment ? `Tavolo ${tableNumber ?? "-"}` : "-");
+    const notes = typeof data.notes === "string" && data.notes.trim() ? data.notes.trim() : "-";
+
+    const rawOrderType = typeof data.orderType === "string" ? data.orderType.trim() : "";
+    const legacyMode = typeof data.mode === "string" ? data.mode.trim() : "";
+    const normalizedOrderType = rawOrderType || (legacyMode === "ritiro" ? "ritiro_in_pizzeria" : "asporto");
+    const orderTypeLabel = normalizedOrderType === "ritiro_in_pizzeria" ? "Ritiro in pizzeria" : "Asporto";
+    const pickupTime = typeof data.pickupTime === "string" && data.pickupTime.trim()
+      ? data.pickupTime.trim()
+      : (typeof data.time === "string" && data.time.trim() ? data.time.trim() : "-");
 
     const tableLine = isTablePayment ? `\n🪑 *Tavolo:* ${tableNumber ?? "-"}` : "";
     const statusLine = data.status ? `\n📌 *Stato:* ${String(data.status)}` : "";
     const orderIdLine = data.orderId ? `\n🧾 *ID:* ${String(data.orderId)}` : "";
+    const orderTypeLine = !isTablePayment ? `\n🛍️ *Tipo ordine:* ${orderTypeLabel}` : "";
+    const pickupTimeLine = !isTablePayment ? `\n⏰ *Ora ritiro:* ${pickupTime}` : "";
+    const notesLine = !isTablePayment ? `\n📝 *Note:* ${notes}` : "";
 
     const message = `
 📦 *Nuovo ordine AL DOGE!*
 
 👤 *Nome:* ${name}
 📞 *Telefono:* ${phone}
-📍 *Indirizzo:* ${address}${tableLine}${statusLine}${orderIdLine}
+📍 *Indirizzo:* ${address}${orderTypeLine}${pickupTimeLine}${notesLine}${tableLine}${statusLine}${orderIdLine}
 
 🧾 *Ordine:*
-${finalItems.map((i) => `- ${i.qty}× ${i.name}`).join("\n")}
+${finalItems.map((i) => {
+      const baseLine = `- ${i.qty}× ${i.name}`;
+      if (!Array.isArray(i.extras) || !i.extras.length) {
+        return baseLine;
+      }
+      const extrasLines = i.extras.map((extra) => `  + ${extra}`).join("\n");
+      return `${baseLine}\n${extrasLines}`;
+    }).join("\n")}
 
 💶 *Totale:* €${totalAmount.toFixed(2)}
     `;

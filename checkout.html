@@ -326,18 +326,23 @@
         return null;
       }
 
+      const orderType = mode === "ritiro" ? "ritiro_in_pizzeria" : "asporto";
+
       return {
         name,
         phone,
         mode,
+        orderType,
         address: mode === "consegna" ? address : "",
         date,
         time,
+        pickupTime: time,
         notes,
         items: cart.map(i => ({
           name: i.name,
           qty: i.quantity,
-          price: i.price
+          price: i.price,
+          extras: Array.isArray(i.extras) ? i.extras : []
         })),
         total: total.toFixed(2)
       };
