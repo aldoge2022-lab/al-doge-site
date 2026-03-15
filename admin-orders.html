@@ -397,23 +397,46 @@
   </div>
 
   <script>
-    // IMPORTANTE: Cambiare questa password in produzione!
-    // Questa è una password di esempio per testing
-    // Per produzione, implementare autenticazione server-side vera
-    const ADMIN_PASSWORD = 'aldoge2024';
     let allOrders = [];
     let filteredOrders = [];
 
-    function login() {
+    async function login() {
       const password = document.getElementById('password-input').value;
       const error = document.getElementById('login-error');
+      error.style.display = 'none';
 
-      if (password === ADMIN_PASSWORD) {
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('dashboard').classList.add('show');
-        sessionStorage.setItem('aldoge_admin_auth', 'true');
-        loadOrders();
-      } else {
+      try {
+        const response = await fetch('/.netlify/functions/admin-auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+
+        const result = await response.json().catch(() => ({}));
+
+        if (response.ok && result.success) {
+          document.getElementById('login-screen').style.display = 'none';
+          document.getElementById('dashboard').classList.add('show');
+          sessionStorage.setItem('aldoge_admin_auth', 'true');
+          loadOrders();
+          return;
+        }
+
+        if (response.status === 401 || result.error === 'INVALID_PASSWORD') {
+          error.textContent = 'Password errata!';
+          error.style.display = 'block';
+          return;
+        }
+
+        console.error('[admin-login] Auth error', {
+          status: response.status,
+          body: result
+        });
+        error.textContent = 'Errore autenticazione. Controlla console.';
+        error.style.display = 'block';
+      } catch (err) {
+        console.error('[admin-login] Network error', err);
+        error.textContent = 'Errore rete. Controlla console.';
         error.style.display = 'block';
       }
     }
