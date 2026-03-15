@@ -299,19 +299,63 @@
 
   <script>
     let tableNumber = null;
+    let paymentCode = null;
     let selectedAmount = 0;
 
-    // Ottieni numero tavolo da URL
-    function getTableNumber() {
+    function renderPaymentState(message, icon) {
+      document.getElementById('payment-form').innerHTML = `
+        <div style="padding: 40px; text-align: center;">
+          <div style="font-size: 60px; margin-bottom: 20px;">${icon}</div>
+          <div style="color: var(--muted); font-size: 18px;">
+            ${message}
+          </div>
+        </div>
+      `;
+    }
+
+    // Inizializzazione canonica del contesto pagamento (table + paymentCode)
+    function resolvePaymentContext() {
       const params = new URLSearchParams(window.location.search);
-      const table = params.get('table');
-      
-      if (!table || isNaN(table) || table < 1 || table > 10) {
-        alert('Numero tavolo non valido');
-        return null;
+      const rawTable = params.get('table');
+      const rawPaymentCode = params.get('paymentCode');
+
+      if (rawTable === null && rawPaymentCode === null) {
+        return {
+          status: 'missing',
+          message: 'Pagina pagamento da aprire tramite QR o link pagamento valido'
+        };
       }
-      
-      return parseInt(table);
+
+      if (rawTable === null || rawPaymentCode === null) {
+        return {
+          status: 'invalid',
+          message: 'Link pagamento non valido. Richiedi un nuovo QR al personale.'
+        };
+      }
+
+      const table = Number.parseInt(rawTable, 10);
+      if (!Number.isInteger(table) || table < 1 || table > 10) {
+        return {
+          status: 'invalid',
+          message: 'Link pagamento non valido. Richiedi un nuovo QR al personale.'
+        };
+      }
+
+      const normalizedPaymentCode = rawPaymentCode.trim().toUpperCase();
+      const expectedPaymentCode = `ALDOGE-T${String(table).padStart(2, '0')}`;
+
+      if (normalizedPaymentCode !== expectedPaymentCode) {
+        return {
+          status: 'invalid',
+          message: 'Link pagamento non valido. Richiedi un nuovo QR al personale.'
+        };
+      }
+
+      return {
+        status: 'valid',
+        tableNumber: table,
+        paymentCode: normalizedPaymentCode
+      };
     }
 
     // Ottieni importo iniziale da URL (amount, fallback total/price)
@@ -385,6 +429,7 @@
           orderId: Date.now(),
           timestamp: new Date().toISOString(),
           tableNumber: tableNumber,
+          paymentCode: paymentCode,
           total: selectedAmount.toFixed(2),
           status: 'paid',
           type: 'table_payment',
@@ -430,8 +475,11 @@
     }
 
     // Inizializza
-    tableNumber = getTableNumber();
-    if (tableNumber) {
+    const paymentContext = resolvePaymentContext();
+
+    if (paymentContext.status === 'valid') {
+      tableNumber = paymentContext.tableNumber;
+      paymentCode = paymentContext.paymentCode;
       document.getElementById('table-number').textContent = tableNumber;
 
       const initialAmount = getInitialAmount();
@@ -451,15 +499,10 @@
         }
       }
     } else {
-      document.getElementById('payment-form').innerHTML = `
-        <div style="padding: 40px; text-align: center;">
-          <div style="font-size: 60px; margin-bottom: 20px;">⚠️</div>
-          <div style="color: var(--muted); font-size: 18px;">
-            Codice QR non valido.<br>
-            Richiedi assistenza al personale.
-          </div>
-        </div>
-      `;
+      renderPaymentState(
+        paymentContext.message,
+        paymentContext.status === 'missing' ? 'ℹ️' : '⚠️'
+      );
     }
   </script>
 </body>

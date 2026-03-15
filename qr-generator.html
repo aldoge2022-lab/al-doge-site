@@ -87,6 +87,9 @@
       color: var(--muted);
       word-break: break-all;
       margin-bottom: 15px;
+      display: block;
+      text-decoration: underline;
+      text-underline-offset: 2px;
     }
 
     .download-btn {
@@ -169,19 +172,24 @@
     // Ottieni l'URL base del sito
     const BASE_URL = window.location.origin;
 
+    function createPaymentCode(tableNumber) {
+      return `ALDOGE-T${String(tableNumber).padStart(2, '0')}`;
+    }
+
     // Genera QR code per 10 tavoli
     function generateQRCodes() {
       const grid = document.getElementById('qr-grid');
       
       for (let i = 1; i <= 10; i++) {
-        const url = `${BASE_URL}/pay.html?table=${i}`;
+        const paymentCode = createPaymentCode(i);
+        const paymentUrl = `${BASE_URL}/pay.html?table=${i}&paymentCode=${encodeURIComponent(paymentCode)}`;
         
         const card = document.createElement('div');
         card.className = 'qr-card';
         card.innerHTML = `
           <div class="table-number">Tavolo ${i}</div>
           <div class="qr-code" id="qr-${i}"></div>
-          <div class="qr-url">${url}</div>
+          <a class="qr-url" href="${paymentUrl}" target="_blank" rel="noopener noreferrer">${paymentUrl}</a>
           <button class="download-btn" onclick="downloadQR(${i})">⬇️ Scarica PNG</button>
         `;
         
@@ -189,7 +197,7 @@
         
         // Genera QR code
         new QRCode(document.getElementById(`qr-${i}`), {
-          text: url,
+          text: paymentUrl,
           width: 200,
           height: 200,
           colorDark: '#000000',
