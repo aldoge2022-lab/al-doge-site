@@ -91,6 +91,61 @@ exports.handler = async function (event, context) {
     const pickupTimeLine = !isTablePayment ? `\n⏰ *Ora ritiro:* ${pickupTime}` : "";
     const notesLine = !isTablePayment ? `\n📝 *Note:* ${notes}` : "";
 
+    const formatDateTime = (value) => {
+      if (!value) return "-";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return String(value);
+      return date.toLocaleString("it-IT", { timeZone: "Europe/Rome" });
+    };
+
+    const isFinalTableSettlement = data.type === "table_payment_completed";
+
+    if (isFinalTableSettlement) {
+      const finalState = data.status ? String(data.status) : "fully_paid";
+      const finalTotal = Number.parseFloat(data.billTotal ?? data.total);
+      const safeFinalTotal = Number.isFinite(finalTotal) ? finalTotal : totalAmount;
+      const completedSplits = data.completedSplits ? String(data.completedSplits) : "-";
+      const finalPaidAt = formatDateTime(data.finalPaidAt || data.timestamp);
+      const finalPaymentId = data.finalPaymentId ? String(data.finalPaymentId) : "-";
+
+      const finalMessage = `
+✅ *Conto tavolo ${tableNumber ?? "-"} completamente saldato*
+
+🪑 *Tavolo:* ${tableNumber ?? "-"}
+📌 *Stato finale:* ${finalState}
+💶 *Totale finale conto:* €${safeFinalTotal.toFixed(2)}
+➗ *Quote completate:* ${completedSplits}
+🕒 *Ultimo pagamento:* ${finalPaidAt}
+💳 *Payment ID finale:* ${finalPaymentId}
+      `;
+
+      const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+
+      const finalResponse = await fetch(telegramUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: finalMessage,
+          parse_mode: "Markdown",
+        }),
+      });
+
+      const finalResult = await finalResponse.json();
+      if (!finalResponse.ok) {
+        console.error("Telegram error:", finalResult);
+        return {
+          statusCode: 500,
+          body: "Telegram API error",
+        };
+      }
+
+      return {
+        statusCode: 200,
+        body: "Final table settlement sent to Telegram",
+      };
+    }
+
     const message = `
 📦 *Nuovo ordine AL DOGE!*
 

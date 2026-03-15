@@ -66,6 +66,7 @@ Sistema completo di ordini online per pizzeria con menu pizze, creatore panini A
 - Input importo personalizzato
 - Pagamento Stripe + notifica Telegram
 - Generatore QR con download e stampa
+- Gap aperto: manca ancora la scelta esplicita tra pagamento unico e pagamento diviso (UI + logica)
 
 ## 🚀 Setup e Installazione
 

@@ -13,7 +13,7 @@
 ✅ panini-custom.html     - Creatore panini AI personalizzati
 ✅ carrello.html          - Carrello unificato con gestione
 ✅ checkout.html          - Checkout 3 step + Stripe
-✅ pay.html               - Pagamento QR tavolo
+⚠️ pay.html               - Flusso pagamento incompleto (manca scelta unico/diviso in UI + logica)
 ```
 
 ### 2. Pagine Admin (2 pagine)
@@ -64,12 +64,12 @@
 - [x] Conferma ordine con numero
 - [x] Salvataggio localStorage
 
-### Pagamenti ✅
+### Pagamenti ⚠️
 - [x] Integrazione Stripe (test mode)
 - [x] QR Code per 10 tavoli
 - [x] Importi predefiniti (€10-€100)
 - [x] Input importo personalizzato
-- [x] Pagamento al tavolo
+- [ ] Scelta modalità pagamento: unico vs diviso (UI + logica reale)
 
 ### Notifiche Telegram ✅
 - [x] Bot automatico ordini
