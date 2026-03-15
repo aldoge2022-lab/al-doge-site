@@ -17,6 +17,7 @@
 
 # OPEN ISSUES REMAINING
 - Catalogo ancora frammentato (`menu.json`, `data/catalog.js`, `core/menu/food-core.json`, hardcoded).
+- Flusso `pay.html` ancora incompleto: mancano scelta e gestione reale tra pagamento unico e pagamento diviso.
 - Da fare successivamente: unificazione sorgente dati e allineamento recommendation deep logic.
 
 # FINAL PROJECT STRUCTURE
