@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conti Tavoli - AL DOGE</title>
+  <style>
+    :root {
+      --gold: #d4af37;
+      --dark: #0b0b0b;
+      --soft: #1a1a1a;
+      --text: #f5f5f5;
+      --muted: #b3b3b3;
+      --ok: #4caf50;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      padding: 24px;
+    }
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      background: var(--soft);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      border-radius: 16px;
+      padding: 24px;
+    }
+    h1 {
+      margin-top: 0;
+      color: var(--gold);
+      font-size: 28px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    label {
+      font-size: 14px;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 6px;
+    }
+    input, textarea, button {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      background: #111;
+      color: var(--text);
+      padding: 12px;
+      font-size: 16px;
+    }
+    textarea { min-height: 92px; resize: vertical; }
+    button {
+      margin-top: 14px;
+      cursor: pointer;
+      background: var(--gold);
+      color: #000;
+      border: none;
+      font-weight: 700;
+    }
+    .status {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 10px;
+      background: rgba(76, 175, 80, 0.12);
+      border: 1px solid rgba(76, 175, 80, 0.5);
+      color: var(--ok);
+      display: none;
+    }
+    .summary {
+      margin-top: 18px;
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .links {
+      margin-top: 12px;
+    }
+    .links a {
+      color: #ffda6f;
+      display: inline-block;
+      margin-right: 12px;
+    }
+    @media (max-width: 640px) {
+      .grid { grid-template-columns: 1fr; }
+      body { padding: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <h1>Gestione Conto Tavolo</h1>
+    <div class="grid">
+      <div>
+        <label for="tableNumber">Numero tavolo (1-10)</label>
+        <input type="number" id="tableNumber" min="1" max="10" value="1">
+      </div>
+      <div>
+        <label for="totalAmount">Totale conto (€)</label>
+        <input type="number" id="totalAmount" min="0.01" step="0.01" placeholder="0.00">
+      </div>
+    </div>
+    <div style="margin-top:12px;">
+      <label for="note">Nota conto (opzionale)</label>
+      <textarea id="note" placeholder="Es. tavolo 4 - compleanno"></textarea>
+    </div>
+    <button id="saveBtn">Salva Conto Tavolo</button>
+    <div class="status" id="statusBox"></div>
+    <div class="summary" id="summaryBox"></div>
+    <div class="links" id="linksBox"></div>
+  </main>
+
+  <script>
+    const statusBox = document.getElementById("statusBox");
+    const summaryBox = document.getElementById("summaryBox");
+    const linksBox = document.getElementById("linksBox");
+
+    function euro(value) {
+      return Number(value).toFixed(2);
+    }
+
+    function showBill(bill) {
+      summaryBox.innerHTML = `
+        Tavolo ${bill.tableNumber} | Totale: €${euro(bill.totalAmount)} | Pagato: €${euro(bill.paidAmount)} | Residuo: €${euro(bill.residualAmount)} | Stato: ${bill.status}
+      `;
+
+      const payUrl = `${window.location.origin}/pay.html?table=${bill.tableNumber}`;
+      linksBox.innerHTML = `
+        <a href="${payUrl}" target="_blank" rel="noopener">Apri pay.html</a>
+        <a href="/qr-generator.html" target="_blank" rel="noopener">Apri qr-generator.html</a>
+      `;
+    }
+
+    async function saveBill() {
+      const tableNumber = Number.parseInt(document.getElementById("tableNumber").value, 10);
+      const totalAmount = Number.parseFloat(document.getElementById("totalAmount").value);
+      const note = document.getElementById("note").value;
+
+      const response = await fetch("/.netlify/functions/table-bill", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tableNumber, totalAmount, note }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Errore salvataggio conto");
+      }
+
+      statusBox.style.display = "block";
+      statusBox.textContent = "Conto tavolo salvato correttamente.";
+      showBill(data.bill);
+    }
+
+    document.getElementById("saveBtn").addEventListener("click", async () => {
+      statusBox.style.display = "none";
+      statusBox.textContent = "";
+      try {
+        await saveBill();
+      } catch (error) {
+        statusBox.style.display = "block";
+        statusBox.style.background = "rgba(255, 72, 72, 0.12)";
+        statusBox.style.borderColor = "rgba(255, 72, 72, 0.45)";
+        statusBox.style.color = "#ffadad";
+        statusBox.textContent = error.message;
+      }
+    });
+  </script>
+</body>
+</html>

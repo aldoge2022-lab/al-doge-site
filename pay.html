@@ -240,8 +240,13 @@
       
       <h1>AL DOGE</h1>
       <div class="table-number">Tavolo <span id="table-number">-</span></div>
-      <p class="subtitle">Seleziona l'importo o inseriscilo manualmente</p>
-      <p class="subtitle" style="margin-top:-24px;font-size:13px;color:#ffcf6b;">Flusso legacy dimostrativo: non costituisce conferma di pagamento reale.</p>
+      <p class="subtitle">Totale e residuo vengono letti in tempo reale dal conto tavolo.</p>
+      <div class="info-box" style="margin-top:-12px;margin-bottom:22px;text-align:left;">
+        <div>Totale conto: <strong>€<span id="bill-total">0.00</span></strong></div>
+        <div>Pagato finora: <strong>€<span id="bill-paid">0.00</span></strong></div>
+        <div>Residuo: <strong>€<span id="bill-residual">0.00</span></strong></div>
+        <div>Stato conto: <strong><span id="bill-status">-</span></strong></div>
+      </div>
 
       <!-- Quick Amounts -->
       <div class="quick-amounts">
@@ -279,7 +284,7 @@
       </button>
 
       <div class="info-box">
-        ℹ️ Pagamento sicuro tramite Stripe. Il personale verrà notificato immediatamente.
+        ℹ️ Pagamento quota conto tavolo. Il personale viene notificato a ogni quota e al saldo finale.
       </div>
     </div>
 
@@ -289,7 +294,8 @@
       <div class="success-text">Pagamento Completato!</div>
       <div class="success-detail">
         Grazie per aver scelto AL DOGE<br>
-        Importo: <span style="color: var(--gold); font-weight: 600;">€<span id="paid-amount">0.00</span></span>
+        Importo quota: <span style="color: var(--gold); font-weight: 600;">€<span id="paid-amount">0.00</span></span><br>
+        Residuo aggiornato: <span style="color: var(--gold); font-weight: 600;">€<span id="remaining-amount">0.00</span></span>
       </div>
       <div class="info-box" style="margin-top: 30px;">
         Il personale è stato notificato del tuo pagamento
@@ -300,75 +306,103 @@
   <script>
     let tableNumber = null;
     let selectedAmount = 0;
+    let paymentContext = null;
 
-    // Ottieni numero tavolo da URL
+    function formatEuro(value) {
+      return Number(value || 0).toFixed(2);
+    }
+
     function getTableNumber() {
       const params = new URLSearchParams(window.location.search);
       const table = params.get('table');
-      
       if (!table || isNaN(table) || table < 1 || table > 10) {
         alert('Numero tavolo non valido');
         return null;
       }
-      
-      return parseInt(table);
+      return parseInt(table, 10);
     }
 
-    // Ottieni importo iniziale da URL (amount, fallback total/price)
-    function getInitialAmount() {
-      const params = new URLSearchParams(window.location.search);
-      const rawAmount = params.get('amount') ?? params.get('total') ?? params.get('price');
+    async function resolvePaymentContext() {
+      const response = await fetch(`/.netlify/functions/table-bill?table=${tableNumber}`);
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Errore caricamento conto tavolo');
+      }
+      paymentContext = data.bill;
+      renderBillSummary();
+      ensureSelectedAmountWithinResidual();
+    }
 
-      if (rawAmount === null) {
-        return null;
+    function renderBillSummary() {
+      if (!paymentContext) return;
+      document.getElementById('bill-total').textContent = formatEuro(paymentContext.totalAmount);
+      document.getElementById('bill-paid').textContent = formatEuro(paymentContext.paidAmount);
+      document.getElementById('bill-residual').textContent = formatEuro(paymentContext.residualAmount);
+      document.getElementById('bill-status').textContent = paymentContext.status;
+    }
+
+    function ensureSelectedAmountWithinResidual() {
+      const residual = Number(paymentContext?.residualAmount || 0);
+      const input = document.getElementById('custom-amount');
+      const btn = document.getElementById('pay-btn');
+
+      if (residual <= 0) {
+        selectedAmount = 0;
+        input.value = '';
+        btn.disabled = true;
+        btn.textContent = '✅ Conto già saldato';
+        return;
       }
 
-      const normalizedAmount = rawAmount.trim().replace(',', '.');
-      const amount = parseFloat(normalizedAmount);
-
-      if (!Number.isFinite(amount) || amount <= 0) {
-        return null;
+      if (selectedAmount <= 0 || selectedAmount > residual) {
+        selectedAmount = residual;
+        input.value = residual.toFixed(2);
       }
+      btn.disabled = selectedAmount <= 0;
+      btn.textContent = '💳 Paga Ora';
+    }
 
-      return amount;
+    function clearQuickSelection() {
+      document.querySelectorAll('.amount-btn').forEach((btn) => btn.classList.remove('selected'));
     }
 
     function selectAmount(amount, event) {
-      selectedAmount = amount;
-      
-      // Aggiorna UI
-      document.querySelectorAll('.amount-btn').forEach(btn => {
-        btn.classList.remove('selected');
-      });
+      const residual = Number(paymentContext?.residualAmount || 0);
+      const normalized = Math.min(Number(amount || 0), residual);
+      selectedAmount = normalized > 0 ? normalized : 0;
+      clearQuickSelection();
       if (event && event.target) {
         event.target.classList.add('selected');
       }
-      
-      // Imposta input custom
-      document.getElementById('custom-amount').value = amount.toFixed(2);
-      
-      // Abilita bottone
-      document.getElementById('pay-btn').disabled = false;
+      document.getElementById('custom-amount').value = selectedAmount > 0 ? selectedAmount.toFixed(2) : '';
+      document.getElementById('pay-btn').disabled = selectedAmount <= 0;
     }
 
     function onAmountChange() {
       const input = document.getElementById('custom-amount');
+      const residual = Number(paymentContext?.residualAmount || 0);
       const amount = parseFloat(input.value) || 0;
-      
-      selectedAmount = amount;
-      
-      // Deseleziona bottoni quick
-      document.querySelectorAll('.amount-btn').forEach(btn => {
-        btn.classList.remove('selected');
-      });
-      
-      // Abilita/disabilita bottone
-      document.getElementById('pay-btn').disabled = amount <= 0;
+      selectedAmount = Math.min(amount, residual);
+      if (amount > residual) {
+        input.value = selectedAmount.toFixed(2);
+      }
+      clearQuickSelection();
+      document.getElementById('pay-btn').disabled = selectedAmount <= 0;
     }
 
     async function processPayment() {
+      if (!paymentContext) {
+        alert('Contesto pagamento non disponibile');
+        return;
+      }
+
       if (selectedAmount <= 0) {
         alert('Inserisci un importo valido');
+        return;
+      }
+
+      if (selectedAmount > Number(paymentContext.residualAmount)) {
+        alert('Importo superiore al residuo');
         return;
       }
 
@@ -377,90 +411,56 @@
       btn.textContent = '⏳ Elaborazione...';
 
       try {
-        // Simula pagamento (in produzione usare Stripe Payment Intent)
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // Crea ordine
-        const order = {
-          orderId: Date.now(),
-          timestamp: new Date().toISOString(),
-          tableNumber: tableNumber,
-          total: selectedAmount.toFixed(2),
-          status: 'paid',
-          type: 'table_payment',
-          name: `Tavolo ${tableNumber}`,
-          phone: '-',
-          address: `Tavolo ${tableNumber}`,
-          items: [
-            {
-              name: `Pagamento tavolo ${tableNumber}`,
-              qty: 1,
-              price: selectedAmount
-            }
-          ]
-        };
-
-        // Salva ordine
-        const orders = JSON.parse(localStorage.getItem('aldoge_orders') || '[]');
-        orders.push(order);
-        localStorage.setItem('aldoge_orders', JSON.stringify(orders));
-
-        // Invia notifica Telegram
-        const notifyResponse = await fetch('/.netlify/functions/telegram-notify', {
+        const response = await fetch('/.netlify/functions/table-payment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(order)
+          body: JSON.stringify({
+            tableNumber,
+            paymentAmount: selectedAmount
+          })
         });
-
-        if (!notifyResponse.ok) {
-          throw new Error('Errore invio notifica Telegram');
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || 'Errore pagamento');
         }
 
-        // Mostra successo
-        document.getElementById('paid-amount').textContent = selectedAmount.toFixed(2);
+        paymentContext = data.bill;
+        renderBillSummary();
+        document.getElementById('paid-amount').textContent = formatEuro(selectedAmount);
+        document.getElementById('remaining-amount').textContent = formatEuro(paymentContext.residualAmount);
         document.getElementById('payment-form').style.display = 'none';
         document.getElementById('success-message').classList.add('show');
-
       } catch (error) {
         console.error('Errore pagamento:', error);
-        alert('Errore nel processare il pagamento. Riprova.');
+        alert(`Errore nel processare il pagamento: ${error.message}`);
         btn.disabled = false;
         btn.textContent = '💳 Paga Ora';
       }
     }
 
-    // Inizializza
-    tableNumber = getTableNumber();
-    if (tableNumber) {
-      document.getElementById('table-number').textContent = tableNumber;
-
-      const initialAmount = getInitialAmount();
-      if (initialAmount !== null) {
-        const matchingQuickButton = Array.from(document.querySelectorAll('.amount-btn')).find(btn => {
-          const buttonValue = parseFloat(
-            (btn.textContent || '').replace(/[^\d.,-]/g, '').replace(',', '.')
-          );
-          return Number.isFinite(buttonValue) && buttonValue === initialAmount;
-        });
-
-        if (matchingQuickButton) {
-          selectAmount(initialAmount, { target: matchingQuickButton });
-        } else {
-          document.getElementById('custom-amount').value = initialAmount.toFixed(2);
-          onAmountChange();
-        }
-      }
-    } else {
-      document.getElementById('payment-form').innerHTML = `
-        <div style="padding: 40px; text-align: center;">
-          <div style="font-size: 60px; margin-bottom: 20px;">⚠️</div>
-          <div style="color: var(--muted); font-size: 18px;">
-            Codice QR non valido.<br>
-            Richiedi assistenza al personale.
+    async function initPayPage() {
+      tableNumber = getTableNumber();
+      if (!tableNumber) {
+        document.getElementById('payment-form').innerHTML = `
+          <div style="padding: 40px; text-align: center;">
+            <div style="font-size: 60px; margin-bottom: 20px;">⚠️</div>
+            <div style="color: var(--muted); font-size: 18px;">
+              Codice QR non valido.<br>
+              Richiedi assistenza al personale.
+            </div>
           </div>
-        </div>
-      `;
+        `;
+        return;
+      }
+
+      document.getElementById('table-number').textContent = tableNumber;
+      await resolvePaymentContext();
     }
+
+    initPayPage().catch((error) => {
+      console.error('Errore init pay page:', error);
+      alert('Errore nel caricamento del conto tavolo.');
+    });
   </script>
 </body>
 </html>

@@ -39,6 +39,9 @@ exports.handler = async function (event, context) {
         body: "Invalid total amount",
       };
     }
+    const paymentAmount = Number.parseFloat(data.paymentAmount);
+    const paidAmount = Number.parseFloat(data.paidAmount);
+    const residualAmount = Number.parseFloat(data.residualAmount);
 
     const items = Array.isArray(data.items)
       ? data.items.filter((item) => item && typeof item.name === "string")
@@ -84,21 +87,32 @@ exports.handler = async function (event, context) {
       ? data.pickupTime.trim()
       : (typeof data.time === "string" && data.time.trim() ? data.time.trim() : "-");
 
-    const tableLine = isTablePayment ? `\n🪑 *Tavolo:* ${tableNumber ?? "-"}` : "";
-    const statusLine = data.status ? `\n📌 *Stato:* ${String(data.status)}` : "";
-    const orderIdLine = data.orderId ? `\n🧾 *ID:* ${String(data.orderId)}` : "";
-    const orderTypeLine = !isTablePayment ? `\n🛍️ *Tipo ordine:* ${orderTypeLabel}` : "";
-    const pickupTimeLine = !isTablePayment ? `\n⏰ *Ora ritiro:* ${pickupTime}` : "";
-    const notesLine = !isTablePayment ? `\n📝 *Note:* ${notes}` : "";
+    const tableLine = isTablePayment ? `\n🪑 Tavolo: ${tableNumber ?? "-"}` : "";
+    const statusLine = data.status ? `\n📌 Stato: ${String(data.status)}` : "";
+    const orderIdLine = data.orderId ? `\n🧾 ID: ${String(data.orderId)}` : "";
+    const orderTypeLine = !isTablePayment ? `\n🛍️ Tipo ordine: ${orderTypeLabel}` : "";
+    const pickupTimeLine = !isTablePayment ? `\n⏰ Ora ritiro: ${pickupTime}` : "";
+    const notesLine = !isTablePayment ? `\n📝 Note: ${notes}` : "";
+
+    const title = isTablePayment ? "💳 Pagamento tavolo AL DOGE" : "📦 Nuovo ordine AL DOGE!";
+    const paymentLine = isTablePayment && Number.isFinite(paymentAmount)
+      ? `\n💸 *Quota pagata:* €${paymentAmount.toFixed(2)}`
+      : "";
+    const paidLine = isTablePayment && Number.isFinite(paidAmount)
+      ? `\n✅ *Pagato finora:* €${paidAmount.toFixed(2)}`
+      : "";
+    const residualLine = isTablePayment && Number.isFinite(residualAmount)
+      ? `\n🧮 *Residuo:* €${residualAmount.toFixed(2)}`
+      : "";
 
     const message = `
-📦 *Nuovo ordine AL DOGE!*
+${title}
 
-👤 *Nome:* ${name}
-📞 *Telefono:* ${phone}
-📍 *Indirizzo:* ${address}${orderTypeLine}${pickupTimeLine}${notesLine}${tableLine}${statusLine}${orderIdLine}
+👤 Nome: ${name}
+📞 Telefono: ${phone}
+📍 Indirizzo: ${address}${orderTypeLine}${pickupTimeLine}${notesLine}${tableLine}${statusLine}${orderIdLine}
 
-🧾 *Ordine:*
+🧾 Ordine:
 ${finalItems.map((i) => {
       const baseLine = `- ${i.qty}× ${i.name}`;
       if (!Array.isArray(i.extras) || !i.extras.length) {
@@ -106,9 +120,9 @@ ${finalItems.map((i) => {
       }
       const extrasLines = i.extras.map((extra) => `  + ${extra}`).join("\n");
       return `${baseLine}\n${extrasLines}`;
-    }).join("\n")}
+}).join("\n")}
 
-💶 *Totale:* €${totalAmount.toFixed(2)}
+💶 Totale conto: €${totalAmount.toFixed(2)}${paymentLine}${paidLine}${residualLine}
     `;
 
     const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
@@ -119,7 +133,6 @@ ${finalItems.map((i) => {
       body: JSON.stringify({
         chat_id: chatId,
         text: message,
-        parse_mode: "Markdown",
       }),
     });
 

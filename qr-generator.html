@@ -174,7 +174,9 @@
       const grid = document.getElementById('qr-grid');
       
       for (let i = 1; i <= 10; i++) {
-        const url = `${BASE_URL}/pay.html?table=${i}`;
+        const payUrl = new URL('/pay.html', BASE_URL);
+        payUrl.searchParams.set('table', String(i));
+        const url = payUrl.toString();
         
         const card = document.createElement('div');
         card.className = 'qr-card';
