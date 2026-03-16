@@ -10,6 +10,9 @@
           integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA==" 
           crossorigin="anonymous" 
           referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer"></script>
   
   <style>
     :root {
@@ -277,47 +280,34 @@
       }
     }
 
-    function downloadQR(tableNumber) {
+    async function downloadQR(tableNumber) {
       const qrContainer = document.getElementById(`qr-${tableNumber}`);
-      const canvas = qrContainer.querySelector('canvas');
-      
-      if (canvas) {
-        const exportCanvas = document.createElement('canvas');
-        exportCanvas.width = canvas.width;
-        exportCanvas.height = canvas.height;
-        const ctx = exportCanvas.getContext('2d');
-        ctx.drawImage(canvas, 0, 0);
+      const card = qrContainer?.closest('.qr-card');
 
-        const logo = new Image();
-        logo.onload = () => {
-          const logoSize = Math.round(canvas.width * 0.2);
-          const logoX = Math.round((canvas.width - logoSize) / 2);
-          const logoY = Math.round((canvas.height - logoSize) / 2);
-          const badgePadding = 4;
-          const centerX = canvas.width / 2;
-          const centerY = canvas.height / 2;
-          const badgeRadius = (logoSize / 2) + badgePadding;
-          const logoRadius = logoSize / 2;
+      if (card && window.html2canvas) {
+        const downloadBtn = card.querySelector('.download-btn');
+        const prevDisplay = downloadBtn ? downloadBtn.style.display : '';
 
-          ctx.fillStyle = '#ffffff';
-          ctx.beginPath();
-          ctx.arc(centerX, centerY, badgeRadius, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.save();
-          ctx.beginPath();
-          ctx.arc(centerX, centerY, logoRadius, 0, Math.PI * 2);
-          ctx.clip();
-          ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
-          ctx.restore();
+        try {
+          if (downloadBtn) downloadBtn.style.display = 'none';
+
+          const exportCanvas = await html2canvas(card, {
+            scale: 3,
+            useCORS: true,
+            backgroundColor: null,
+            logging: false
+          });
 
           const url = exportCanvas.toDataURL('image/png');
           const a = document.createElement('a');
           a.href = url;
           a.download = `aldoge-tavolo-${tableNumber}.png`;
           a.click();
-        };
-
-        logo.src = '/logo-al-doge.png';
+        } catch (error) {
+          console.error('Errore durante export PNG card:', error);
+        } finally {
+          if (downloadBtn) downloadBtn.style.display = prevDisplay;
+        }
       }
     }
 
