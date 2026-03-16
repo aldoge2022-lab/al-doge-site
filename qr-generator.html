@@ -113,34 +113,30 @@
       line-height: 1.3;
     }
 
-    .qr-caption-brand {
+    .qr-caption-table {
       display: block;
       font-family: 'Playfair Display', serif;
-      font-size: 22px;
-      color: #ffffff;
-      letter-spacing: 0.5px;
+      font-size: 25px;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.3px;
     }
 
     .qr-caption-action {
       display: block;
       font-size: 15px;
-      color: #d4d4d4;
-      margin-top: 3px;
-    }
-
-    .qr-caption-table {
-      display: block;
+      color: #e2e2e2;
       margin-top: 4px;
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--gold);
+      font-weight: 500;
     }
 
-    .qr-url {
-      font-size: 11px;
-      color: var(--muted);
-      word-break: break-all;
-      margin-bottom: 14px;
+    .qr-caption-brand {
+      display: block;
+      margin-top: 5px;
+      font-family: 'Playfair Display', serif;
+      font-size: 19px;
+      color: #ffffff;
+      letter-spacing: 0.6px;
     }
 
     .download-btn {
@@ -213,11 +209,6 @@
         color: black;
       }
 
-      .qr-url {
-        color: #666;
-        font-size: 10px;
-      }
-
       .download-btn {
         display: none;
       }
@@ -258,11 +249,10 @@
           <div class="table-number">Tavolo ${i}</div>
           <div class="qr-code" id="qr-${i}"></div>
           <div class="qr-caption">
-            <span class="qr-caption-brand">AL DOGE</span>
-            <span class="qr-caption-action">Scansiona per pagare</span>
             <span class="qr-caption-table">Tavolo ${i}</span>
+            <span class="qr-caption-action">Scansiona il QR per il pagamento</span>
+            <span class="qr-caption-brand">AL DOGE</span>
           </div>
-          <div class="qr-url">${url}</div>
           <button class="download-btn" onclick="downloadQR(${i})">⬇️ Scarica PNG</button>
         `;
         
