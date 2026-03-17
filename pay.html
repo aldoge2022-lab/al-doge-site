@@ -395,6 +395,8 @@
   <script>
     const TABLE_MIN = 1;
     const TABLE_MAX = 10;
+    const SPLIT_MIN = 2;
+    const SPLIT_MAX = 20;
 
     const state = {
       tableId: null,
@@ -567,7 +569,7 @@
       });
 
       if (!response.ok) {
-        throw new Error('Caricamento conto tavolo non riuscito');
+        throw new Error(`Caricamento conto tavolo non riuscito (HTTP ${response.status})`);
       }
 
       const payload = await response.json();
@@ -606,7 +608,7 @@
         };
       }
 
-      const splitCount = Math.max(2, Math.min(20, Number.parseInt(state.splitCount, 10) || 2));
+      const splitCount = Math.max(SPLIT_MIN, Math.min(SPLIT_MAX, Number.parseInt(state.splitCount, 10) || SPLIT_MIN));
       const nextIndex = Math.min(state.paymentCount + 1, splitCount);
       const baseShare = round2(state.billTotal / splitCount);
       let amountNow = nextIndex < splitCount ? Math.min(baseShare, remaining) : remaining;
@@ -690,8 +692,12 @@
 
     function buildFinalSettlementNotification(finalPaymentOrder, splitCount) {
       const isSplit = state.paymentMode === 'split';
+      const requestedSplitCount = Number.parseInt(splitCount, 10);
+      const fallbackSplitCount = Number.isInteger(state.paymentCount) && state.paymentCount >= SPLIT_MIN
+        ? state.paymentCount
+        : SPLIT_MIN;
       const safeSplitCount = isSplit
-        ? Math.max(2, Math.min(20, Number.parseInt(splitCount, 10) || state.paymentCount || 2))
+        ? Math.max(SPLIT_MIN, Math.min(SPLIT_MAX, Number.isInteger(requestedSplitCount) ? requestedSplitCount : fallbackSplitCount))
         : 1;
       const completedSplits = `${Math.max(1, Math.min(state.paymentCount, safeSplitCount))}/${safeSplitCount}`;
 
@@ -749,7 +755,7 @@
         const remainingBefore = getRemainingAmount();
 
         const splitCount = state.paymentMode === 'split'
-          ? Math.max(2, Math.min(20, Number.parseInt(state.splitCount, 10) || 2))
+          ? Math.max(SPLIT_MIN, Math.min(SPLIT_MAX, Number.parseInt(state.splitCount, 10) || SPLIT_MIN))
           : null;
 
         const order = buildPaymentOrder(
@@ -815,7 +821,7 @@
 
       document.getElementById('split-count').addEventListener('input', (event) => {
         const parsed = Number.parseInt(event.target.value, 10);
-        const safe = Number.isInteger(parsed) ? Math.max(2, Math.min(20, parsed)) : 2;
+        const safe = Number.isInteger(parsed) ? Math.max(SPLIT_MIN, Math.min(SPLIT_MAX, parsed)) : SPLIT_MIN;
         state.splitCount = safe;
         event.target.value = safe;
         renderPaymentPanel();

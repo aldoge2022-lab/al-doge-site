@@ -113,6 +113,7 @@ function resolveStorage() {
     };
   } catch (error) {
     if (error && error.name === 'MissingBlobsEnvironmentError') {
+      console.warn('[table-bill] Netlify Blobs non configurato, uso storage locale di fallback');
       return { kind: 'memory' };
     }
     throw error;
