@@ -308,6 +308,21 @@
     let splitShares = 2;
     let splitShareIndex = 1;
 
+    function getPaymentReturnState() {
+      const params = new URLSearchParams(window.location.search);
+      return {
+        paymentStatus: params.get('payment'),
+        sessionId: params.get('session_id')
+      };
+    }
+
+    function clearPaymentReturnState() {
+      const current = new URL(window.location.href);
+      current.searchParams.delete('payment');
+      current.searchParams.delete('session_id');
+      window.history.replaceState({}, '', `${current.pathname}${current.search}`);
+    }
+
     // Ottieni numero tavolo da URL
     function getTableNumber() {
       const params = new URLSearchParams(window.location.search);
@@ -521,6 +536,31 @@
       });
     }
 
+    function showPaymentSuccess(amount) {
+      document.getElementById('paid-amount').textContent = Number(amount).toFixed(2);
+      document.getElementById('payment-form').style.display = 'none';
+      document.getElementById('success-message').classList.add('show');
+    }
+
+    async function verifyStripePayment(sessionId) {
+      const confirmResponse = await fetch(TABLE_PAYMENT_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'confirm',
+          sessionId,
+          tableNumber
+        })
+      });
+
+      const confirmData = await confirmResponse.json().catch(() => null);
+      if (!confirmResponse.ok || !confirmData || confirmData.ok !== true || confirmData.paid !== true) {
+        throw new Error('Pagamento Stripe non confermato');
+      }
+
+      return confirmData;
+    }
+
     async function processPayment() {
       if (selectedAmount <= 0) {
         alert('Importo non disponibile');
@@ -549,15 +589,11 @@
           throw new Error('Errore invio pagamento tavolo');
         }
         const responseData = await notifyResponse.json();
-        const paidAmount = Number(responseData?.payableAmount);
-        if (Number.isFinite(paidAmount) && paidAmount > 0) {
-          selectedAmount = paidAmount;
+        if (!responseData || responseData.ok !== true || typeof responseData.checkoutUrl !== 'string') {
+          throw new Error('Sessione Stripe non valida');
         }
 
-        // Mostra successo
-        document.getElementById('paid-amount').textContent = selectedAmount.toFixed(2);
-        document.getElementById('payment-form').style.display = 'none';
-        document.getElementById('success-message').classList.add('show');
+        window.location.assign(responseData.checkoutUrl);
 
       } catch (error) {
         console.error('Errore pagamento:', error);
@@ -587,6 +623,31 @@
       }
 
       updatePayableAmount();
+
+      const returnState = getPaymentReturnState();
+      if (returnState.paymentStatus === 'cancelled') {
+        showBillStatus('Pagamento annullato. Nessun addebito effettuato.');
+        clearPaymentReturnState();
+        return;
+      }
+
+      if (returnState.paymentStatus === 'success' && returnState.sessionId) {
+        const btn = document.getElementById('pay-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Verifica pagamento...';
+        showBillStatus('Verifica pagamento Stripe in corso...');
+        try {
+          const confirmedPayment = await verifyStripePayment(returnState.sessionId);
+          const paidAmount = Number(confirmedPayment?.payableAmount);
+          showPaymentSuccess(Number.isFinite(paidAmount) && paidAmount > 0 ? paidAmount : selectedAmount);
+          clearPaymentReturnState();
+        } catch (error) {
+          console.error('Errore verifica pagamento Stripe:', error);
+          showBillStatus('Pagamento non ancora confermato. Se l\'addebito risulta effettuato, contatta il personale.');
+          btn.disabled = false;
+          btn.textContent = '💳 Paga Ora';
+        }
+      }
     }
 
     init();
