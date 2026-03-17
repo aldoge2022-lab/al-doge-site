@@ -75,55 +75,6 @@
       margin-bottom: 40px;
     }
 
-    .quick-amounts {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .amount-btn {
-      padding: 20px;
-      border: 2px solid rgba(212, 175, 55, 0.3);
-      border-radius: 12px;
-      background: var(--dark);
-      color: var(--text);
-      font-size: 18px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .amount-btn:hover {
-      border-color: var(--gold);
-      background: rgba(212, 175, 55, 0.1);
-    }
-
-    .amount-btn.selected {
-      border-color: var(--gold);
-      background: rgba(212, 175, 55, 0.2);
-    }
-
-    .divider {
-      display: flex;
-      align-items: center;
-      margin: 30px 0;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .divider::before,
-    .divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: rgba(212, 175, 55, 0.3);
-    }
-
-    .divider span {
-      padding: 0 15px;
-    }
-
     .custom-amount {
       margin-bottom: 30px;
     }
@@ -226,9 +177,6 @@
         padding: 30px 20px;
       }
 
-      .quick-amounts {
-        grid-template-columns: repeat(2, 1fr);
-      }
     }
   </style>
 </head>
@@ -240,21 +188,16 @@
       
       <h1>AL DOGE</h1>
       <div class="table-number">Tavolo <span id="table-number">-</span></div>
-      <p class="subtitle">Seleziona l'importo o inseriscilo manualmente</p>
-      <p class="subtitle" style="margin-top:-24px;font-size:13px;color:#ffcf6b;">Flusso legacy dimostrativo: non costituisce conferma di pagamento reale.</p>
-
-      <!-- Quick Amounts -->
-      <div class="quick-amounts">
-        <button class="amount-btn" onclick="selectAmount(10, event)">€10</button>
-        <button class="amount-btn" onclick="selectAmount(20, event)">€20</button>
-        <button class="amount-btn" onclick="selectAmount(30, event)">€30</button>
-        <button class="amount-btn" onclick="selectAmount(40, event)">€40</button>
-        <button class="amount-btn" onclick="selectAmount(50, event)">€50</button>
-        <button class="amount-btn" onclick="selectAmount(100, event)">€100</button>
-      </div>
-
-      <div class="divider">
-        <span>oppure</span>
+      <p class="subtitle">Conto del tavolo</p>
+      <div id="bill-status" class="info-box" style="margin-top: 0; display: none;"></div>
+      <div id="bill-details" class="info-box" style="margin-top: 12px; display: none; text-align: left;">
+        <div style="display:flex;justify-content:space-between;gap:8px;font-weight:600;color:#fff;">
+          <span>Totale conto</span>
+          <span id="bill-total">--</span>
+        </div>
+        <div id="bill-note" style="display:none;margin-top:8px;font-size:13px;"></div>
+        <div id="bill-payment-code" style="display:none;margin-top:8px;font-size:13px;"></div>
+        <ul id="bill-items" style="margin:10px 0 0;padding-left:18px;"></ul>
       </div>
 
       <!-- Custom Amount -->
@@ -298,20 +241,138 @@
   </div>
 
   <script>
+    const TABLE_BILL_ENDPOINT = '/.netlify/functions/table-bill';
     let tableNumber = null;
     let selectedAmount = 0;
+    let currentBill = null;
 
     // Ottieni numero tavolo da URL
     function getTableNumber() {
       const params = new URLSearchParams(window.location.search);
-      const table = params.get('table');
-      
-      if (!table || isNaN(table) || table < 1 || table > 10) {
-        alert('Numero tavolo non valido');
+      const table =
+        params.get('table') ||
+        params.get('tableNumber') ||
+        params.get('t');
+
+      if (!table) {
         return null;
       }
-      
-      return parseInt(table);
+
+      return String(table).trim();
+    }
+
+    function formatCurrency(amount) {
+      const value = Number(amount);
+      if (!Number.isFinite(value)) {
+        return '€0.00';
+      }
+      return `€${value.toFixed(2)}`;
+    }
+
+    function showBillStatus(message) {
+      const status = document.getElementById('bill-status');
+      status.style.display = 'block';
+      status.textContent = message;
+    }
+
+    function showFormError(message) {
+      document.getElementById('payment-form').innerHTML = `
+        <div style="padding: 40px; text-align: center;">
+          <div style="font-size: 60px; margin-bottom: 20px;">⚠️</div>
+          <div style="color: var(--muted); font-size: 18px;">
+            ${message}
+          </div>
+        </div>
+      `;
+    }
+
+    function getItemTotal(item) {
+      if (!item || typeof item !== 'object') {
+        return 0;
+      }
+      if (Number.isFinite(Number(item.total))) {
+        return Number(item.total);
+      }
+      const qty = Number(item.qty ?? item.quantity ?? 1);
+      const price = Number(item.price ?? item.unitPrice ?? 0);
+      if (Number.isFinite(qty) && Number.isFinite(price)) {
+        return qty * price;
+      }
+      return 0;
+    }
+
+    function renderBill(bill) {
+      currentBill = bill;
+      const safeTableNumber = bill?.tableNumber ?? tableNumber;
+      tableNumber = String(safeTableNumber);
+      document.getElementById('table-number').textContent = safeTableNumber;
+
+      const total = Number(bill?.total);
+      document.getElementById('bill-total').textContent = formatCurrency(total);
+      document.getElementById('bill-details').style.display = 'block';
+
+      const noteEl = document.getElementById('bill-note');
+      if (bill?.note) {
+        noteEl.textContent = `Nota: ${bill.note}`;
+        noteEl.style.display = 'block';
+      } else {
+        noteEl.style.display = 'none';
+      }
+
+      const paymentCodeEl = document.getElementById('bill-payment-code');
+      if (bill?.paymentCode) {
+        paymentCodeEl.textContent = `Codice pagamento: ${bill.paymentCode}`;
+        paymentCodeEl.style.display = 'block';
+      } else {
+        paymentCodeEl.style.display = 'none';
+      }
+
+      const billItems = Array.isArray(bill?.items) ? bill.items : [];
+      const itemsEl = document.getElementById('bill-items');
+      if (billItems.length === 0) {
+        itemsEl.style.display = 'none';
+        itemsEl.innerHTML = '';
+      } else {
+        itemsEl.style.display = 'block';
+        itemsEl.innerHTML = billItems.map((item) => {
+          const qty = Number(item?.qty ?? item?.quantity ?? 1);
+          const itemName = item?.name || 'Voce conto';
+          const itemTotal = getItemTotal(item);
+          return `<li>${qty}x ${itemName} - ${formatCurrency(itemTotal)}</li>`;
+        }).join('');
+      }
+
+      if (Number.isFinite(total) && total > 0) {
+        selectedAmount = total;
+        document.getElementById('custom-amount').value = total.toFixed(2);
+        document.getElementById('pay-btn').disabled = false;
+      } else {
+        document.getElementById('pay-btn').disabled = true;
+      }
+    }
+
+    async function loadBillForTable(table) {
+      const res = await fetch(`${TABLE_BILL_ENDPOINT}?table=${encodeURIComponent(table)}`, { cache: 'no-store' });
+      if (!res.ok) {
+        throw new Error(`Errore caricamento conto (${res.status})`);
+      }
+
+      const payload = await res.json();
+      if (!payload || payload.ok !== true) {
+        throw new Error('Risposta conto non valida');
+      }
+
+      if (payload.empty === true) {
+        showBillStatus('Nessun conto aperto per questo tavolo');
+        document.getElementById('pay-btn').disabled = true;
+        return;
+      }
+
+      if (!payload.bill || typeof payload.bill !== 'object') {
+        throw new Error('Conto mancante nella risposta');
+      }
+
+      renderBill(payload.bill);
     }
 
     // Ottieni importo iniziale da URL (amount, fallback total/price)
@@ -333,35 +394,12 @@
       return amount;
     }
 
-    function selectAmount(amount, event) {
-      selectedAmount = amount;
-      
-      // Aggiorna UI
-      document.querySelectorAll('.amount-btn').forEach(btn => {
-        btn.classList.remove('selected');
-      });
-      if (event && event.target) {
-        event.target.classList.add('selected');
-      }
-      
-      // Imposta input custom
-      document.getElementById('custom-amount').value = amount.toFixed(2);
-      
-      // Abilita bottone
-      document.getElementById('pay-btn').disabled = false;
-    }
-
     function onAmountChange() {
       const input = document.getElementById('custom-amount');
       const amount = parseFloat(input.value) || 0;
       
       selectedAmount = amount;
-      
-      // Deseleziona bottoni quick
-      document.querySelectorAll('.amount-btn').forEach(btn => {
-        btn.classList.remove('selected');
-      });
-      
+
       // Abilita/disabilita bottone
       document.getElementById('pay-btn').disabled = amount <= 0;
     }
@@ -377,9 +415,6 @@
       btn.textContent = '⏳ Elaborazione...';
 
       try {
-        // Simula pagamento (in produzione usare Stripe Payment Intent)
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
         // Crea ordine
         const order = {
           orderId: Date.now(),
@@ -391,19 +426,16 @@
           name: `Tavolo ${tableNumber}`,
           phone: '-',
           address: `Tavolo ${tableNumber}`,
-          items: [
-            {
-              name: `Pagamento tavolo ${tableNumber}`,
-              qty: 1,
-              price: selectedAmount
-            }
-          ]
+          items: Array.isArray(currentBill?.items) && currentBill.items.length > 0
+            ? currentBill.items
+            : [
+                {
+                  name: `Pagamento tavolo ${tableNumber}`,
+                  qty: 1,
+                  price: selectedAmount
+                }
+              ]
         };
-
-        // Salva ordine
-        const orders = JSON.parse(localStorage.getItem('aldoge_orders') || '[]');
-        orders.push(order);
-        localStorage.setItem('aldoge_orders', JSON.stringify(orders));
 
         // Invia notifica Telegram
         const notifyResponse = await fetch('/.netlify/functions/telegram-notify', {
@@ -430,37 +462,32 @@
     }
 
     // Inizializza
-    tableNumber = getTableNumber();
-    if (tableNumber) {
+    async function init() {
+      tableNumber = getTableNumber();
+      if (!tableNumber) {
+        showFormError('Tavolo non specificato');
+        return;
+      }
+
       document.getElementById('table-number').textContent = tableNumber;
 
-      const initialAmount = getInitialAmount();
-      if (initialAmount !== null) {
-        const matchingQuickButton = Array.from(document.querySelectorAll('.amount-btn')).find(btn => {
-          const buttonValue = parseFloat(
-            (btn.textContent || '').replace(/[^\d.,-]/g, '').replace(',', '.')
-          );
-          return Number.isFinite(buttonValue) && buttonValue === initialAmount;
-        });
-
-        if (matchingQuickButton) {
-          selectAmount(initialAmount, { target: matchingQuickButton });
-        } else {
-          document.getElementById('custom-amount').value = initialAmount.toFixed(2);
-          onAmountChange();
-        }
+      try {
+        await loadBillForTable(tableNumber);
+      } catch (error) {
+        console.error('Errore caricamento conto:', error);
+        showFormError('Errore nel caricamento del conto. Riprova tra poco.');
+        return;
       }
-    } else {
-      document.getElementById('payment-form').innerHTML = `
-        <div style="padding: 40px; text-align: center;">
-          <div style="font-size: 60px; margin-bottom: 20px;">⚠️</div>
-          <div style="color: var(--muted); font-size: 18px;">
-            Codice QR non valido.<br>
-            Richiedi assistenza al personale.
-          </div>
-        </div>
-      `;
+
+      const billTotal = Number(currentBill?.total);
+      const initialAmount = getInitialAmount();
+      if ((!Number.isFinite(billTotal) || billTotal <= 0) && initialAmount !== null) {
+        document.getElementById('custom-amount').value = initialAmount.toFixed(2);
+        onAmountChange();
+      }
     }
+
+    init();
   </script>
 </body>
 </html>
