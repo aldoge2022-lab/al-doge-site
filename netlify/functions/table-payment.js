@@ -92,18 +92,38 @@ function normalizeBillShape(rawBill, tableNumber) {
   const source = rawBill && typeof rawBill === 'object' ? rawBill : {};
   const items = normalizeItems(source.items);
   const total = computeTotal(items, source.total);
+  const originalTotal = parseMoney(source.originalTotal);
+  const remainingTotal = parseMoney(source.remainingTotal);
+  const paymentMode = source.paymentMode === 'split' ? 'split' : 'full';
+  const splitMode = source.splitMode === 'split' || paymentMode === 'split' ? 'split' : 'full';
+  const totalShares = Math.max(0, Number.parseInt(source.totalShares, 10) || (paymentMode === 'split' ? SPLIT_MIN_SHARES : 1));
+  const paidShares = Math.max(0, Number.parseInt(source.paidShares, 10) || 0);
+  const remainingShares = Math.max(0, Number.parseInt(source.remainingShares, 10) || Math.max(0, totalShares - paidShares));
+  const paymentStatus = ['open', 'partial', 'partially_paid', 'paid'].includes(String(source.paymentStatus || '').trim())
+    ? String(source.paymentStatus).trim()
+    : (total > 0 ? 'open' : 'paid');
+
   return {
     tableNumber,
     items,
     total,
+    paymentStatus,
+    paymentMode,
+    splitMode,
+    totalShares,
+    paidShares: Math.min(totalShares, paidShares),
+    remainingShares: Math.min(totalShares, remainingShares),
+    originalTotal: round2(originalTotal ?? total),
+    remainingTotal: round2(remainingTotal ?? total),
     note: typeof source.note === 'string' ? source.note.trim() : '',
     paymentCode: typeof source.paymentCode === 'string' ? source.paymentCode.trim() : '',
+    updatedAt: source.updatedAt || new Date().toISOString(),
   };
 }
 
 function computeSplitAmount(total, splitShares, splitShareIndex) {
   const totalCents = roundToCents(total);
-  const shares = Math.max(SPLIT_MIN_SHARES, Math.min(SPLIT_MAX_SHARES, splitShares));
+  const shares = Math.max(1, Math.min(SPLIT_MAX_SHARES, splitShares));
   const index = Math.max(1, Math.min(shares, splitShareIndex));
   const baseShare = Math.floor(totalCents / shares);
   const remainder = totalCents % shares;
@@ -166,6 +186,32 @@ async function loadRawBill(tableNumber) {
   }
 
   return null;
+}
+
+async function saveRawBill(tableNumber, bill) {
+  const keys = [`table-${tableNumber}`, `table-bill:${tableNumber}`];
+  const store = getBlobStore();
+  if (store) {
+    await Promise.all(keys.map((key) => store.setJSON(key, bill)));
+    return;
+  }
+
+  await fs.mkdir(path.dirname(LOCAL_STORE_PATH), { recursive: true });
+  let parsed = {};
+  try {
+    const raw = await fs.readFile(LOCAL_STORE_PATH, 'utf8');
+    const existing = JSON.parse(raw);
+    if (existing && typeof existing === 'object') {
+      parsed = existing;
+    }
+  } catch (error) {
+    if (!error || error.code !== 'ENOENT') {
+      throw error;
+    }
+  }
+
+  keys.forEach((key) => { parsed[key] = bill; });
+  await fs.writeFile(LOCAL_STORE_PATH, JSON.stringify(parsed, null, 2), 'utf8');
 }
 
 function getPaymentRecordKey(sessionId) {
@@ -267,11 +313,9 @@ async function createCheckoutSession(event, payload) {
     return respond(400, { ok: false, error: 'INVALID_TABLE' });
   }
 
-  const paymentMode = payload.paymentMode === 'split' ? 'split' : 'full';
-  const splitShares = Number.parseInt(payload.splitShares, 10) || SPLIT_MIN_SHARES;
-  const splitShareIndex = Number.parseInt(payload.splitShareIndex, 10) || 1;
-  const normalizedShares = Math.max(SPLIT_MIN_SHARES, Math.min(SPLIT_MAX_SHARES, splitShares));
-  const normalizedShareIndex = Math.max(1, Math.min(normalizedShares, splitShareIndex));
+  const requestedMode = payload.paymentMode === 'split' ? 'split' : 'full';
+  const requestedShares = Number.parseInt(payload.splitShares, 10) || SPLIT_MIN_SHARES;
+  const requestedShareIndex = Number.parseInt(payload.splitShareIndex, 10) || 1;
 
   const rawBill = await loadRawBill(tableNumber);
   if (!rawBill) {
@@ -279,13 +323,25 @@ async function createCheckoutSession(event, payload) {
   }
 
   const bill = normalizeBillShape(rawBill.bill || rawBill, tableNumber);
-  if (!Number.isFinite(bill.total) || bill.total <= 0) {
+  const effectiveTotal = bill.paymentStatus === 'partial'
+    ? round2(bill.remainingTotal)
+    : round2(bill.total);
+  if (!Number.isFinite(effectiveTotal) || effectiveTotal <= 0) {
     return respond(400, { ok: false, error: 'EMPTY_BILL' });
   }
 
+  const isOngoingSplit = bill.paymentStatus === 'partial' && bill.remainingShares > 0;
+  const paymentMode = isOngoingSplit ? 'split' : requestedMode;
+  const normalizedShares = isOngoingSplit
+    ? Math.max(1, Math.min(SPLIT_MAX_SHARES, bill.remainingShares))
+    : Math.max(SPLIT_MIN_SHARES, Math.min(SPLIT_MAX_SHARES, requestedShares));
+  const normalizedShareIndex = isOngoingSplit
+    ? 1
+    : Math.max(1, Math.min(normalizedShares, requestedShareIndex));
+
   const payableAmount = paymentMode === 'split'
-    ? computeSplitAmount(bill.total, normalizedShares, normalizedShareIndex)
-    : round2(bill.total);
+    ? computeSplitAmount(effectiveTotal, normalizedShares, normalizedShareIndex)
+    : round2(effectiveTotal);
 
   if (!Number.isFinite(payableAmount) || payableAmount <= 0) {
     return respond(400, { ok: false, error: 'INVALID_PAYABLE_AMOUNT' });
@@ -323,7 +379,10 @@ async function createCheckoutSession(event, payload) {
       paymentMode,
       splitShares: String(normalizedShares),
       splitShareIndex: String(normalizedShareIndex),
-      billTotal: bill.total.toFixed(2),
+      billTotal: effectiveTotal.toFixed(2),
+      originalTotal: round2(bill.originalTotal || bill.total).toFixed(2),
+      priorPaidShares: String(Math.max(0, Number.parseInt(bill.paidShares, 10) || 0)),
+      priorTotalShares: String(Math.max(0, Number.parseInt(bill.totalShares, 10) || 0)),
       payableAmount: payableAmount.toFixed(2),
     },
   });
@@ -340,7 +399,7 @@ async function createCheckoutSession(event, payload) {
     paymentMode,
     splitShares: normalizedShares,
     splitShareIndex: normalizedShareIndex,
-    billTotal: round2(bill.total),
+    billTotal: round2(effectiveTotal),
     payableAmount: round2(payableAmount),
   });
 }
@@ -384,6 +443,7 @@ async function confirmCheckoutSession(payload) {
   );
 
   const fallbackTotal = parseMoney(metadata.billTotal);
+  const fallbackOriginalTotal = parseMoney(metadata.originalTotal);
   const fallbackPayable = parseMoney(metadata.payableAmount);
   const rawBill = await loadRawBill(tableNumber);
   const bill = rawBill ? normalizeBillShape(rawBill.bill || rawBill, tableNumber) : {
@@ -399,12 +459,85 @@ async function confirmCheckoutSession(payload) {
     : round2((session.amount_total || 0) / 100);
 
   const alreadyConfirmed = await hasConfirmedPayment(session.id);
-  if (!alreadyConfirmed) {
-    const splitLine = paymentMode === 'split'
-      ? `\n👥 *Modalita:* Pagamento diviso (${splitShareIndex}/${splitShares})`
-      : '\n👥 *Modalita:* Pagamento unico';
+  if (alreadyConfirmed) {
+    return respond(200, {
+      ok: true,
+      paid: true,
+      alreadyConfirmed: true,
+      tableNumber,
+      paymentMode: bill.paymentMode || paymentMode,
+      splitShares: Math.max(0, Number.parseInt(bill.totalShares, 10) || splitShares),
+      splitShareIndex,
+      billTotal: round2(parseMoney(bill.originalTotal) ?? bill.total),
+      payableAmount: paidAmount,
+      paymentStatus: bill.paymentStatus || 'open',
+      totalShares: Math.max(0, Number.parseInt(bill.totalShares, 10) || 0),
+      paidShares: Math.max(0, Number.parseInt(bill.paidShares, 10) || 0),
+      remainingShares: Math.max(0, Number.parseInt(bill.remainingShares, 10) || 0),
+      originalTotal: round2(parseMoney(bill.originalTotal) ?? bill.total),
+      remainingTotal: round2(parseMoney(bill.remainingTotal) ?? bill.total),
+      sessionId: session.id,
+    });
+  }
 
-    const message = `
+  const baseOriginalTotal = Number.isFinite(parseMoney(bill.originalTotal))
+    ? round2(parseMoney(bill.originalTotal))
+    : round2(Number.isFinite(fallbackOriginalTotal) ? fallbackOriginalTotal : bill.total);
+  const currentRemainingTotal = bill.paymentStatus === 'partial'
+    ? round2(bill.remainingTotal)
+    : round2(bill.total);
+  const safeCurrentRemaining = Math.max(0, currentRemainingTotal);
+  const nextRemainingTotal = round2(Math.max(0, safeCurrentRemaining - paidAmount));
+  const priorPaidShares = Math.max(
+    0,
+    Number.parseInt(metadata.priorPaidShares, 10)
+      || Number.parseInt(bill.paidShares, 10)
+      || 0
+  );
+  const priorTotalShares = Math.max(
+    0,
+    Number.parseInt(metadata.priorTotalShares, 10)
+      || Number.parseInt(bill.totalShares, 10)
+      || 0
+  );
+  const effectiveTotalShares = paymentMode === 'split'
+    ? Math.max(SPLIT_MIN_SHARES, priorTotalShares || splitShares)
+    : 1;
+  const nextPaidShares = paymentMode === 'split'
+    ? Math.min(effectiveTotalShares, priorPaidShares + 1)
+    : 1;
+  const nextRemainingShares = paymentMode === 'split'
+    ? Math.max(0, effectiveTotalShares - nextPaidShares)
+    : 0;
+  const isFullyPaid = nextRemainingTotal <= 0 || nextRemainingShares === 0 || paymentMode === 'full';
+
+  const updatedBill = {
+    ...bill,
+    paymentMode: paymentMode === 'split' ? 'split' : 'full',
+    splitMode: paymentMode === 'split' ? 'split' : 'full',
+    paymentStatus: isFullyPaid ? 'paid' : 'partial',
+    totalShares: effectiveTotalShares,
+    paidShares: nextPaidShares,
+    remainingShares: nextRemainingShares,
+    originalTotal: baseOriginalTotal,
+    remainingTotal: isFullyPaid ? 0 : nextRemainingTotal,
+    total: isFullyPaid ? 0 : nextRemainingTotal,
+    updatedAt: new Date().toISOString(),
+  };
+
+  if (isFullyPaid) {
+    updatedBill.items = [];
+    updatedBill.note = '';
+    updatedBill.paymentCode = '';
+  }
+
+  await saveRawBill(tableNumber, updatedBill);
+
+  const splitLine = paymentMode === 'split'
+    ? `\n👥 *Modalita:* Pagamento diviso (${splitShareIndex}/${splitShares})`
+    : '\n👥 *Modalita:* Pagamento unico';
+
+  const message = `
 💳 *Pagamento tavolo ricevuto*
 
 🪑 *Tavolo:* ${tableNumber}${splitLine}
@@ -412,18 +545,17 @@ async function confirmCheckoutSession(payload) {
 ✅ *Importo pagato:* €${paidAmount.toFixed(2)}
 🧾 *Stripe Session:* ${session.id}
 🕒 *Ora:* ${new Date().toISOString()}
-    `;
+  `;
 
-    await sendTelegramMessage(message);
-    await markPaymentConfirmed(session.id, {
-      tableNumber,
-      paymentMode,
-      splitShares,
-      splitShareIndex,
-      billTotal: round2(bill.total),
-      paidAmount,
-    });
-  }
+  await sendTelegramMessage(message);
+  await markPaymentConfirmed(session.id, {
+    tableNumber,
+    paymentMode,
+    splitShares,
+    splitShareIndex,
+    billTotal: round2(bill.total),
+    paidAmount,
+  });
 
   return respond(200, {
     ok: true,
@@ -431,10 +563,16 @@ async function confirmCheckoutSession(payload) {
     alreadyConfirmed,
     tableNumber,
     paymentMode,
-    splitShares,
+    splitShares: effectiveTotalShares,
     splitShareIndex,
-    billTotal: round2(bill.total),
+    billTotal: round2(baseOriginalTotal),
     payableAmount: paidAmount,
+    paymentStatus: updatedBill.paymentStatus,
+    totalShares: updatedBill.totalShares,
+    paidShares: updatedBill.paidShares,
+    remainingShares: updatedBill.remainingShares,
+    originalTotal: updatedBill.originalTotal,
+    remainingTotal: updatedBill.remainingTotal,
     sessionId: session.id,
   });
 }
