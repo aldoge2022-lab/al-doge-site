@@ -70,11 +70,30 @@ function normalizeItems(rawItems) {
       const qty = Math.max(1, Number.parseInt(item.qty ?? item.quantity, 10) || 1);
       const price = parseMoney(item.price ?? item.unitPrice);
       const subtotal = parseMoney(item.subtotal ?? item.lineTotal ?? item.total);
+      const extras = Array.isArray(item.extras)
+        ? item.extras
+          .map((extra) => {
+            if (!extra || typeof extra !== 'object') return null;
+            const extraName = String(extra.name ?? '').trim();
+            if (!extraName) return null;
+            const extraPrice = parseMoney(extra.price);
+            return {
+              name: extraName,
+              ...(extraPrice !== null ? { price: round2(extraPrice) } : {}),
+            };
+          })
+          .filter(Boolean)
+        : [];
+      const note = typeof item.note === 'string' ? item.note.trim() : '';
       return {
         name,
         qty,
+        ...(typeof item.id === 'string' && item.id.trim() ? { id: item.id.trim() } : {}),
         ...(price !== null ? { price: round2(price) } : {}),
         ...(subtotal !== null ? { subtotal: round2(subtotal) } : {}),
+        ...(typeof item.basePrice === 'number' && Number.isFinite(item.basePrice) ? { basePrice: round2(item.basePrice) } : {}),
+        ...(extras.length ? { extras } : {}),
+        ...(note ? { note } : {}),
       };
     })
     .filter(Boolean);
@@ -101,6 +120,7 @@ function normalizeBillShape(rawBill, tableNumber) {
     tableNumber,
     items,
     total,
+    covers: Math.max(0, Number.parseInt(source.covers, 10) || 0),
     note: typeof source.note === 'string' ? source.note.trim() : '',
     paymentCode: typeof source.paymentCode === 'string' ? source.paymentCode.trim() : '',
     updatedAt: source.updatedAt || new Date().toISOString(),
@@ -112,6 +132,7 @@ function buildEmptyBill(tableNumber) {
     tableNumber,
     status: 'empty',
     items: [],
+    covers: 0,
     total: 0,
     updatedAt: null,
   };
