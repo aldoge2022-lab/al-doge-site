@@ -4,16 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pagamento Tavolo - AL DOGE</title>
-  
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  
+
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
     :root {
       --gold: #d4af37;
       --dark: #0b0b0b;
-      --soft: #1a1a1a;
+      --soft: #181818;
+      --soft-2: #111111;
       --text: #f5f5f5;
-      --muted: #b3b3b3;
+      --muted: #afafaf;
+      --line: rgba(212, 175, 55, 0.25);
+      --ok: #5ac77b;
+      --warn: #ffcf6b;
+      --danger: #ff7d7d;
     }
 
     * {
@@ -23,211 +28,302 @@
     }
 
     body {
-      background: var(--dark);
+      background: radial-gradient(circle at top, #1e1e1e 0%, #0b0b0b 55%);
       color: var(--text);
       font-family: 'Inter', sans-serif;
       min-height: 100vh;
+      padding: 18px;
       display: flex;
-      align-items: center;
       justify-content: center;
-      padding: 20px;
+      align-items: center;
     }
 
     .container {
-      max-width: 500px;
-      width: 100%;
+      width: min(640px, 100%);
       background: var(--soft);
-      border-radius: 20px;
-      padding: 40px 30px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 24px;
+    }
+
+    .head {
       text-align: center;
-      border: 2px solid rgba(212, 175, 55, 0.3);
+      margin-bottom: 18px;
     }
 
     .logo {
-      width: 120px;
-      height: 120px;
-      border-radius: 20px;
-      margin: 0 auto 30px;
-      box-shadow: 0 5px 20px rgba(212, 175, 55, 0.3);
+      width: 92px;
+      height: 92px;
+      border-radius: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 6px 24px rgba(212, 175, 55, 0.25);
     }
 
     h1 {
       font-family: 'Playfair Display', serif;
       color: var(--gold);
-      font-size: 36px;
+      font-size: 34px;
+      line-height: 1;
       margin-bottom: 10px;
     }
 
-    .table-number {
+    .table-pill {
       display: inline-block;
       background: var(--gold);
-      color: black;
-      padding: 10px 30px;
-      border-radius: 25px;
-      font-size: 24px;
-      font-weight: 600;
-      margin-bottom: 30px;
+      color: #1d1404;
+      border-radius: 999px;
+      font-weight: 700;
+      padding: 8px 20px;
+      margin-bottom: 10px;
     }
 
     .subtitle {
       color: var(--muted);
-      font-size: 16px;
-      margin-bottom: 40px;
+      font-size: 0.95rem;
     }
 
-    .quick-amounts {
+    .summary {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 20px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 16px;
     }
 
-    .amount-btn {
-      padding: 20px;
-      border: 2px solid rgba(212, 175, 55, 0.3);
+    .card {
+      border: 1px solid var(--line);
       border-radius: 12px;
-      background: var(--dark);
-      color: var(--text);
-      font-size: 18px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .amount-btn:hover {
-      border-color: var(--gold);
-      background: rgba(212, 175, 55, 0.1);
-    }
-
-    .amount-btn.selected {
-      border-color: var(--gold);
-      background: rgba(212, 175, 55, 0.2);
-    }
-
-    .divider {
-      display: flex;
-      align-items: center;
-      margin: 30px 0;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .divider::before,
-    .divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: rgba(212, 175, 55, 0.3);
-    }
-
-    .divider span {
-      padding: 0 15px;
-    }
-
-    .custom-amount {
-      margin-bottom: 30px;
-    }
-
-    .amount-input-container {
-      position: relative;
-      display: inline-block;
-      width: 100%;
-    }
-
-    .currency-symbol {
-      position: absolute;
-      left: 20px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--gold);
-      font-size: 24px;
-      font-weight: 600;
-    }
-
-    .amount-input {
-      width: 100%;
-      padding: 20px 20px 20px 50px;
-      border-radius: 12px;
-      border: 2px solid rgba(212, 175, 55, 0.3);
-      background: var(--dark);
-      color: var(--text);
-      font-size: 32px;
-      font-weight: 600;
+      background: var(--soft-2);
+      padding: 10px;
       text-align: center;
     }
 
-    .amount-input:focus {
-      outline: none;
+    .card .label {
+      color: var(--muted);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+
+    .card .value {
+      font-size: 1.18rem;
+      font-weight: 700;
+    }
+
+    .value.paid {
+      color: var(--ok);
+    }
+
+    .value.remaining {
+      color: var(--warn);
+    }
+
+    .section-title {
+      font-size: 0.88rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .mode-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .mode-btn {
+      border: 1px solid var(--line);
+      background: #101010;
+      color: var(--text);
+      border-radius: 12px;
+      padding: 14px 10px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+
+    .mode-btn .mode-name {
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .mode-btn .mode-detail {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .mode-btn.active {
       border-color: var(--gold);
+      background: rgba(212, 175, 55, 0.12);
+    }
+
+    .split-controls {
+      display: none;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #101010;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .split-controls.show {
+      display: block;
+    }
+
+    .field-label {
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .split-input {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: #060606;
+      color: var(--text);
+      font-size: 1.2rem;
+      padding: 10px 12px;
+      font-weight: 700;
+    }
+
+    .hint {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .payment-box {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #0f0f0f;
+      padding: 14px;
+      margin-bottom: 12px;
+      display: grid;
+      gap: 6px;
+      text-align: center;
+    }
+
+    .payment-amount {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--gold);
+      line-height: 1;
+    }
+
+    .payment-meta {
+      color: var(--muted);
+      font-size: 0.88rem;
     }
 
     .pay-button {
       width: 100%;
-      padding: 20px;
-      border-radius: 12px;
       border: none;
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 1rem;
+      font-weight: 800;
       background: var(--gold);
-      color: black;
-      font-size: 20px;
-      font-weight: 600;
+      color: #1d1404;
       cursor: pointer;
-      transition: all 0.3s;
-      margin-top: 10px;
+      transition: transform 0.2s;
+      margin-bottom: 12px;
     }
 
     .pay-button:hover:not(:disabled) {
-      transform: scale(1.02);
-      box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+      transform: translateY(-1px);
     }
 
     .pay-button:disabled {
       opacity: 0.5;
       cursor: not-allowed;
+      transform: none;
     }
 
-    .success-message {
-      display: none;
-      padding: 30px;
-    }
-
-    .success-message.show {
-      display: block;
-    }
-
-    .success-icon {
-      font-size: 80px;
-      margin-bottom: 20px;
-    }
-
-    .success-text {
-      font-size: 24px;
-      color: #4CAF50;
-      font-weight: 600;
-      margin-bottom: 15px;
-    }
-
-    .success-detail {
-      color: var(--muted);
-      font-size: 16px;
-    }
-
-    .info-box {
-      background: rgba(212, 175, 55, 0.1);
-      border: 1px solid rgba(212, 175, 55, 0.3);
+    .notice {
+      border: 1px solid var(--line);
       border-radius: 10px;
-      padding: 15px;
-      margin-top: 20px;
-      font-size: 14px;
+      padding: 10px;
       color: var(--muted);
+      font-size: 0.88rem;
+      background: rgba(212, 175, 55, 0.08);
+      margin-bottom: 12px;
     }
 
-    @media (max-width: 480px) {
+    .notice.warn {
+      border-color: rgba(255, 207, 107, 0.4);
+      color: #ffd98f;
+      background: rgba(255, 207, 107, 0.08);
+    }
+
+    .notice.success {
+      border-color: rgba(90, 199, 123, 0.4);
+      color: #9df1b7;
+      background: rgba(90, 199, 123, 0.1);
+    }
+
+    .notice.error {
+      border-color: rgba(255, 125, 125, 0.4);
+      color: #ffb2b2;
+      background: rgba(255, 125, 125, 0.1);
+    }
+
+    .bill-wrap {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #0f0f0f;
+    }
+
+    .bill-head,
+    .bill-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 8px;
+      padding: 9px 10px;
+      font-size: 0.87rem;
+    }
+
+    .bill-head {
+      background: #141414;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: 0.74rem;
+    }
+
+    .bill-row {
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .bill-row strong {
+      color: #f0d986;
+    }
+
+    .empty {
+      padding: 12px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    @media (max-width: 560px) {
       .container {
-        padding: 30px 20px;
+        padding: 18px;
       }
 
-      .quick-amounts {
-        grid-template-columns: repeat(2, 1fr);
+      .summary {
+        grid-template-columns: 1fr;
+      }
+
+      .mode-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .payment-amount {
+        font-size: 1.8rem;
       }
     }
   </style>
@@ -235,232 +331,532 @@
 
 <body>
   <div class="container">
-    <div id="payment-form">
+    <div class="head">
       <img src="logo-al-doge.png" class="logo" alt="AL DOGE">
-      
       <h1>AL DOGE</h1>
-      <div class="table-number">Tavolo <span id="table-number">-</span></div>
-      <p class="subtitle">Seleziona l'importo o inseriscilo manualmente</p>
-      <p class="subtitle" style="margin-top:-24px;font-size:13px;color:#ffcf6b;">Flusso legacy dimostrativo: non costituisce conferma di pagamento reale.</p>
+      <div class="table-pill">Tavolo <span id="table-number">-</span></div>
+      <p class="subtitle">Pagamento conto tavolo con scelta singolo o diviso</p>
+    </div>
 
-      <!-- Quick Amounts -->
-      <div class="quick-amounts">
-        <button class="amount-btn" onclick="selectAmount(10, event)">€10</button>
-        <button class="amount-btn" onclick="selectAmount(20, event)">€20</button>
-        <button class="amount-btn" onclick="selectAmount(30, event)">€30</button>
-        <button class="amount-btn" onclick="selectAmount(40, event)">€40</button>
-        <button class="amount-btn" onclick="selectAmount(50, event)">€50</button>
-        <button class="amount-btn" onclick="selectAmount(100, event)">€100</button>
+    <div class="summary">
+      <div class="card">
+        <div class="label">Totale conto</div>
+        <div class="value" id="bill-total">€0,00</div>
       </div>
-
-      <div class="divider">
-        <span>oppure</span>
+      <div class="card">
+        <div class="label">Già pagato</div>
+        <div class="value paid" id="paid-total">€0,00</div>
       </div>
-
-      <!-- Custom Amount -->
-      <div class="custom-amount">
-        <div class="amount-input-container">
-          <span class="currency-symbol">€</span>
-          <input 
-            type="number" 
-            class="amount-input" 
-            id="custom-amount" 
-            placeholder="0.00"
-            step="0.01"
-            min="0"
-            oninput="onAmountChange()"
-          >
-        </div>
-      </div>
-
-      <!-- Pay Button -->
-      <button class="pay-button" onclick="processPayment()" id="pay-btn" disabled>
-        💳 Paga Ora
-      </button>
-
-      <div class="info-box">
-        ℹ️ Pagamento sicuro tramite Stripe. Il personale verrà notificato immediatamente.
+      <div class="card">
+        <div class="label">Residuo</div>
+        <div class="value remaining" id="remaining-total">€0,00</div>
       </div>
     </div>
 
-    <!-- Success Message -->
-    <div class="success-message" id="success-message">
-      <div class="success-icon">✓</div>
-      <div class="success-text">Pagamento Completato!</div>
-      <div class="success-detail">
-        Grazie per aver scelto AL DOGE<br>
-        Importo: <span style="color: var(--gold); font-weight: 600;">€<span id="paid-amount">0.00</span></span>
+    <div class="section-title">Modalità pagamento</div>
+    <div class="mode-grid">
+      <button class="mode-btn active" id="mode-single" type="button">
+        <div class="mode-name">Pagamento unico</div>
+        <div class="mode-detail">Chiude subito il residuo del tavolo</div>
+      </button>
+      <button class="mode-btn" id="mode-split" type="button">
+        <div class="mode-name">Pagamento diviso</div>
+        <div class="mode-detail">Paga una quota del conto</div>
+      </button>
+    </div>
+
+    <div class="split-controls" id="split-controls">
+      <label class="field-label" for="split-count">Numero quote</label>
+      <input class="split-input" id="split-count" type="number" min="2" max="20" step="1" value="2">
+      <div class="hint" id="split-hint">Il sistema calcola automaticamente la quota corrente.</div>
+    </div>
+
+    <div class="payment-box">
+      <div class="payment-meta" id="payment-label">Importo da pagare ora</div>
+      <div class="payment-amount" id="payment-amount">€0,00</div>
+      <div class="payment-meta" id="payment-meta">In attesa del caricamento conto tavolo...</div>
+    </div>
+
+    <button class="pay-button" id="pay-btn" type="button" disabled>⏳ Caricamento...</button>
+
+    <div class="notice" id="status-box">Il conto viene letto da backend tavoli.</div>
+
+    <div class="section-title">Dettaglio conto tavolo</div>
+    <div class="bill-wrap">
+      <div class="bill-head">
+        <span>Articolo</span>
+        <span>Qta</span>
+        <span>Totale</span>
       </div>
-      <div class="info-box" style="margin-top: 30px;">
-        Il personale è stato notificato del tuo pagamento
-      </div>
+      <div id="bill-rows" class="empty">Nessuna voce disponibile.</div>
     </div>
   </div>
 
   <script>
-    let tableNumber = null;
-    let selectedAmount = 0;
+    const TABLE_MIN = 1;
+    const TABLE_MAX = 10;
 
-    // Ottieni numero tavolo da URL
+    const state = {
+      tableId: null,
+      billTotal: 0,
+      billItems: [],
+      billUpdatedAt: null,
+      paidAmount: 0,
+      paymentCount: 0,
+      paymentMode: 'single',
+      splitCount: 2,
+      finalClosureNotified: false,
+      finalClosurePaymentId: null,
+      lastPaymentAt: null,
+      isLoading: true,
+    };
+
+    function round2(value) {
+      return Math.round((Number(value) + Number.EPSILON) * 100) / 100;
+    }
+
+    function formatMoney(value) {
+      return `€${round2(value).toFixed(2).replace('.', ',')}`;
+    }
+
+    function parseMoney(value) {
+      if (typeof value === 'number' && Number.isFinite(value)) {
+        return round2(value);
+      }
+      if (typeof value === 'string') {
+        const parsed = Number.parseFloat(value.trim().replace(',', '.'));
+        if (Number.isFinite(parsed)) {
+          return round2(parsed);
+        }
+      }
+      return null;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
     function getTableNumber() {
       const params = new URLSearchParams(window.location.search);
-      const table = params.get('table');
-      
-      if (!table || isNaN(table) || table < 1 || table > 10) {
-        alert('Numero tavolo non valido');
-        return null;
-      }
-      
-      return parseInt(table);
-    }
+      const tableRaw = params.get('table');
+      const table = Number.parseInt(String(tableRaw ?? ''), 10);
 
-    // Ottieni importo iniziale da URL (amount, fallback total/price)
-    function getInitialAmount() {
-      const params = new URLSearchParams(window.location.search);
-      const rawAmount = params.get('amount') ?? params.get('total') ?? params.get('price');
-
-      if (rawAmount === null) {
+      if (!Number.isInteger(table) || table < TABLE_MIN || table > TABLE_MAX) {
         return null;
       }
 
-      const normalizedAmount = rawAmount.trim().replace(',', '.');
-      const amount = parseFloat(normalizedAmount);
+      return String(table);
+    }
 
-      if (!Number.isFinite(amount) || amount <= 0) {
-        return null;
+    function getProgressStorageKey(tableId) {
+      return `aldoge_table_payment_progress:${tableId}`;
+    }
+
+    function getRemainingAmount() {
+      return Math.max(0, round2(state.billTotal - state.paidAmount));
+    }
+
+    function setStatus(message, kind = 'default') {
+      const box = document.getElementById('status-box');
+      box.textContent = message;
+      box.className = 'notice';
+      if (kind === 'warn') {
+        box.classList.add('warn');
       }
-
-      return amount;
-    }
-
-    function selectAmount(amount, event) {
-      selectedAmount = amount;
-      
-      // Aggiorna UI
-      document.querySelectorAll('.amount-btn').forEach(btn => {
-        btn.classList.remove('selected');
-      });
-      if (event && event.target) {
-        event.target.classList.add('selected');
+      if (kind === 'success') {
+        box.classList.add('success');
       }
-      
-      // Imposta input custom
-      document.getElementById('custom-amount').value = amount.toFixed(2);
-      
-      // Abilita bottone
-      document.getElementById('pay-btn').disabled = false;
+      if (kind === 'error') {
+        box.classList.add('error');
+      }
     }
 
-    function onAmountChange() {
-      const input = document.getElementById('custom-amount');
-      const amount = parseFloat(input.value) || 0;
-      
-      selectedAmount = amount;
-      
-      // Deseleziona bottoni quick
-      document.querySelectorAll('.amount-btn').forEach(btn => {
-        btn.classList.remove('selected');
-      });
-      
-      // Abilita/disabilita bottone
-      document.getElementById('pay-btn').disabled = amount <= 0;
-    }
-
-    async function processPayment() {
-      if (selectedAmount <= 0) {
-        alert('Inserisci un importo valido');
+    function renderBillRows() {
+      const rows = document.getElementById('bill-rows');
+      if (!Array.isArray(state.billItems) || state.billItems.length === 0) {
+        rows.className = 'empty';
+        rows.textContent = 'Conto vuoto o non ancora disponibile.';
         return;
       }
 
-      const btn = document.getElementById('pay-btn');
-      btn.disabled = true;
-      btn.textContent = '⏳ Elaborazione...';
+      rows.className = '';
+      rows.innerHTML = state.billItems.map((item) => {
+        const name = escapeHtml(item.name ?? 'Articolo');
+        const qty = Number.isFinite(Number(item.qty)) ? Number(item.qty) : 1;
+        const lineTotal = parseMoney(item.lineTotal) ?? round2((parseMoney(item.price) ?? 0) * qty);
+        return `
+          <div class="bill-row">
+            <span>${name}</span>
+            <span>${qty}</span>
+            <strong>${formatMoney(lineTotal)}</strong>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function readSavedProgress() {
+      const key = getProgressStorageKey(state.tableId);
+      let saved;
 
       try {
-        // Simula pagamento (in produzione usare Stripe Payment Intent)
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // Crea ordine
-        const order = {
-          orderId: Date.now(),
-          timestamp: new Date().toISOString(),
-          tableNumber: tableNumber,
-          total: selectedAmount.toFixed(2),
-          status: 'paid',
-          type: 'table_payment',
-          name: `Tavolo ${tableNumber}`,
-          phone: '-',
-          address: `Tavolo ${tableNumber}`,
-          items: [
-            {
-              name: `Pagamento tavolo ${tableNumber}`,
-              qty: 1,
-              price: selectedAmount
-            }
-          ]
+        saved = JSON.parse(localStorage.getItem(key) || 'null');
+      } catch (error) {
+        saved = null;
+      }
+
+      if (!saved || typeof saved !== 'object') {
+        state.paidAmount = 0;
+        state.paymentCount = 0;
+        state.finalClosureNotified = false;
+        state.finalClosurePaymentId = null;
+        state.lastPaymentAt = null;
+        return;
+      }
+
+      const savedReferenceTotal = parseMoney(saved.referenceTotal);
+      const savedPaidAmount = parseMoney(saved.paidAmount);
+      const savedPaymentCount = Number.parseInt(saved.paymentCount, 10);
+      const savedFinalClosureNotified = Boolean(saved.finalClosureNotified);
+      const savedFinalClosurePaymentId = saved.finalClosurePaymentId ? String(saved.finalClosurePaymentId) : null;
+      const savedLastPaymentAt = typeof saved.lastPaymentAt === 'string' ? saved.lastPaymentAt : null;
+
+      const sameTotal = savedReferenceTotal !== null && Math.abs(savedReferenceTotal - state.billTotal) <= 0.01;
+      if (!sameTotal) {
+        state.paidAmount = 0;
+        state.paymentCount = 0;
+        state.finalClosureNotified = false;
+        state.finalClosurePaymentId = null;
+        state.lastPaymentAt = null;
+        return;
+      }
+
+      state.paidAmount = savedPaidAmount !== null && savedPaidAmount > 0
+        ? Math.min(savedPaidAmount, state.billTotal)
+        : 0;
+      state.paymentCount = Number.isInteger(savedPaymentCount) && savedPaymentCount > 0
+        ? savedPaymentCount
+        : 0;
+      state.finalClosureNotified = savedFinalClosureNotified;
+      state.finalClosurePaymentId = savedFinalClosurePaymentId;
+      state.lastPaymentAt = savedLastPaymentAt;
+    }
+
+    function persistProgress() {
+      const key = getProgressStorageKey(state.tableId);
+      const payload = {
+        referenceTotal: round2(state.billTotal),
+        paidAmount: round2(state.paidAmount),
+        paymentCount: state.paymentCount,
+        finalClosureNotified: state.finalClosureNotified,
+        finalClosurePaymentId: state.finalClosurePaymentId,
+        lastPaymentAt: state.lastPaymentAt,
+        updatedAt: new Date().toISOString(),
+      };
+      localStorage.setItem(key, JSON.stringify(payload));
+    }
+
+    async function loadBillFromBackend() {
+      const response = await fetch(`/.netlify/functions/table-bill?table=${encodeURIComponent(state.tableId)}`, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+      });
+
+      if (!response.ok) {
+        throw new Error('Caricamento conto tavolo non riuscito');
+      }
+
+      const payload = await response.json();
+      if (!payload.ok || payload.empty || !payload.bill) {
+        throw new Error(payload.error || 'Conto tavolo non disponibile');
+      }
+
+      const loadedTotal = parseMoney(payload.bill.total);
+      if (loadedTotal === null) {
+        throw new Error('Totale conto non valido dal backend');
+      }
+
+      state.billTotal = loadedTotal;
+      state.billItems = Array.isArray(payload.bill.items) ? payload.bill.items : [];
+      state.billUpdatedAt = payload.bill.updatedAt || null;
+    }
+
+    function getCurrentPaymentPlan() {
+      const remaining = getRemainingAmount();
+
+      if (remaining <= 0) {
+        return {
+          amountNow: 0,
+          payLabel: 'Conto già saldato',
+          paymentMeta: 'Nessun importo residuo da pagare.',
+          nextSplitIndex: state.paymentCount,
         };
+      }
 
-        // Salva ordine
-        const orders = JSON.parse(localStorage.getItem('aldoge_orders') || '[]');
-        orders.push(order);
-        localStorage.setItem('aldoge_orders', JSON.stringify(orders));
+      if (state.paymentMode === 'single') {
+        return {
+          amountNow: remaining,
+          payLabel: `💳 Paga totale ${formatMoney(remaining)}`,
+          paymentMeta: 'Pagamento unico del residuo tavolo.',
+          nextSplitIndex: null,
+        };
+      }
 
-        // Invia notifica Telegram
-        const notifyResponse = await fetch('/.netlify/functions/telegram-notify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(order)
-        });
+      const splitCount = Math.max(2, Math.min(20, Number.parseInt(state.splitCount, 10) || 2));
+      const nextIndex = Math.min(state.paymentCount + 1, splitCount);
+      const baseShare = round2(state.billTotal / splitCount);
+      let amountNow = nextIndex < splitCount ? Math.min(baseShare, remaining) : remaining;
 
-        if (!notifyResponse.ok) {
-          throw new Error('Errore invio notifica Telegram');
+      if (amountNow <= 0 && remaining > 0) {
+        amountNow = remaining;
+      }
+
+      return {
+        amountNow: round2(amountNow),
+        payLabel: `💳 Paga quota ${nextIndex}/${splitCount}`,
+        paymentMeta: `Quota calcolata su ${splitCount} paganti.`,
+        nextSplitIndex: nextIndex,
+      };
+    }
+
+    function renderSummary() {
+      document.getElementById('table-number').textContent = state.tableId || '-';
+      document.getElementById('bill-total').textContent = formatMoney(state.billTotal);
+      document.getElementById('paid-total').textContent = formatMoney(state.paidAmount);
+      document.getElementById('remaining-total').textContent = formatMoney(getRemainingAmount());
+    }
+
+    function renderPaymentPanel() {
+      const remaining = getRemainingAmount();
+      const isSplit = state.paymentMode === 'split';
+
+      document.getElementById('mode-single').classList.toggle('active', !isSplit);
+      document.getElementById('mode-split').classList.toggle('active', isSplit);
+      document.getElementById('split-controls').classList.toggle('show', isSplit);
+
+      const plan = getCurrentPaymentPlan();
+      document.getElementById('payment-amount').textContent = formatMoney(plan.amountNow);
+      document.getElementById('payment-meta').textContent = plan.paymentMeta;
+
+      const payButton = document.getElementById('pay-btn');
+      payButton.textContent = plan.payLabel;
+      payButton.disabled = state.isLoading || plan.amountNow <= 0;
+
+      if (remaining <= 0) {
+        setStatus('Conto tavolo saldato. Nessun importo residuo.', 'success');
+      }
+    }
+
+    function refreshAll() {
+      renderSummary();
+      renderBillRows();
+      renderPaymentPanel();
+    }
+
+    function buildPaymentOrder(paymentAmount, splitIndex, splitCount) {
+      const remainingAfter = Math.max(0, round2(getRemainingAmount() - paymentAmount));
+      const isSplit = state.paymentMode === 'split';
+
+      return {
+        orderId: Date.now(),
+        timestamp: new Date().toISOString(),
+        tableNumber: Number.parseInt(state.tableId, 10),
+        total: paymentAmount.toFixed(2),
+        status: 'paid',
+        type: isSplit ? 'table_split_payment' : 'table_full_payment',
+        paymentMode: state.paymentMode,
+        splitCount: isSplit ? splitCount : null,
+        splitPaymentIndex: isSplit ? splitIndex : null,
+        billTotal: state.billTotal.toFixed(2),
+        remainingAfter: remainingAfter.toFixed(2),
+        name: `Tavolo ${state.tableId}`,
+        phone: '-',
+        address: `Tavolo ${state.tableId}`,
+        items: [
+          {
+            name: isSplit
+              ? `Pagamento quota tavolo ${state.tableId} (${splitIndex}/${splitCount})`
+              : `Pagamento tavolo ${state.tableId} - saldo`,
+            qty: 1,
+            price: paymentAmount,
+          },
+        ],
+      };
+    }
+
+    function buildFinalSettlementNotification(finalPaymentOrder, splitCount) {
+      const isSplit = state.paymentMode === 'split';
+      const safeSplitCount = isSplit
+        ? Math.max(2, Math.min(20, Number.parseInt(splitCount, 10) || state.paymentCount || 2))
+        : 1;
+      const completedSplits = `${Math.max(1, Math.min(state.paymentCount, safeSplitCount))}/${safeSplitCount}`;
+
+      return {
+        orderId: `final-${finalPaymentOrder.orderId}`,
+        timestamp: new Date().toISOString(),
+        tableNumber: Number.parseInt(state.tableId, 10),
+        total: state.billTotal.toFixed(2),
+        status: 'fully_paid',
+        type: 'table_payment_completed',
+        paymentMode: state.paymentMode,
+        completedSplits,
+        finalPaymentId: String(finalPaymentOrder.orderId),
+        finalPaidAt: finalPaymentOrder.timestamp,
+        billTotal: state.billTotal.toFixed(2),
+        remainingAfter: '0.00',
+        name: `Tavolo ${state.tableId}`,
+        phone: '-',
+        address: `Tavolo ${state.tableId}`,
+        items: [
+          {
+            name: `Pagamento completo tavolo ${state.tableId}`,
+            qty: 1,
+            price: state.billTotal,
+          },
+        ],
+      };
+    }
+
+    async function notifyStaff(order) {
+      const response = await fetch('/.netlify/functions/telegram-notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(order),
+      });
+
+      if (!response.ok) {
+        throw new Error('Notifica personale non inviata');
+      }
+    }
+
+    async function processPayment() {
+      const payButton = document.getElementById('pay-btn');
+      const plan = getCurrentPaymentPlan();
+      const amountToPay = plan.amountNow;
+
+      if (amountToPay <= 0) {
+        return;
+      }
+
+      payButton.disabled = true;
+      payButton.textContent = '⏳ Elaborazione...';
+
+      try {
+        const remainingBefore = getRemainingAmount();
+
+        const splitCount = state.paymentMode === 'split'
+          ? Math.max(2, Math.min(20, Number.parseInt(state.splitCount, 10) || 2))
+          : null;
+
+        const order = buildPaymentOrder(
+          amountToPay,
+          plan.nextSplitIndex,
+          splitCount
+        );
+
+        state.paidAmount = round2(Math.min(state.billTotal, state.paidAmount + amountToPay));
+        state.paymentCount += 1;
+        state.lastPaymentAt = order.timestamp;
+        persistProgress();
+
+        try {
+          await notifyStaff(order);
+        } catch (notifyError) {
+          console.warn('Pagamento registrato, ma notifica non inviata:', notifyError);
+          setStatus('Pagamento registrato. Notifica personale non confermata, avvisare la sala.', 'warn');
         }
 
-        // Mostra successo
-        document.getElementById('paid-amount').textContent = selectedAmount.toFixed(2);
-        document.getElementById('payment-form').style.display = 'none';
-        document.getElementById('success-message').classList.add('show');
+        const remaining = getRemainingAmount();
+        const reachedFullPaymentNow = remainingBefore > 0 && remaining <= 0 && !state.finalClosureNotified;
+        if (reachedFullPaymentNow) {
+          try {
+            const finalNotification = buildFinalSettlementNotification(order, splitCount);
+            await notifyStaff(finalNotification);
+            state.finalClosureNotified = true;
+            state.finalClosurePaymentId = String(order.orderId);
+            persistProgress();
+          } catch (finalNotifyError) {
+            console.warn('Saldo completo raggiunto, ma notifica finale non inviata:', finalNotifyError);
+            setStatus('Conto saldato, ma notifica finale staff non confermata. Avvisare la sala.', 'warn');
+          }
+        }
 
+        if (remaining > 0) {
+          setStatus(`Pagamento registrato: ${formatMoney(amountToPay)}. Residuo: ${formatMoney(remaining)}.`, 'success');
+        } else {
+          setStatus(`Pagamento registrato: ${formatMoney(amountToPay)}. Conto completamente saldato.`, 'success');
+        }
+
+        refreshAll();
       } catch (error) {
         console.error('Errore pagamento:', error);
-        alert('Errore nel processare il pagamento. Riprova.');
-        btn.disabled = false;
-        btn.textContent = '💳 Paga Ora';
+        setStatus('Errore nel processare il pagamento. Riprova.', 'error');
+        renderPaymentPanel();
       }
     }
 
-    // Inizializza
-    tableNumber = getTableNumber();
-    if (tableNumber) {
-      document.getElementById('table-number').textContent = tableNumber;
-
-      const initialAmount = getInitialAmount();
-      if (initialAmount !== null) {
-        const matchingQuickButton = Array.from(document.querySelectorAll('.amount-btn')).find(btn => {
-          const buttonValue = parseFloat(
-            (btn.textContent || '').replace(/[^\d.,-]/g, '').replace(',', '.')
-          );
-          return Number.isFinite(buttonValue) && buttonValue === initialAmount;
-        });
-
-        if (matchingQuickButton) {
-          selectAmount(initialAmount, { target: matchingQuickButton });
-        } else {
-          document.getElementById('custom-amount').value = initialAmount.toFixed(2);
-          onAmountChange();
-        }
+    function handleModeChange(mode) {
+      state.paymentMode = mode;
+      renderPaymentPanel();
+      if (mode === 'split') {
+        setStatus('Pagamento diviso attivo: viene proposta la quota corrente.', 'default');
+      } else {
+        setStatus('Pagamento unico attivo: viene pagato tutto il residuo.', 'default');
       }
-    } else {
-      document.getElementById('payment-form').innerHTML = `
-        <div style="padding: 40px; text-align: center;">
-          <div style="font-size: 60px; margin-bottom: 20px;">⚠️</div>
-          <div style="color: var(--muted); font-size: 18px;">
-            Codice QR non valido.<br>
-            Richiedi assistenza al personale.
+    }
+
+    function bindEvents() {
+      document.getElementById('mode-single').addEventListener('click', () => handleModeChange('single'));
+      document.getElementById('mode-split').addEventListener('click', () => handleModeChange('split'));
+
+      document.getElementById('split-count').addEventListener('input', (event) => {
+        const parsed = Number.parseInt(event.target.value, 10);
+        const safe = Number.isInteger(parsed) ? Math.max(2, Math.min(20, parsed)) : 2;
+        state.splitCount = safe;
+        event.target.value = safe;
+        renderPaymentPanel();
+      });
+
+      document.getElementById('pay-btn').addEventListener('click', processPayment);
+    }
+
+    async function init() {
+      state.tableId = getTableNumber();
+
+      if (!state.tableId) {
+        document.querySelector('.container').innerHTML = `
+          <div class="notice error">
+            Codice pagamento non valido. Richiedere assistenza al personale.
           </div>
-        </div>
-      `;
+        `;
+        return;
+      }
+
+      bindEvents();
+      setStatus('Caricamento conto tavolo dal backend...', 'default');
+
+      try {
+        await loadBillFromBackend();
+        setStatus('Conto tavolo caricato correttamente dal backend.', 'success');
+      } catch (error) {
+        document.querySelector('.container').innerHTML = `
+          <div class="notice error">
+            Impossibile caricare il conto tavolo. Riprova dal QR del tavolo.
+          </div>
+        `;
+        return;
+      }
+
+      readSavedProgress();
+      state.isLoading = false;
+      refreshAll();
     }
+
+    init();
   </script>
 </body>
 </html>
