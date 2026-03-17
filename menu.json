@@ -1,279 +1,1378 @@
 {
   "pizze": [
     {
-      "nome": "Margherita",
-      "prezzo": 6.00,
-      "ingredienti": ["pomodoro", "mozzarella", "origano"],
-      "allergeni": [1,7],
-      "categoria": "classica"
-    },
-    {
-      "nome": "Prosciutto e Funghi",
-      "prezzo": 8.00,
-      "ingredienti": ["pomodoro", "mozzarella", "prosciutto cotto", "funghi freschi", "origano"],
-      "allergeni": [1,7],
-      "categoria": "classica"
-    },
-    {
-      "nome": "Prosciutto",
-      "prezzo": 7.50,
-      "ingredienti": ["pomodoro", "mozzarella", "prosciutto cotto", "origano"],
-      "allergeni": [1,7],
-      "categoria": "classica"
-    },
-    {
-      "nome": "Viennese",
-      "prezzo": 7.00,
-      "ingredienti": ["pomodoro", "mozzarella", "wurstel", "origano"],
-      "allergeni": [1,7],
-      "categoria": "classica"
-    },
-    {
-      "nome": "Siciliana",
-      "prezzo": 8.50,
-      "ingredienti": ["pomodoro", "mozzarella", "acciughe", "capperi", "olive nere", "origano"],
-      "allergeni": [1,4,7],
-      "categoria": "classica"
-    },
-    {
-      "nome": "Chips",
-      "prezzo": 6.50,
-      "ingredienti": ["pomodoro", "mozzarella", "patate fritte", "origano"],
-      "allergeni": [1,7],
-      "categoria": "classica"
-    },
-    {
-      "nome": "Capricciosa",
-      "prezzo": 8.00,
-      "ingredienti": ["pomodoro", "mozzarella", "prosciutto cotto", "funghi freschi", "carciofi", "origano"],
-      "allergeni": [1,7],
-      "categoria": "classica"
+      "nome": "4 Formaggi",
+      "prezzo": 8.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "tre tipi di formaggi",
+        "gorgonzola",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
     },
     {
       "nome": "4 Stagioni",
-      "prezzo": 8.50,
-      "ingredienti": ["pomodoro", "mozzarella", "prosciutto cotto", "peperoni", "funghi freschi", "carciofi", "origano"],
-      "allergeni": [1,7],
-      "categoria": "classica"
-    },
-    {
-      "nome": "4 Formaggi",
-      "prezzo": 8.50,
-      "ingredienti": ["pomodoro", "mozzarella", "tre tipi di formaggi", "gorgonzola", "origano"],
-      "allergeni": [1,7],
-      "categoria": "formaggi"
-    },
-    {
-      "nome": "Pugliese",
-      "prezzo": 6.50,
-      "ingredienti": ["pomodoro", "mozzarella", "cipolla", "origano"],
-      "allergeni": [1,7],
-      "categoria": "classica"
-    },
-    {
-      "nome": "Bresaola Rucola e Grana",
-      "prezzo": 9.00,
-      "ingredienti": ["pomodoro", "mozzarella", "bresaola", "rucola", "grana", "origano"],
-      "allergeni": [1,7],
-      "categoria": "speciale"
-    },
-    {
-      "nome": "San Daniele",
-      "prezzo": 9.00,
-      "ingredienti": ["pomodoro", "mozzarella", "prosciutto crudo San Daniele", "origano"],
-      "allergeni": [1,7],
-      "categoria": "speciale"
-    },
-    {
-      "nome": "Diavola",
-      "prezzo": 8.00,
-      "ingredienti": ["pomodoro", "mozzarella", "salamino piccante", "peperoncino", "origano"],
-      "allergeni": [1,7],
-      "categoria": "piccante"
-    },
-    {
-      "nome": "Panna e Speck",
-      "prezzo": 8.50,
-      "ingredienti": ["pomodoro", "mozzarella", "panna", "speck", "origano"],
-      "allergeni": [1,7],
-      "categoria": "speciale"
-    },
-    {
-      "nome": "Marinara",
-      "prezzo": 5.50,
-      "ingredienti": ["pomodoro", "aglio", "origano"],
-      "allergeni": [1],
-      "categoria": "leggera"
-    },
-    {
-      "nome": "Viennese e Patatine",
-      "prezzo": 7.50,
-      "ingredienti": ["pomodoro", "mozzarella", "wurstel", "patatine", "origano"],
-      "allergeni": [1,7],
-      "categoria": "bambini"
-    },
-    {
-      "nome": "Friulana",
-      "prezzo": 9.00,
-      "ingredienti": ["pomodoro", "mozzarella", "patate al forno", "salame dolce", "cipolla"],
-      "allergeni": [1,7],
-      "categoria": "saporita"
-    },
-    {
-      "nome": "Calzone",
-      "prezzo": 8.00,
-      "ingredienti": ["pomodoro", "mozzarella", "prosciutto cotto", "funghi freschi", "origano"],
-      "allergeni": [1,7],
-      "categoria": "classica"
-    },
-    {
-      "nome": "Romana",
-      "prezzo": 7.50,
-      "ingredienti": ["pomodoro", "mozzarella", "acciughe", "origano"],
-      "allergeni": [1,4,7],
-      "categoria": "classica"
-    },
-    {
-      "nome": "Tonno e Cipolla",
-      "prezzo": 7.50,
-      "ingredienti": ["pomodoro", "mozzarella", "tonno", "cipolla", "origano"],
-      "allergeni": [1,4,7],
-      "categoria": "classica"
-    },
-    {
-      "nome": "Nirvana",
-      "prezzo": 10.00,
-      "ingredienti": ["pomodoro", "mozzarella", "prosciutto cotto", "brie", "salsiccia", "prosciutto San Daniele", "origano"],
-      "allergeni": [1,7],
-      "categoria": "speciale"
-    },
-    {
-      "nome": "Napoletana",
-      "prezzo": 8.00,
-      "ingredienti": ["pomodoro", "mozzarella", "acciughe", "olive nere", "origano"],
-      "allergeni": [1,7],
-      "categoria": "classica"
+      "prezzo": 8.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "prosciutto cotto",
+        "peperoni",
+        "funghi freschi",
+        "carciofi",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
     },
     {
       "nome": "8 Gusti",
-      "prezzo": 10.00,
-      "ingredienti": ["pomodoro", "mozzarella", "prosciutto cotto", "funghi freschi", "carciofi", "peperoni", "wurstel", "salamino piccante", "asparagi", "origano"],
-      "allergeni": [1,7],
-      "categoria": "speciale"
+      "prezzo": 10,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "prosciutto cotto",
+        "funghi freschi",
+        "carciofi",
+        "peperoni",
+        "wurstel",
+        "salamino piccante",
+        "asparagi",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
     },
     {
-      "nome": "Boscaiola",
-      "prezzo": 8.50,
-      "ingredienti": ["pomodoro", "mozzarella", "funghi porcini", "panna", "speck", "ricotta affumicata", "origano"],
-      "allergeni": [1,7],
-      "categoria": "speciale"
+      "nome": "Alberto",
+      "prezzo": 8.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "prosciutto cotto",
+        "cipolla",
+        "panna",
+        "ricotta affumicata",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
     },
     {
-      "nome": "Primo Amore",
-      "prezzo": 8.00,
-      "ingredienti": ["pomodoro", "mozzarella", "mozzarelline", "pomodorini", "origano"],
-      "allergeni": [1,7],
-      "categoria": "classica"
+      "nome": "Alex",
+      "prezzo": 8,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "gorgonzola",
+        "cipolla",
+        "acciughe",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        4,
+        7
+      ],
+      "categoria": "pizze"
     },
     {
-      "nome": "Bufala",
-      "prezzo": 9.00,
-      "ingredienti": ["pomodoro", "mozzarella", "mozzarella di Bufala", "origano"],
-      "allergeni": [1,7],
-      "categoria": "speciale"
-    },
-    {
-      "nome": "Estate",
-      "prezzo": 8.50,
-      "ingredienti": ["pomodoro", "mozzarella", "rucola", "pomodorini", "mozzarelline", "origano"],
-      "allergeni": [1,7],
-      "categoria": "stagionale"
+      "nome": "Amalfi",
+      "prezzo": 9.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "salmone affumicato",
+        "gamberetti",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        2,
+        4,
+        7
+      ],
+      "categoria": "pizze"
     },
     {
       "nome": "Autunno",
-      "prezzo": 8.50,
-      "ingredienti": ["pomodoro", "mozzarella", "purea di zucca", "salsiccia", "ricotta affumicata", "origano"],
-      "allergeni": [1,7],
-      "categoria": "stagionale"
+      "prezzo": 8.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "purea di zucca",
+        "salsiccia",
+        "ricotta affumicata",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
     },
     {
-      "nome": "Inverno",
-      "prezzo": 7.50,
-      "ingredienti": ["pomodoro", "mozzarella", "radicchio di Treviso", "grana", "origano"],
-      "allergeni": [1,7],
-      "categoria": "stagionale"
+      "nome": "Boscaiola",
+      "prezzo": 8.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "funghi porcini",
+        "panna",
+        "speck",
+        "ricotta affumicata",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Braccio di Ferro",
+      "prezzo": 7.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "ricotta fresca",
+        "spinaci",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Bresaola Rucola e Grana",
+      "prezzo": 9,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "bresaola",
+        "rucola",
+        "grana",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Brie Rucola e Noci",
+      "prezzo": 8,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "brie",
+        "rucola",
+        "noci",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7,
+        8
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Bufala",
+      "prezzo": 9,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "mozzarella di bufala",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Calzone",
+      "prezzo": 8,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "prosciutto cotto",
+        "funghi freschi",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Capricciosa",
+      "prezzo": 8,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "prosciutto cotto",
+        "funghi freschi",
+        "carciofi",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Carbonara",
+      "prezzo": 9,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "panna",
+        "pancetta",
+        "uova",
+        "grana in cottura",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        3,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Carciofina",
+      "prezzo": 8.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "pate di carciofi",
+        "pomodori secchi",
+        "olive taggiasche",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Chips",
+      "prezzo": 6.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "patate fritte",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Columbia",
+      "prezzo": 9.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "porcini",
+        "prosciutto San Daniele",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
     },
     {
       "nome": "Contadina",
-      "prezzo": 8.50,
-      "ingredienti": ["pomodoro", "mozzarella", "radicchio di Treviso", "salsiccia", "ricotta affumicata", "origano"],
-      "allergeni": [1,7],
-      "categoria": "saporita"
+      "prezzo": 8.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "radicchio di Treviso",
+        "salsiccia",
+        "ricotta affumicata",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
     },
     {
-      "nome": "Texana",
-      "prezzo": 8.00,
-      "ingredienti": ["pomodoro", "mozzarella", "fagioli", "cipolla", "salsiccia", "peperoncino", "origano"],
-      "allergeni": [1,7],
-      "categoria": "piccante"
+      "nome": "Crudo e Stracchino",
+      "prezzo": 8.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "stracchino",
+        "prosciutto San Daniele",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
     },
     {
-      "nome": "Sfiziosa",
-      "prezzo": 9.00,
-      "ingredienti": ["pomodoro", "mozzarella", "radicchio di Treviso", "gorgonzola", "speck in cottura", "origano"],
-      "allergeni": [1,7],
-      "categoria": "speciale"
+      "nome": "Dama Bianca",
+      "prezzo": 5.5,
+      "ingredienti": [
+        "mozzarella",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
     },
     {
-      "nome": "La Greca",
-      "prezzo": 7.50,
-      "ingredienti": ["pomodoro", "mozzarella", "feta", "olive verdi e nere", "origano"],
-      "allergeni": [1,7],
-      "categoria": "classica"
+      "nome": "Deliziosa",
+      "prezzo": 8.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "asparagi",
+        "gorgonzola",
+        "speck",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
     },
     {
-      "nome": "Nicolò",
-      "prezzo": 8.50,
-      "ingredienti": ["pomodoro", "mozzarella", "prosciutto cotto", "zucchine", "philadelphia", "origano"],
-      "allergeni": [1,7],
-      "categoria": "speciale"
+      "nome": "Diavola",
+      "prezzo": 8,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "salamino piccante",
+        "peperoncino",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Doge",
+      "prezzo": 9.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "tonno",
+        "cipolla",
+        "salsiccia",
+        "salamino piccante",
+        "peperoni",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        4,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Estate",
+      "prezzo": 8.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "rucola",
+        "pomodorini",
+        "mozzarelline",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
     },
     {
       "nome": "Fresca",
-      "prezzo": 8.50,
-      "ingredienti": ["pomodoro", "mozzarella", "olive taggiasche", "scamorza", "pomodorini", "origano"],
-      "allergeni": [1,7],
-      "categoria": "classica"
+      "prezzo": 8.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "olive taggiasche",
+        "scamorza",
+        "pomodorini",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Frico",
+      "prezzo": 9,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "tre formaggi",
+        "cipolla",
+        "patate al forno",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Friulana",
+      "prezzo": 9,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "patate al forno",
+        "salame dolce",
+        "cipolla"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Frutti di Mare",
+      "prezzo": 9,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "frutti di mare",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        2,
+        4,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Genovese",
+      "prezzo": 9.5,
+      "ingredienti": [
+        "mozzarella",
+        "pesto alla genovese",
+        "pomodori secchi",
+        "burrata",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7,
+        8
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Inverno",
+      "prezzo": 7.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "radicchio di Treviso",
+        "grana",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Jasmine",
+      "prezzo": 8,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "pancetta",
+        "peperoni",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "La Greca",
+      "prezzo": 7.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "feta",
+        "olive verdi e nere",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Manuel",
+      "prezzo": 10,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "scamorza affumicata",
+        "wurstel",
+        "petto d'oca",
+        "ricotta affumicata",
+        "patatine al forno",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Margherita",
+      "prezzo": 6,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Mari e Monti",
+      "prezzo": 10,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "frutti di mare",
+        "porcini",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        2,
+        4,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Marinara",
+      "prezzo": 5.5,
+      "ingredienti": [
+        "pomodoro",
+        "aglio",
+        "origano"
+      ],
+      "allergeni": [
+        1
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Meridione",
+      "prezzo": 8.5,
+      "ingredienti": [
+        "mozzarella",
+        "friarielli",
+        "salsiccia",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Montanara",
+      "prezzo": 9.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "funghi freschi",
+        "salamino piccante",
+        "wurstel",
+        "prosciutto San Daniele",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Napoletana",
+      "prezzo": 8,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "acciughe",
+        "olive nere",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        4,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Nicolo",
+      "prezzo": 8.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "prosciutto cotto",
+        "zucchine",
+        "philadelphia",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Nik",
+      "prezzo": 8.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "gorgonzola",
+        "salsiccia",
+        "patate al forno",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Nirvana",
+      "prezzo": 10,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "prosciutto cotto",
+        "brie",
+        "salsiccia",
+        "prosciutto di San Daniele",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Noci Rucola e Mascarpone",
+      "prezzo": 8,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "noci",
+        "rucola",
+        "mascarpone",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7,
+        8
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Norvegia",
+      "prezzo": 9.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "salmone",
+        "philadelphia",
+        "rucola",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        4,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Panna e Speck",
+      "prezzo": 8.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "panna",
+        "speck",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Parmigiana",
+      "prezzo": 8.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "melanzane",
+        "grana padano in cottura",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Philadelphia e Speck",
+      "prezzo": 8,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "philadelphia",
+        "speck",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Primavera",
+      "prezzo": 8,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "pomodorini in cottura",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Primo Amore",
+      "prezzo": 8,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "mozzarelline",
+        "pomodorini",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Prosciutto",
+      "prezzo": 7.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "prosciutto cotto",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Prosciutto e Funghi",
+      "prezzo": 8,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "prosciutto cotto",
+        "funghi freschi",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Pugliese",
+      "prezzo": 6.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "cipolla",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Puttanesca",
+      "prezzo": 8,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "acciughe",
+        "capperi",
+        "olive taggiasche",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        4,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Rea",
+      "prezzo": 9,
+      "ingredienti": [
+        "mozzarella",
+        "pancetta",
+        "patate al forno",
+        "cipolla",
+        "grana in cottura",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Romana",
+      "prezzo": 7.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "acciughe",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        4,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Rustica",
+      "prezzo": 9,
+      "ingredienti": [
+        "mozzarella",
+        "pancetta",
+        "cipolla",
+        "grana in cottura",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "San Daniele",
+      "prezzo": 9,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "prosciutto crudo San Daniele",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "San Daniele e Burrata",
+      "prezzo": 10,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "prosciutto San Daniele",
+        "burrata",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Sara",
+      "prezzo": 8.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "zucchine",
+        "scamorza affumicata",
+        "pancetta",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Sfiziosa",
+      "prezzo": 9,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "radicchio di Treviso",
+        "gorgonzola",
+        "speck in cottura",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Siciliana",
+      "prezzo": 8.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "acciughe",
+        "capperi",
+        "olive nere",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        4,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Souffle",
+      "prezzo": 8.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "prosciutto cotto",
+        "funghi freschi",
+        "ricotta fresca",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Stracchinella",
+      "prezzo": 9,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "funghi freschi",
+        "stracchino",
+        "prosciutto San Daniele",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Texana",
+      "prezzo": 8,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "fagioli",
+        "cipolla",
+        "salsiccia",
+        "peperoncino",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Tirolese",
+      "prezzo": 8,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "gorgonzola",
+        "funghi freschi",
+        "speck",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Tonno e Cipolla",
+      "prezzo": 7.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "tonno",
+        "cipolla",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        4,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Valtellina",
+      "prezzo": 9,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "spinaci",
+        "philadelphia",
+        "bresaola",
+        "grana",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Vegetariana",
+      "prezzo": 8.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "melanzane",
+        "zucchine",
+        "rucola",
+        "grana",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Verdure",
+      "prezzo": 9,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "peperoni",
+        "melanzane",
+        "zucchine",
+        "asparagi",
+        "spinaci",
+        "carciofi",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Viennese",
+      "prezzo": 7,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "wurstel",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
+    },
+    {
+      "nome": "Viennese e Patatine",
+      "prezzo": 7.5,
+      "ingredienti": [
+        "pomodoro",
+        "mozzarella",
+        "wurstel",
+        "patatine",
+        "origano"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "pizze"
     }
   ],
-
   "panino_al_doge": {
     "nome": "Panino AL DOGE",
     "descrizione": "Panino artigianale preparato con impasto pizza AL DOGE, cotto al momento. Farcito con prosciutto crudo San Daniele, rucola fresca e crema di formaggio.",
-    "ingredienti": ["impasto pizza", "prosciutto crudo San Daniele", "rucola", "crema di formaggio"],
+    "ingredienti": [
+      "impasto pizza",
+      "prosciutto crudo San Daniele",
+      "rucola",
+      "crema di formaggio"
+    ],
     "peso_totale_g": 220,
     "kcal_totali_stimate": 495,
-    "allergeni": [1,7]
+    "allergeni": [
+      1,
+      7
+    ]
   },
-
   "bevande": [
-    { "nome": "Acqua naturale 0.75L", "kcal": 0, "categoria": "leggera" },
-    { "nome": "Acqua frizzante 0.75L", "kcal": 0, "categoria": "leggera" },
-    { "nome": "Coca Cola", "kcal": 139, "categoria": "dolce" },
-    { "nome": "Coca Cola Zero", "kcal": 1, "categoria": "leggera" },
-    { "nome": "Fanta", "kcal": 150, "categoria": "dolce" },
-    { "nome": "Sprite", "kcal": 140, "categoria": "dolce" },
-    { "nome": "Birra Malteus 0.3", "kcal": 120, "categoria": "birra" },
-    { "nome": "Birra Malteus 0.5", "kcal": 200, "categoria": "birra" },
-    { "nome": "Birra IPA Ducato 0.4", "kcal": 180, "categoria": "birra" },
-    { "nome": "Vino rosso 1/4", "kcal": 125, "categoria": "vino" }
+    {
+      "nome": "Acqua naturale 0.75L",
+      "prezzo": 2,
+      "kcal": 0,
+      "categoria": "leggera"
+    },
+    {
+      "nome": "Acqua frizzante 0.75L",
+      "prezzo": 2,
+      "kcal": 0,
+      "categoria": "leggera"
+    },
+    {
+      "nome": "Coca Cola",
+      "prezzo": 3,
+      "kcal": 139,
+      "categoria": "dolce"
+    },
+    {
+      "nome": "Coca Cola Zero",
+      "prezzo": 3,
+      "kcal": 1,
+      "categoria": "leggera"
+    },
+    {
+      "nome": "Fanta",
+      "prezzo": 3,
+      "kcal": 150,
+      "categoria": "dolce"
+    },
+    {
+      "nome": "Sprite",
+      "prezzo": 3,
+      "kcal": 140,
+      "categoria": "dolce"
+    },
+    {
+      "nome": "Birra Malteus 0.3",
+      "prezzo": 3.5,
+      "kcal": 120,
+      "categoria": "birra"
+    },
+    {
+      "nome": "Birra Malteus 0.5",
+      "prezzo": 5,
+      "kcal": 200,
+      "categoria": "birra"
+    },
+    {
+      "nome": "Birra IPA Ducato 0.4",
+      "prezzo": 5.5,
+      "kcal": 180,
+      "categoria": "birra"
+    },
+    {
+      "nome": "Vino rosso 1/4",
+      "prezzo": 3.5,
+      "kcal": 125,
+      "categoria": "vino"
+    }
   ],
-
+  "dolci": [
+    {
+      "nome": "Tiramisù della casa",
+      "prezzo": 5,
+      "ingredienti": [
+        "savoiardi",
+        "mascarpone",
+        "caffè",
+        "cacao"
+      ],
+      "allergeni": [
+        1,
+        3,
+        7
+      ],
+      "categoria": "classico"
+    },
+    {
+      "nome": "Panna cotta",
+      "prezzo": 4.5,
+      "ingredienti": [
+        "panna",
+        "zucchero",
+        "vaniglia"
+      ],
+      "allergeni": [
+        7
+      ],
+      "categoria": "classico"
+    },
+    {
+      "nome": "Cheesecake frutti rossi",
+      "prezzo": 5.5,
+      "ingredienti": [
+        "formaggio fresco",
+        "biscotto",
+        "frutti rossi"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "speciale"
+    }
+  ],
+  "cucina": [
+    {
+      "nome": "Tagliere misto",
+      "prezzo": 12,
+      "ingredienti": [
+        "salumi misti",
+        "formaggi",
+        "pane"
+      ],
+      "allergeni": [
+        1,
+        7
+      ],
+      "categoria": "antipasto"
+    },
+    {
+      "nome": "Patatine fritte",
+      "prezzo": 4.5,
+      "ingredienti": [
+        "patate",
+        "sale"
+      ],
+      "allergeni": [],
+      "categoria": "contorno"
+    },
+    {
+      "nome": "Insalata mista",
+      "prezzo": 5,
+      "ingredienti": [
+        "insalata",
+        "pomodorini",
+        "carote"
+      ],
+      "allergeni": [],
+      "categoria": "contorno"
+    }
+  ],
   "impasto_pizza": {
     "descrizione": "Impasto pizza AL DOGE, usato per pizze e panini, cotto al momento.",
     "kcal_per_100g": 265
   },
-
   "ingredienti_kcal": {
     "pomodoro": 18,
     "mozzarella": 280,
@@ -314,5 +1413,16 @@
     "frutti di mare": 90,
     "rucola": 25,
     "insalata": 5
+  },
+  "impasti": {
+    "normale": {
+      "sovrapprezzo": 0
+    },
+    "riso": {
+      "sovrapprezzo": 1.5
+    },
+    "kamut": {
+      "sovrapprezzo": 1.5
+    }
   }
 }
