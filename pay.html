@@ -75,41 +75,83 @@
       margin-bottom: 40px;
     }
 
-    .custom-amount {
-      margin-bottom: 30px;
+    .payment-modes {
+      margin-top: 20px;
+      display: grid;
+      gap: 10px;
+      text-align: left;
     }
 
-    .amount-input-container {
-      position: relative;
-      display: inline-block;
+    .mode-option {
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 10px;
+      padding: 12px;
+      background: rgba(212, 175, 55, 0.05);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .mode-option input {
+      accent-color: var(--gold);
+      width: 18px;
+      height: 18px;
+    }
+
+    .split-controls {
+      display: none;
+      margin-top: 12px;
+      gap: 10px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .split-controls.show {
+      display: grid;
+    }
+
+    .split-field label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .split-field select {
       width: 100%;
-    }
-
-    .currency-symbol {
-      position: absolute;
-      left: 20px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--gold);
-      font-size: 24px;
-      font-weight: 600;
-    }
-
-    .amount-input {
-      width: 100%;
-      padding: 20px 20px 20px 50px;
-      border-radius: 12px;
-      border: 2px solid rgba(212, 175, 55, 0.3);
+      border-radius: 8px;
+      border: 1px solid rgba(212, 175, 55, 0.3);
       background: var(--dark);
       color: var(--text);
-      font-size: 32px;
-      font-weight: 600;
-      text-align: center;
+      padding: 10px;
+      font-size: 15px;
     }
 
-    .amount-input:focus {
-      outline: none;
-      border-color: var(--gold);
+    .payable-box {
+      margin-top: 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      background: rgba(212, 175, 55, 0.1);
+      padding: 14px;
+      text-align: left;
+    }
+
+    .payable-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .payable-label {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .payable-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--gold);
     }
 
     .pay-button {
@@ -200,20 +242,34 @@
         <ul id="bill-items" style="margin:10px 0 0;padding-left:18px;"></ul>
       </div>
 
-      <!-- Custom Amount -->
-      <div class="custom-amount">
-        <div class="amount-input-container">
-          <span class="currency-symbol">€</span>
-          <input 
-            type="number" 
-            class="amount-input" 
-            id="custom-amount" 
-            placeholder="0.00"
-            step="0.01"
-            min="0"
-            oninput="onAmountChange()"
-          >
+      <div class="payment-modes">
+        <label class="mode-option">
+          <input type="radio" name="payment-mode" value="full" checked>
+          <span>Pagamento unico</span>
+        </label>
+        <label class="mode-option">
+          <input type="radio" name="payment-mode" value="split">
+          <span>Pagamento diviso</span>
+        </label>
+      </div>
+
+      <div class="split-controls" id="split-controls">
+        <div class="split-field">
+          <label for="split-count">Numero quote</label>
+          <select id="split-count"></select>
         </div>
+        <div class="split-field">
+          <label for="split-index">Quota da pagare</label>
+          <select id="split-index"></select>
+        </div>
+      </div>
+
+      <div class="payable-box">
+        <div class="payable-row">
+          <span class="payable-label">Importo pagabile</span>
+          <span class="payable-value" id="payable-amount">€0.00</span>
+        </div>
+        <div id="payable-detail" style="font-size: 12px; color: var(--muted); margin-top: 6px;"></div>
       </div>
 
       <!-- Pay Button -->
@@ -242,9 +298,15 @@
 
   <script>
     const TABLE_BILL_ENDPOINT = '/.netlify/functions/table-bill';
+    const TABLE_PAYMENT_ENDPOINT = '/.netlify/functions/table-payment';
+    const SPLIT_MIN_SHARES = 2;
+    const SPLIT_MAX_SHARES = 12;
     let tableNumber = null;
     let selectedAmount = 0;
     let currentBill = null;
+    let paymentMode = 'full';
+    let splitShares = 2;
+    let splitShareIndex = 1;
 
     // Ottieni numero tavolo da URL
     function getTableNumber() {
@@ -267,6 +329,10 @@
         return '€0.00';
       }
       return `€${value.toFixed(2)}`;
+    }
+
+    function roundToCents(value) {
+      return Math.round((Number(value) + Number.EPSILON) * 100);
     }
 
     function showBillStatus(message) {
@@ -342,13 +408,7 @@
         }).join('');
       }
 
-      if (Number.isFinite(total) && total > 0) {
-        selectedAmount = total;
-        document.getElementById('custom-amount').value = total.toFixed(2);
-        document.getElementById('pay-btn').disabled = false;
-      } else {
-        document.getElementById('pay-btn').disabled = true;
-      }
+      updatePayableAmount();
     }
 
     async function loadBillForTable(table) {
@@ -375,38 +435,95 @@
       renderBill(payload.bill);
     }
 
-    // Ottieni importo iniziale da URL (amount, fallback total/price)
-    function getInitialAmount() {
-      const params = new URLSearchParams(window.location.search);
-      const rawAmount = params.get('amount') ?? params.get('total') ?? params.get('price');
-
-      if (rawAmount === null) {
-        return null;
-      }
-
-      const normalizedAmount = rawAmount.trim().replace(',', '.');
-      const amount = parseFloat(normalizedAmount);
-
-      if (!Number.isFinite(amount) || amount <= 0) {
-        return null;
-      }
-
-      return amount;
+    function getCalculatedSplitAmount(total) {
+      const totalCents = roundToCents(total);
+      const shares = Math.max(SPLIT_MIN_SHARES, splitShares);
+      const index = Math.min(shares, Math.max(1, splitShareIndex));
+      const baseShare = Math.floor(totalCents / shares);
+      const remainder = totalCents % shares;
+      const shareCents = baseShare + (index <= remainder ? 1 : 0);
+      return shareCents / 100;
     }
 
-    function onAmountChange() {
-      const input = document.getElementById('custom-amount');
-      const amount = parseFloat(input.value) || 0;
-      
-      selectedAmount = amount;
+    function refreshSplitShareOptions() {
+      const splitCountEl = document.getElementById('split-count');
+      const splitIndexEl = document.getElementById('split-index');
+      const shares = Number.parseInt(splitCountEl.value, 10);
+      splitShares = Number.isInteger(shares) ? shares : SPLIT_MIN_SHARES;
 
-      // Abilita/disabilita bottone
-      document.getElementById('pay-btn').disabled = amount <= 0;
+      const max = splitShares;
+      const currentIndex = Math.min(max, Math.max(1, Number.parseInt(splitIndexEl.value, 10) || 1));
+      splitIndexEl.innerHTML = '';
+      for (let idx = 1; idx <= max; idx += 1) {
+        const option = document.createElement('option');
+        option.value = String(idx);
+        option.textContent = `Quota ${idx} di ${max}`;
+        splitIndexEl.appendChild(option);
+      }
+      splitIndexEl.value = String(currentIndex);
+      splitShareIndex = currentIndex;
+    }
+
+    function updatePayableAmount() {
+      const billTotal = Number(currentBill?.total);
+      const isBillValid = Number.isFinite(billTotal) && billTotal > 0;
+      const splitControls = document.getElementById('split-controls');
+      const detail = document.getElementById('payable-detail');
+
+      splitControls.classList.toggle('show', paymentMode === 'split');
+
+      if (!isBillValid) {
+        selectedAmount = 0;
+        document.getElementById('payable-amount').textContent = formatCurrency(0);
+        detail.textContent = 'Nessun importo disponibile';
+        document.getElementById('pay-btn').disabled = true;
+        return;
+      }
+
+      if (paymentMode === 'full') {
+        selectedAmount = billTotal;
+        detail.textContent = 'Pagamento unico: totale completo del tavolo';
+      } else {
+        selectedAmount = getCalculatedSplitAmount(billTotal);
+        detail.textContent = `Pagamento diviso: quota ${splitShareIndex} di ${splitShares}`;
+      }
+
+      document.getElementById('payable-amount').textContent = formatCurrency(selectedAmount);
+      document.getElementById('pay-btn').disabled = selectedAmount <= 0;
+    }
+
+    function setupModeControls() {
+      const splitCountEl = document.getElementById('split-count');
+      for (let shares = SPLIT_MIN_SHARES; shares <= SPLIT_MAX_SHARES; shares += 1) {
+        const option = document.createElement('option');
+        option.value = String(shares);
+        option.textContent = `${shares} quote`;
+        splitCountEl.appendChild(option);
+      }
+      splitCountEl.value = String(splitShares);
+      refreshSplitShareOptions();
+
+      document.querySelectorAll('input[name="payment-mode"]').forEach((input) => {
+        input.addEventListener('change', (event) => {
+          paymentMode = event.target.value === 'split' ? 'split' : 'full';
+          updatePayableAmount();
+        });
+      });
+
+      splitCountEl.addEventListener('change', () => {
+        refreshSplitShareOptions();
+        updatePayableAmount();
+      });
+
+      document.getElementById('split-index').addEventListener('change', (event) => {
+        splitShareIndex = Math.max(1, Number.parseInt(event.target.value, 10) || 1);
+        updatePayableAmount();
+      });
     }
 
     async function processPayment() {
       if (selectedAmount <= 0) {
-        alert('Inserisci un importo valido');
+        alert('Importo non disponibile');
         return;
       }
 
@@ -415,37 +532,26 @@
       btn.textContent = '⏳ Elaborazione...';
 
       try {
-        // Crea ordine
-        const order = {
-          orderId: Date.now(),
-          timestamp: new Date().toISOString(),
-          tableNumber: tableNumber,
-          total: selectedAmount.toFixed(2),
-          status: 'paid',
-          type: 'table_payment',
-          name: `Tavolo ${tableNumber}`,
-          phone: '-',
-          address: `Tavolo ${tableNumber}`,
-          items: Array.isArray(currentBill?.items) && currentBill.items.length > 0
-            ? currentBill.items
-            : [
-                {
-                  name: `Pagamento tavolo ${tableNumber}`,
-                  qty: 1,
-                  price: selectedAmount
-                }
-              ]
+        const paymentPayload = {
+          tableNumber,
+          paymentMode,
+          splitShares,
+          splitShareIndex
         };
 
-        // Invia notifica Telegram
-        const notifyResponse = await fetch('/.netlify/functions/telegram-notify', {
+        const notifyResponse = await fetch(TABLE_PAYMENT_ENDPOINT, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(order)
+          body: JSON.stringify(paymentPayload)
         });
 
         if (!notifyResponse.ok) {
-          throw new Error('Errore invio notifica Telegram');
+          throw new Error('Errore invio pagamento tavolo');
+        }
+        const responseData = await notifyResponse.json();
+        const paidAmount = Number(responseData?.payableAmount);
+        if (Number.isFinite(paidAmount) && paidAmount > 0) {
+          selectedAmount = paidAmount;
         }
 
         // Mostra successo
@@ -470,6 +576,7 @@
       }
 
       document.getElementById('table-number').textContent = tableNumber;
+      setupModeControls();
 
       try {
         await loadBillForTable(tableNumber);
@@ -479,12 +586,7 @@
         return;
       }
 
-      const billTotal = Number(currentBill?.total);
-      const initialAmount = getInitialAmount();
-      if ((!Number.isFinite(billTotal) || billTotal <= 0) && initialAmount !== null) {
-        document.getElementById('custom-amount').value = initialAmount.toFixed(2);
-        onAmountChange();
-      }
+      updatePayableAmount();
     }
 
     init();
