@@ -1,17 +1,17 @@
-const { getStore } = require('@netlify/blobs');
+const { connectLambda, getStore } = require('@netlify/blobs');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 
 const TABLE_MIN = 1;
 const TABLE_MAX = 200;
 const STORE_NAME = 'table-bills';
-const LOCAL_STORE_PATH = path.join(process.cwd(), '.netlify', 'local-table-bills.json');
+const LOCAL_STORE_PATH = path.join('/tmp', 'local-table-bills.json');
 
 const HEADERS = {
   'Content-Type': 'application/json',
   'Cache-Control': 'no-store',
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, PUT, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, PUT, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
@@ -176,8 +176,8 @@ function getBlobStore() {
     const siteID = process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
     const token = process.env.NETLIFY_AUTH_TOKEN;
     const options = token && siteID
-      ? { name: STORE_NAME, consistency: 'strong', siteID, token }
-      : { name: STORE_NAME, consistency: 'strong' };
+      ? { name: STORE_NAME, siteID, token }
+      : STORE_NAME;
     blobStore = getStore(options);
     return blobStore;
   } catch (error) {
@@ -190,16 +190,25 @@ function getBlobStore() {
 }
 
 exports.handler = async (event) => {
+  try {
+    connectLambda(event);
+  } catch (_) {
+    // Ignore when not required; getStore fallback logic will handle availability.
+  }
+
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 204, headers: HEADERS, body: '' };
   }
 
-  if (event.httpMethod !== 'GET' && event.httpMethod !== 'PUT') {
+  const method = String(event.httpMethod || '').toUpperCase();
+  const isWriteMethod = method === 'PUT' || method === 'POST';
+
+  if (method !== 'GET' && !isWriteMethod) {
     return respond(405, { ok: false, error: 'METHOD_NOT_ALLOWED' });
   }
 
   let payload = {};
-  if (event.httpMethod === 'PUT') {
+  if (isWriteMethod) {
     try {
       payload = JSON.parse(event.body || '{}');
     } catch (_) {
@@ -213,7 +222,7 @@ exports.handler = async (event) => {
   }
 
   try {
-    if (event.httpMethod === 'PUT') {
+    if (isWriteMethod) {
       const bill = normalizeBillShape(payload.bill || payload, tableNumber);
       await saveAllKeys(tableNumber, bill);
       return respond(200, {

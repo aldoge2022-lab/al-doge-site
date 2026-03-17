@@ -1,0 +1,1109 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portale Tavoli Staff - AL DOGE</title>
+  <style>
+    :root {
+      --bg: #f7f4ee;
+      --card: #ffffff;
+      --ink: #1f1d1a;
+      --muted: #6a645d;
+      --accent: #b14a2e;
+      --line: #e4ddd2;
+      --ok: #2f8f4e;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top right, #efe6da, var(--bg));
+      color: var(--ink);
+    }
+
+    .layout {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 18px;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.05);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      letter-spacing: 0.5px;
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(120px, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    input, select, button {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      padding: 10px;
+      font-size: 14px;
+    }
+
+    button {
+      background: #f2ece3;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .catalog-list {
+      max-height: 65vh;
+      overflow: auto;
+      margin-top: 14px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .category-tabs {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(90px, 1fr));
+      gap: 8px;
+    }
+
+    .category-tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .catalog-item {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .catalog-item small {
+      display: block;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .bill-items {
+      margin-top: 12px;
+      display: grid;
+      gap: 12px;
+      max-height: 62vh;
+      overflow: auto;
+    }
+
+    .bill-item {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px;
+    }
+
+    .bill-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .muted { color: var(--muted); font-size: 13px; }
+
+    .qty-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .qty-row button { width: auto; padding: 6px 10px; }
+
+    .additions {
+      margin-top: 8px;
+      display: grid;
+      gap: 6px;
+      border-top: 1px dashed var(--line);
+      padding-top: 8px;
+    }
+
+    .additions-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      background: #faf7f2;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+    }
+
+    .totals {
+      margin-top: 12px;
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+      font-weight: 700;
+      font-size: 20px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--ok);
+      min-height: 18px;
+    }
+
+    .catalog-check {
+      margin-top: 8px;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 13px;
+      border: 1px solid var(--line);
+      background: #fcfaf6;
+    }
+
+    .catalog-check.ok {
+      border-color: #b9ddc5;
+      background: #f2fbf5;
+      color: #1d6c38;
+    }
+
+    .catalog-check.error {
+      border-color: #efc8c3;
+      background: #fff5f3;
+      color: #8d2a1f;
+    }
+
+    .active-tables {
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fcfaf6;
+      padding: 10px;
+    }
+
+    .active-tables h3 {
+      margin: 0;
+      font-size: 14px;
+    }
+
+    .active-table-list {
+      margin-top: 8px;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(90px, 1fr));
+      gap: 6px;
+    }
+
+    .table-pill {
+      width: 100%;
+      padding: 8px;
+      border-radius: 10px;
+      font-size: 12px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      text-align: center;
+    }
+
+    .table-pill.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .table-pill.open {
+      border-color: #b9ddc5;
+      background: #f2fbf5;
+      color: #1d6c38;
+    }
+
+    .table-note {
+      margin-top: 12px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .table-note textarea {
+      min-height: 78px;
+      resize: vertical;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      padding: 10px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    @media (max-width: 1024px) {
+      .layout { grid-template-columns: 1fr; }
+      .controls { grid-template-columns: repeat(2, minmax(140px, 1fr)); }
+      .category-tabs { grid-template-columns: repeat(2, minmax(130px, 1fr)); }
+      .active-table-list { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <section class="panel">
+      <h1>Portale Tavoli Staff</h1>
+      <p class="subtitle" id="catalog-meta">Catalogo in caricamento...</p>
+      <div class="controls">
+        <select id="table-select"></select>
+        <input id="search-input" type="search" placeholder="Cerca pizza o ingrediente">
+        <button type="button" onclick="refreshCatalog()">Aggiorna catalogo</button>
+        <button type="button" onclick="clearBill()">Svuota conto</button>
+      </div>
+      <div class="active-tables">
+        <h3>Tavoli 1-10 sempre visibili</h3>
+        <div class="muted">Ogni tavolo resta sempre cliccabile, anche quando il conto e vuoto.</div>
+        <div class="active-table-list" id="active-table-list"></div>
+      </div>
+      <div class="catalog-check" id="catalog-check">Verifica catalogo in corso...</div>
+      <div class="category-tabs" id="category-tabs">
+        <button type="button" class="category-tab active" data-category="Pizze">Pizze</button>
+        <button type="button" class="category-tab" data-category="Bevande">Bevande</button>
+        <button type="button" class="category-tab" data-category="Dolci">Dolci</button>
+        <button type="button" class="category-tab" data-category="Cucina">Cucina</button>
+      </div>
+      <div class="catalog-list" id="catalog-list"></div>
+    </section>
+
+    <section class="panel">
+      <h2 id="bill-title" style="margin:0;">Conto tavolo 1</h2>
+      <p class="subtitle">Ogni tavolo mantiene un conto separato fino a svuotamento o saldo.</p>
+      <div class="controls" style="margin-top:12px;">
+        <input id="payment-code" placeholder="Payment code (opzionale)">
+        <button type="button" onclick="addCoverCharge()">Aggiungi coperto</button>
+        <button class="primary" type="button" onclick="saveBill()">Salva conto</button>
+        <button type="button" onclick="loadBill()">Ricarica conto</button>
+      </div>
+      <div class="table-note">
+        <label for="table-note"><strong>Note tavolo/comanda</strong></label>
+        <textarea id="table-note" placeholder="Es: senza cipolla, cottura particolare, allergia, richiesta speciale"></textarea>
+      </div>
+
+      <div class="bill-items" id="bill-items"></div>
+      <div class="totals">
+        <span>Totale conto</span>
+        <span id="bill-total">€0,00</span>
+      </div>
+      <div class="status" id="status"></div>
+    </section>
+  </div>
+
+  <script src="/pizza-pricing.js"></script>
+  <script src="/shared-additions.js"></script>
+  <script src="/table-bill-utils.js"></script>
+  <script>
+    const TABLE_STORAGE_KEY = 'al-doge-staff-table-bills-v1';
+    const TABLE_COUNT = 10;
+    const EXPECTED_PIZZA_COUNT = 72;
+    const COVER_CHARGE_ITEM = {
+      id: 'cuc-coperto',
+      name: 'Coperto',
+      price: 1.5,
+      category: 'Cucina',
+      ingredients: []
+    };
+    const FALLBACK_EXTRA_CATEGORIES = [
+      {
+        key: 'verdure',
+        label: 'Verdure',
+        ingredients: [
+          'Funghi freschi', 'Funghi porcini', 'Carciofi', 'Peperoni', 'Cipolla', 'Patate al forno',
+          'Patatine', 'Rucola', 'Pomodorini', 'Zucchine', 'Spinaci', 'Radicchio di Treviso',
+          'Melanzane', 'Asparagi', 'Fagioli', 'Olive nere', 'Olive verdi', 'Olive taggiasche',
+          'Pomodori secchi', 'Capperi', 'Friarielli', 'Noci'
+        ]
+      },
+      {
+        key: 'affettati',
+        label: 'Affettati',
+        ingredients: [
+          'Prosciutto cotto', 'Prosciutto crudo San Daniele', 'Bresaola', 'Speck', 'Pancetta',
+          'Salamino piccante', 'Wurstel', 'Salsiccia', 'Salame dolce', "Petto d'oca", 'Acciughe',
+          'Tonno', 'Salmone', 'Salmone affumicato', 'Gamberetti', 'Frutti di mare'
+        ]
+      },
+      {
+        key: 'burrata-bufala',
+        label: 'Burrata / bufala',
+        ingredients: ['Burrata', 'Mozzarella di bufala']
+      }
+    ];
+    const FALLBACK_ADDITION_SURCHARGES = {
+      verdure: 1.5,
+      affettati: 2,
+      'burrata-bufala': 3
+    };
+
+    const state = {
+      pizzaCatalog: [],
+      extraCatalog: [],
+      catalog: [],
+      filteredCatalog: [],
+      source: null,
+      verification: null,
+      diagnostics: null,
+      billItems: [],
+      activeCategory: 'Pizze',
+      activeTable: 1,
+      tableBills: {}
+    };
+    const BillUtils = window.TableBillUtils || {
+      EXTRA_CATEGORIES: FALLBACK_EXTRA_CATEGORIES,
+      getAdditionSurcharge(categoryKey) {
+        return Number(FALLBACK_ADDITION_SURCHARGES[String(categoryKey || '').trim()] || 0);
+      },
+      getAutomaticAdditions() {
+        return [];
+      },
+      calculateLineTotals(row) {
+        const quantity = Math.max(1, Number(row?.quantity || 1));
+        const basePrice = Number(row?.basePrice || 0);
+        const additions = Array.isArray(row?.additions) ? row.additions : [];
+        const additionsPrice = additions.reduce((sum, addition) => {
+          return sum + this.getAdditionSurcharge(addition?.categoryKey);
+        }, 0);
+        const total = (basePrice + additionsPrice) * quantity;
+        return {
+          ...row,
+          quantity,
+          basePrice,
+          additions,
+          additionsPrice,
+          total
+        };
+      },
+      calculateBillTotals(items) {
+        const normalized = (Array.isArray(items) ? items : []).map((item) => this.calculateLineTotals(item));
+        const total = normalized.reduce((sum, item) => sum + Number(item.total || 0), 0);
+        return { items: normalized, total };
+      }
+    };
+
+    function euro(value) {
+      return `€${Number(value || 0).toFixed(2).replace('.', ',')}`;
+    }
+
+    function setStatus(message, isError = false) {
+      const node = document.getElementById('status');
+      node.textContent = message || '';
+      node.style.color = isError ? '#b13a2d' : '#2f8f4e';
+    }
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function buildTableOptions() {
+      const select = document.getElementById('table-select');
+      select.innerHTML = Array.from({ length: TABLE_COUNT }, (_, idx) => {
+        const table = idx + 1;
+        return `<option value="${table}">Tavolo ${table}</option>`;
+      }).join('');
+      select.value = String(state.activeTable);
+    }
+
+    function getCurrentTable() {
+      return Number(document.getElementById('table-select').value || 1);
+    }
+
+    function getCatalogItemById(id) {
+      const target = String(id || '').trim();
+      return state.catalog.find((item) => String(item?.id || '').trim() === target) || null;
+    }
+
+    function getCatalogDedupKey(item) {
+      const idKey = String(item?.id || '').trim().toLowerCase();
+      const categoryKey = String(item?.category || '').trim().toLowerCase();
+      const priceKey = Number(item?.price || 0).toFixed(2);
+      if (idKey) return `id:${idKey}:${categoryKey}:${priceKey}`;
+      const nameKey = String(item?.name || '').trim().toLowerCase().replace(/\s+/g, ' ');
+      return `name:${nameKey}:${categoryKey}:${priceKey}`;
+    }
+
+    function dedupeCatalog(items) {
+      const seen = new Set();
+      const deduped = [];
+      (Array.isArray(items) ? items : []).forEach((item) => {
+        const key = getCatalogDedupKey(item);
+        if (seen.has(key)) return;
+        seen.add(key);
+        deduped.push(item);
+      });
+      return deduped;
+    }
+
+    function sortCatalogByName(items) {
+      return [...(Array.isArray(items) ? items : [])].sort((a, b) => {
+        return String(a?.name || '').localeCompare(String(b?.name || ''), 'it', { sensitivity: 'base' });
+      });
+    }
+
+    function flattenArrayBuckets(value) {
+      if (Array.isArray(value)) return [value];
+      if (!value || typeof value !== 'object') return [];
+      return Object.values(value).flatMap(flattenArrayBuckets);
+    }
+
+    function collectPizzaPayloadItems(payload, tableItems) {
+      const explicitPizzaSources = [
+        payload?.pizzas,
+        payload?.pizze,
+        payload?.pizza,
+        payload?.pizzaCatalog,
+        payload?.catalog?.pizzas,
+        payload?.catalog?.pizze,
+        payload?.menu?.pizzas,
+        payload?.menu?.pizze
+      ];
+      const rows = [
+        ...explicitPizzaSources.flatMap(flattenArrayBuckets).flat()
+      ];
+
+      return rows.filter((item) => {
+        const displayCategory = toDisplayCategory(item?.category || item?.categoria || item?.type);
+        if (displayCategory === 'Pizze') return true;
+        const domains = Array.isArray(item?.domains) ? item.domains : [];
+        return domains.some((entry) => String(entry || '').trim().toLowerCase() === 'pizza');
+      });
+    }
+
+    async function parseJsonSafe(response) {
+      const raw = await response.text();
+      if (!raw) return null;
+      try {
+        return JSON.parse(raw);
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function renderCatalogCheck() {
+      const node = document.getElementById('catalog-check');
+      const verification = state.verification;
+      const actualCount = Number(state.pizzaCatalog.length || 0);
+
+      if (!verification) {
+        node.className = actualCount >= EXPECTED_PIZZA_COUNT ? 'catalog-check ok' : 'catalog-check error';
+        node.textContent = actualCount >= EXPECTED_PIZZA_COUNT
+          ? `Catalogo verificato: ${actualCount}/${EXPECTED_PIZZA_COUNT} pizze • ${state.extraCatalog.length} extra.`
+          : `Catalogo non completo: ${actualCount}/${EXPECTED_PIZZA_COUNT} pizze.`;
+        return;
+      }
+
+      const expected = Number(verification.expectedTotal || verification.expected || EXPECTED_PIZZA_COUNT);
+      const actual = Math.max(actualCount, Number(verification.total || 0));
+      const safeExpected = Math.max(expected, EXPECTED_PIZZA_COUNT);
+      const delta = safeExpected - actual;
+
+      if (verification.ok) {
+        node.className = 'catalog-check ok';
+        node.textContent = `Catalogo verificato: ${actual}/${safeExpected} pizze. Categorie allineate al riferimento ufficiale.`;
+        return;
+      }
+
+      const mismatchLabel = (verification.mismatches || [])
+        .map((entry) => `${entry.category} ${entry.actual}/${entry.expected}`)
+        .join(' • ');
+      const unexpectedLabel = (verification.unexpectedCategories || []).join(', ');
+      let loadIssue = '';
+      if (state.diagnostics?.status === 'remote_unavailable') {
+        const firstFailure = Array.isArray(state.diagnostics.attemptedTables)
+          ? state.diagnostics.attemptedTables.find((entry) => entry.error)
+          : null;
+        loadIssue = firstFailure
+          ? `Caricamento interrotto sulla source remota (${firstFailure.table}: ${firstFailure.error}). Fallback locale attivo.`
+          : 'Caricamento interrotto sulla source remota. Fallback locale attivo.';
+      }
+
+      const parts = [
+        `Catalogo non completo: ${actual}/${safeExpected} pizze (${delta > 0 ? `- ${delta}` : 'eccedenza'}).`,
+        mismatchLabel ? `Categorie: ${mismatchLabel}.` : '',
+        unexpectedLabel ? `Categorie fuori riferimento: ${unexpectedLabel}.` : '',
+        loadIssue
+      ].filter(Boolean);
+
+      node.className = 'catalog-check error';
+      node.textContent = parts.join(' ');
+    }
+
+    function getStaticExtraCatalog() {
+      return [
+        { id: 'bev-coca-cola', name: 'Coca-Cola', price: 3, category: 'Bevande', ingredients: [] },
+        { id: 'bev-acqua-50', name: 'Acqua 0,5L', price: 1.5, category: 'Bevande', ingredients: [] },
+        { id: 'bev-birra-chiara', name: 'Birra chiara', price: 5, category: 'Bevande', ingredients: [] },
+        { id: 'dol-tiramisu', name: 'Tiramisu', price: 5.5, category: 'Dolci', ingredients: [] },
+        { id: 'dol-panna-cotta', name: 'Panna cotta', price: 5, category: 'Dolci', ingredients: [] },
+        { id: 'cuc-fritto-misto', name: 'Fritto misto', price: 8, category: 'Cucina', ingredients: [] },
+        COVER_CHARGE_ITEM
+      ];
+    }
+
+    function toDisplayCategory(value) {
+      const raw = String(value || '').trim().toLowerCase();
+      if (raw === 'pizze' || raw === 'pizza' || raw === 'classica' || raw === 'formaggi' || raw === 'speciale' || raw === 'piccante' || raw === 'leggera' || raw === 'bambini' || raw === 'saporita' || raw === 'stagionale') {
+        return 'Pizze';
+      }
+      if (raw === 'bevande' || raw === 'bevanda' || raw === 'drink' || raw === 'drinks') {
+        return 'Bevande';
+      }
+      if (raw === 'dolci' || raw === 'dolce' || raw === 'dessert') {
+        return 'Dolci';
+      }
+      if (raw === 'cucina' || raw === 'food') {
+        return 'Cucina';
+      }
+      return 'Pizze';
+    }
+
+    function normalizeCatalogItems(items, fallbackCategory) {
+      return (Array.isArray(items) ? items : []).map((item, index) => {
+        const name = String(item?.name || item?.nome || '').trim();
+        if (!name) return null;
+        const baseId = String(item?.id || '').trim().toLowerCase().replace(/\s+/g, '-');
+        const id = baseId || `${fallbackCategory.toLowerCase()}-${index + 1}`;
+        const rawPrice = Number(item?.price ?? item?.prezzo ?? 0);
+        const price = Number.isFinite(rawPrice) ? rawPrice : 0;
+        const ingredients = Array.isArray(item?.ingredients) ? item.ingredients : (Array.isArray(item?.ingredienti) ? item.ingredienti : []);
+        const category = fallbackCategory || toDisplayCategory(item?.category || item?.categoria);
+        return {
+          id,
+          name,
+          price,
+          category,
+          ingredients
+        };
+      }).filter(Boolean);
+    }
+
+    function mergeCatalogs() {
+      state.catalog = [...state.pizzaCatalog, ...state.extraCatalog];
+    }
+
+    function ensureCoverChargeInCatalog() {
+      const hasCover = state.catalog.some((item) => String(item?.id || '').trim() === COVER_CHARGE_ITEM.id);
+      if (!hasCover) {
+        state.extraCatalog.push({ ...COVER_CHARGE_ITEM });
+        mergeCatalogs();
+      }
+    }
+
+    async function refreshCatalog() {
+      try {
+        const response = await fetch('/.netlify/functions/catalog');
+        const payload = await response.json();
+        const tableItems = Array.isArray(payload.tableItems) ? payload.tableItems : [];
+        const payloadPizzas = collectPizzaPayloadItems(payload, tableItems);
+        const payloadBevande = [
+          ...(Array.isArray(payload.bevande) ? payload.bevande : []),
+          ...tableItems.filter((item) => toDisplayCategory(item?.category || item?.categoria || item?.type) === 'Bevande')
+        ];
+        const payloadDolci = [
+          ...(Array.isArray(payload.dolci) ? payload.dolci : []),
+          ...tableItems.filter((item) => toDisplayCategory(item?.category || item?.categoria || item?.type) === 'Dolci')
+        ];
+        const payloadCucina = [
+          ...(Array.isArray(payload.cucina) ? payload.cucina : []),
+          ...tableItems.filter((item) => toDisplayCategory(item?.category || item?.categoria || item?.type) === 'Cucina')
+        ];
+
+        state.pizzaCatalog = sortCatalogByName(dedupeCatalog(normalizeCatalogItems(payloadPizzas, 'Pizze')));
+
+        const dynamicExtras = dedupeCatalog([
+          ...normalizeCatalogItems(payloadBevande, 'Bevande'),
+          ...normalizeCatalogItems(payloadDolci, 'Dolci'),
+          ...normalizeCatalogItems(payloadCucina, 'Cucina')
+        ]);
+
+        state.extraCatalog = dynamicExtras.length ? dynamicExtras : getStaticExtraCatalog();
+        mergeCatalogs();
+        ensureCoverChargeInCatalog();
+        state.source = payload.source || 'unknown';
+        state.verification = payload.verification || {
+          expected: EXPECTED_PIZZA_COUNT,
+          total: state.pizzaCatalog.length,
+          ok: state.pizzaCatalog.length >= EXPECTED_PIZZA_COUNT
+        };
+        state.diagnostics = payload.diagnostics || null;
+        applyCatalogFilter();
+        const extrasByCategory = state.extraCatalog.reduce((acc, item) => {
+          acc[item.category] = (acc[item.category] || 0) + 1;
+          return acc;
+        }, {});
+        document.getElementById('catalog-meta').textContent = `Fonte: ${state.source} • Pizze: ${state.pizzaCatalog.length}/${EXPECTED_PIZZA_COUNT} • Bevande: ${extrasByCategory.Bevande || 0} • Dolci: ${extrasByCategory.Dolci || 0} • Cucina: ${extrasByCategory.Cucina || 0}`;
+        renderCatalogCheck();
+      } catch (error) {
+        document.getElementById('catalog-meta').textContent = 'Errore caricamento catalogo';
+        document.getElementById('catalog-check').className = 'catalog-check error';
+        document.getElementById('catalog-check').textContent = 'Errore verifica catalogo: source non raggiungibile.';
+        setStatus('Catalogo non raggiungibile', true);
+      }
+    }
+
+    function applyCatalogFilter() {
+      const query = document.getElementById('search-input').value.trim().toLowerCase();
+      state.filteredCatalog = state.catalog.filter((pizza) => {
+        const category = String(pizza.category || 'Pizze');
+        if (state.activeCategory && category !== state.activeCategory) return false;
+        if (!query) return true;
+        const byName = String(pizza.name || '').toLowerCase().includes(query);
+        const byIng = Array.isArray(pizza.ingredients)
+          ? pizza.ingredients.some((ing) => String(ing).toLowerCase().includes(query))
+          : false;
+        return byName || byIng;
+      });
+      renderCatalog();
+    }
+
+    function renderCatalog() {
+      const container = document.getElementById('catalog-list');
+      if (!state.filteredCatalog.length) {
+        container.innerHTML = `<div class="muted">Nessun articolo trovato in ${escapeHtml(state.activeCategory)}</div>`;
+        return;
+      }
+
+      container.innerHTML = state.filteredCatalog.map((pizza) => {
+        return `
+          <div class="catalog-item">
+            <div>
+              <strong>${escapeHtml(pizza.name)}</strong>
+              <small>${escapeHtml(pizza.category || 'Pizze')}${(pizza.ingredients || []).length ? ` • ${escapeHtml((pizza.ingredients || []).join(', '))}` : ''}</small>
+            </div>
+            <div>
+              <div style="text-align:right;font-weight:700;">${euro(pizza.price)}</div>
+              <button type="button" onclick="addPizzaToBill('${escapeHtml(pizza.id)}')">Aggiungi</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addPizzaToBill(pizzaId) {
+      const pizza = getCatalogItemById(pizzaId);
+      if (!pizza) return;
+      const automaticAdditions = typeof BillUtils.getAutomaticAdditions === 'function'
+        ? BillUtils.getAutomaticAdditions(pizza)
+        : [];
+      state.billItems.push(
+        BillUtils.calculateLineTotals({
+          pizzaId: pizza.id,
+          name: pizza.name,
+          basePrice: pizza.price,
+          quantity: 1,
+          additions: Array.isArray(automaticAdditions) ? automaticAdditions : []
+        })
+      );
+      renderBill();
+      syncCurrentTableState();
+      setStatus(`${pizza.name} aggiunta al tavolo ${getCurrentTable()}`);
+    }
+
+    function clearBill() {
+      state.billItems = [];
+      document.getElementById('payment-code').value = '';
+      renderBill();
+      syncCurrentTableState();
+      setStatus(`Conto tavolo ${getCurrentTable()} svuotato`);
+    }
+
+    function updateQty(index, delta) {
+      const row = state.billItems[index];
+      if (!row) return;
+      row.quantity = Math.max(1, Number(row.quantity || 1) + delta);
+      state.billItems[index] = BillUtils.calculateLineTotals(row);
+      renderBill();
+      syncCurrentTableState();
+    }
+
+    function removeRow(index) {
+      state.billItems = state.billItems.filter((_, idx) => idx !== index);
+      renderBill();
+      syncCurrentTableState();
+    }
+
+    function addAddition(index, categoryKey) {
+      const select = document.getElementById(`ingredient-${index}-${categoryKey}`);
+      if (!select || !select.value) return;
+      const row = state.billItems[index];
+      if (!row) return;
+      row.additions = Array.isArray(row.additions) ? row.additions : [];
+      row.additions.push({
+        categoryKey,
+        name: select.value
+      });
+      state.billItems[index] = BillUtils.calculateLineTotals(row);
+      renderBill();
+      syncCurrentTableState();
+    }
+
+    function removeAddition(index, additionIndex) {
+      const row = state.billItems[index];
+      if (!row) return;
+      row.additions = (row.additions || []).filter((_, idx) => idx !== additionIndex);
+      state.billItems[index] = BillUtils.calculateLineTotals(row);
+      renderBill();
+      syncCurrentTableState();
+    }
+
+    function renderBill() {
+      const container = document.getElementById('bill-items');
+      const totals = BillUtils.calculateBillTotals(state.billItems);
+      state.billItems = totals.items;
+
+      if (!state.billItems.length) {
+        container.innerHTML = '<div class="muted">Nessun conto aperto per questo tavolo</div>';
+        document.getElementById('bill-total').textContent = euro(0);
+        return;
+      }
+
+      container.innerHTML = state.billItems.map((row, index) => {
+        const additions = (row.additions || []).map((addition, additionIndex) => `
+          <span class="chip">
+            ${escapeHtml(addition.name)} (${escapeHtml(addition.categoryKey)})
+            <button type="button" style="margin-left:6px;width:auto;padding:1px 5px;" onclick="removeAddition(${index}, ${additionIndex})">x</button>
+          </span>
+        `).join('');
+
+        const selectors = BillUtils.EXTRA_CATEGORIES.map((category) => `
+          <div class="additions-row">
+            <span class="muted">${escapeHtml(category.label)} (+${euro(BillUtils.getAdditionSurcharge(category.key)).replace('€', '€')})</span>
+            <select id="ingredient-${index}-${category.key}">
+              <option value="">Seleziona ingrediente</option>
+              ${category.ingredients.map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join('')}
+            </select>
+            <button type="button" onclick="addAddition(${index}, '${category.key}')">Aggiungi</button>
+          </div>
+        `).join('');
+
+        return `
+          <article class="bill-item">
+            <div class="bill-header">
+              <div>
+                <strong>${escapeHtml(row.name)}</strong>
+                <div class="muted">Base ${euro(row.basePrice)} • Aggiunte ${euro(row.additionsPrice)}</div>
+              </div>
+              <div style="font-weight:700;">${euro(row.total)}</div>
+            </div>
+
+            <div class="qty-row">
+              <button type="button" onclick="updateQty(${index}, -1)">-</button>
+              <span>Qta: <strong>${row.quantity}</strong></span>
+              <button type="button" onclick="updateQty(${index}, 1)">+</button>
+              <button type="button" onclick="removeRow(${index})" style="margin-left:auto;width:auto;">Rimuovi</button>
+            </div>
+
+            <div class="additions">
+              ${selectors}
+              <div class="chips">${additions || '<span class="muted">Nessuna aggiunta</span>'}</div>
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      document.getElementById('bill-total').textContent = euro(totals.total);
+    }
+
+    function cloneItems(items) {
+      return JSON.parse(JSON.stringify(Array.isArray(items) ? items : []));
+    }
+
+    function toBackendBillItems(items) {
+      return (Array.isArray(items) ? items : []).map((row) => {
+        const quantity = Math.max(1, Number(row?.quantity || 1));
+        const total = Number(row?.total);
+        const unitPriceFromTotal = Number.isFinite(total) ? total / quantity : NaN;
+        const basePrice = Number(row?.basePrice);
+        const unitPrice = Number.isFinite(unitPriceFromTotal)
+          ? unitPriceFromTotal
+          : (Number.isFinite(basePrice) ? basePrice : 0);
+        return {
+          id: String(row?.pizzaId || row?.id || row?.name || '').trim(),
+          name: String(row?.name || '').trim(),
+          category: String(row?.category || state.activeCategory || 'Pizze').trim(),
+          quantity,
+          price: Number(unitPrice.toFixed(2)),
+          basePrice: Number.isFinite(basePrice) ? Number(basePrice.toFixed(2)) : Number(unitPrice.toFixed(2)),
+          additionsPrice: Number.isFinite(row?.additionsPrice) ? Number(Number(row.additionsPrice).toFixed(2)) : 0,
+          additions: Array.isArray(row?.additions) ? row.additions : []
+        };
+      }).filter((row) => row.name && row.quantity > 0 && Number.isFinite(row.price));
+    }
+
+    function fromBackendBillItems(items) {
+      return (Array.isArray(items) ? items : []).map((row) => {
+        const quantity = Math.max(1, Number(row?.quantity || 1));
+        const unitPrice = Number(row?.price);
+        const basePrice = Number.isFinite(row?.basePrice) ? Number(row.basePrice) : (Number.isFinite(unitPrice) ? unitPrice : 0);
+        const additions = Array.isArray(row?.additions) ? row.additions : [];
+        const additionsPrice = Number.isFinite(row?.additionsPrice)
+          ? Number(row.additionsPrice)
+          : Math.max(0, (Number.isFinite(unitPrice) ? unitPrice : basePrice) - basePrice);
+
+        return BillUtils.calculateLineTotals({
+          pizzaId: String(row?.id || '').trim(),
+          name: String(row?.name || '').trim(),
+          category: String(row?.category || 'Pizze').trim(),
+          basePrice,
+          quantity,
+          additions,
+          additionsPrice
+        });
+      }).filter((row) => row.name);
+    }
+
+    function persistTableBills() {
+      try {
+        localStorage.setItem(TABLE_STORAGE_KEY, JSON.stringify(state.tableBills));
+      } catch (error) {
+        setStatus('Persistenza locale tavoli non disponibile', true);
+      }
+    }
+
+    function restoreTableBills() {
+      try {
+        const raw = localStorage.getItem(TABLE_STORAGE_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          const normalized = {};
+          Object.keys(parsed).forEach((key) => {
+            const table = Number(key);
+            if (!Number.isFinite(table) || table <= 0) return;
+            const source = parsed[key] || {};
+            normalized[String(table)] = {
+              items: cloneItems(source.items),
+              paymentCode: String(source.paymentCode || ''),
+              note: String(source.note || '')
+            };
+          });
+          state.tableBills = normalized;
+        }
+      } catch (error) {
+        state.tableBills = {};
+      }
+    }
+
+    function getOpenTables() {
+      return Object.keys(state.tableBills)
+        .map((key) => Number(key))
+        .filter((table) => Number.isFinite(table) && table > 0)
+        .sort((a, b) => a - b)
+        .filter((table) => {
+          const entry = state.tableBills[String(table)];
+          return Array.isArray(entry?.items) && entry.items.length > 0;
+        });
+    }
+
+    function renderActiveTables() {
+      const container = document.getElementById('active-table-list');
+      const visibleTables = Array.from({ length: TABLE_COUNT }, (_, idx) => idx + 1);
+      container.innerHTML = visibleTables.map((table) => {
+        const entry = getOrCreateTableState(table);
+        const total = BillUtils.calculateBillTotals(entry.items || []).total || 0;
+        const classNames = [
+          'table-pill',
+          table === state.activeTable ? 'active' : '',
+          (entry.items || []).length > 0 ? 'open' : ''
+        ].filter(Boolean).join(' ');
+        return `<button type="button" class="${classNames}" onclick="switchTable(${table})">Tavolo ${table} • ${euro(total)}</button>`;
+      }).join('');
+    }
+
+    function getOrCreateTableState(table) {
+      const key = String(table);
+      if (!state.tableBills[key]) {
+        state.tableBills[key] = { items: [], paymentCode: '', note: '' };
+      }
+      return state.tableBills[key];
+    }
+
+    function syncCurrentTableState(table = state.activeTable) {
+      const entry = getOrCreateTableState(table);
+      entry.items = cloneItems(state.billItems);
+      entry.paymentCode = document.getElementById('payment-code').value.trim();
+      entry.note = document.getElementById('table-note').value.trim();
+      persistTableBills();
+      renderActiveTables();
+    }
+
+    function loadTableState(table) {
+      const entry = getOrCreateTableState(table);
+      state.billItems = cloneItems(entry.items);
+      document.getElementById('payment-code').value = entry.paymentCode || '';
+      document.getElementById('table-note').value = entry.note || '';
+      document.getElementById('bill-title').textContent = `Conto tavolo ${table}`;
+      renderBill();
+      renderActiveTables();
+    }
+
+    function switchTable(table) {
+      syncCurrentTableState(state.activeTable);
+      state.activeTable = table;
+      document.getElementById('table-select').value = String(table);
+      loadTableState(table);
+      setStatus(`Tavolo ${table} attivo`);
+    }
+
+    function setCategory(category) {
+      state.activeCategory = category;
+      document.querySelectorAll('.category-tab').forEach((button) => {
+        button.classList.toggle('active', button.dataset.category === category);
+      });
+      applyCatalogFilter();
+    }
+
+    function addCoverCharge() {
+      ensureCoverChargeInCatalog();
+      state.billItems.push(
+        BillUtils.calculateLineTotals({
+          pizzaId: COVER_CHARGE_ITEM.id,
+          name: COVER_CHARGE_ITEM.name,
+          basePrice: COVER_CHARGE_ITEM.price,
+          quantity: 1,
+          additions: []
+        })
+      );
+      renderBill();
+      syncCurrentTableState();
+      setStatus(`Coperto aggiunto (${euro(COVER_CHARGE_ITEM.price)})`);
+    }
+
+    async function saveBill() {
+      const table = getCurrentTable();
+      const paymentCode = document.getElementById('payment-code').value.trim();
+      syncCurrentTableState();
+      const payload = {
+        tableNumber: table,
+        paymentCode,
+        note: document.getElementById('table-note').value.trim(),
+        items: toBackendBillItems(state.billItems)
+      };
+
+      try {
+        const response = await fetch('/.netlify/functions/table-bill', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await parseJsonSafe(response);
+        if (!response.ok || !result || !result.ok) {
+          throw new Error(result?.error || `Errore salvataggio (HTTP ${response.status})`);
+        }
+
+        state.billItems = Array.isArray(result.bill?.items) ? fromBackendBillItems(result.bill.items) : state.billItems;
+        document.getElementById('payment-code').value = String(result.bill?.paymentCode || paymentCode || '');
+        if (typeof result.bill?.note === 'string') {
+          document.getElementById('table-note').value = result.bill.note;
+        }
+        renderBill();
+        syncCurrentTableState();
+        setStatus(`Conto tavolo ${table} salvato (${euro(result.bill?.total)})`);
+      } catch (error) {
+        setStatus(`Salvataggio fallito: ${error.message}`, true);
+      }
+    }
+
+    async function loadBill() {
+      const table = getCurrentTable();
+      const query = new URLSearchParams({ table: String(table) });
+
+      try {
+        const response = await fetch(`/.netlify/functions/table-bill?${query.toString()}`);
+        const result = await parseJsonSafe(response);
+
+        if (!response.ok || !result || !result.ok) {
+          throw new Error(result?.error || `Errore caricamento (HTTP ${response.status})`);
+        }
+
+        state.billItems = Array.isArray(result.bill?.items) ? fromBackendBillItems(result.bill.items) : [];
+        document.getElementById('payment-code').value = String(result.bill?.paymentCode || '');
+        if (typeof result.bill?.note === 'string') {
+          document.getElementById('table-note').value = result.bill.note;
+        }
+        renderBill();
+        syncCurrentTableState();
+        if (result.empty) {
+          setStatus(result.message || 'Nessun conto aperto per questo tavolo');
+          return;
+        }
+        setStatus(`Conto tavolo ${table} caricato (${euro(result.bill?.total)})`);
+      } catch (error) {
+        if (String(error.message || '').includes('TABLE_BILL_NOT_FOUND')) {
+          state.billItems = [];
+          document.getElementById('payment-code').value = '';
+          renderBill();
+          syncCurrentTableState();
+          setStatus('Nessun conto aperto per questo tavolo');
+          return;
+        }
+        setStatus(`Caricamento fallito: ${error.message}`, true);
+      }
+    }
+
+    document.getElementById('search-input').addEventListener('input', applyCatalogFilter);
+    document.getElementById('table-select').addEventListener('change', (event) => {
+      switchTable(Number(event.target.value || 1));
+    });
+    document.getElementById('table-note').addEventListener('input', () => {
+      syncCurrentTableState();
+    });
+    document.querySelectorAll('.category-tab').forEach((button) => {
+      button.addEventListener('click', () => setCategory(button.dataset.category));
+    });
+
+    restoreTableBills();
+    buildTableOptions();
+    loadTableState(getCurrentTable());
+    refreshCatalog();
+    renderActiveTables();
+    renderBill();
+  </script>
+</body>
+</html>
