@@ -220,3 +220,90 @@ test('table-payment confirms Stripe session and sends Telegram only once', async
     process.env.TELEGRAM_CHAT_ID = previousChatId;
   }
 });
+
+test('table-payment confirm in split mode updates bill as partial and does not fail without Telegram credentials', async () => {
+  const previousSecretKey = process.env.STRIPE_SECRET_KEY;
+  const previousBotToken = process.env.TELEGRAM_BOT_TOKEN;
+  const previousChatId = process.env.TELEGRAM_CHAT_ID;
+  process.env.STRIPE_SECRET_KEY = 'sk_test_table';
+  delete process.env.TELEGRAM_BOT_TOKEN;
+  delete process.env.TELEGRAM_CHAT_ID;
+
+  const fetchMock = async () => ({ ok: true });
+
+  const stripeFactoryMock = () => ({
+    checkout: {
+      sessions: {
+        create: async () => {
+          throw new Error('create should not be called in confirm flow');
+        },
+        retrieve: async () => ({
+          id: 'cs_table_paid_split_1',
+          payment_status: 'paid',
+          status: 'complete',
+          amount_total: 1200,
+          metadata: {
+            tableNumber: '2',
+            paymentMode: 'split',
+            splitShares: '3',
+            splitShareIndex: '1',
+            billTotal: '36.00',
+            payableAmount: '12.00',
+            originalTotal: '36.00',
+            paidShares: '0',
+            remainingShares: '3',
+          },
+        }),
+      },
+    },
+  });
+
+  const { handler, restore, storeData } = loadTablePaymentHandler({
+    stripeFactoryMock,
+    fetchMock,
+    initialStoreData: {
+      'table-2': {
+        tableNumber: 2,
+        items: [{ name: 'Antipasto', qty: 1, price: 36 }],
+        total: 36,
+        paymentMode: 'split',
+        splitMode: 'equal',
+        totalShares: 3,
+        paidShares: 0,
+        remainingShares: 3,
+        paymentStatus: 'unpaid',
+        originalTotal: 36,
+        remainingTotal: 36,
+      },
+    },
+  });
+
+  try {
+    const response = await handler({
+      httpMethod: 'POST',
+      body: JSON.stringify({
+        action: 'confirm',
+        sessionId: 'cs_table_paid_split_1',
+      }),
+    });
+
+    assert.equal(response.statusCode, 200);
+    const body = JSON.parse(response.body);
+    assert.equal(body.ok, true);
+    assert.equal(body.paid, true);
+    assert.equal(body.alreadyConfirmed, false);
+
+    const updatedBill = storeData.get('table-2');
+    assert.equal(updatedBill.paymentStatus, 'partial');
+    assert.equal(updatedBill.paidShares, 1);
+    assert.equal(updatedBill.remainingShares, 2);
+    assert.equal(updatedBill.originalTotal, 36);
+    assert.equal(updatedBill.remainingTotal, 24);
+    assert.equal(updatedBill.total, 24);
+  } finally {
+    restore();
+    process.env.STRIPE_SECRET_KEY = previousSecretKey;
+    process.env.TELEGRAM_BOT_TOKEN = previousBotToken;
+    process.env.TELEGRAM_CHAT_ID = previousChatId;
+  }
+});
