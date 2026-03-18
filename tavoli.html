@@ -257,6 +257,18 @@
       color: #1d6c38;
     }
 
+    .table-pill.partial {
+      border-color: #e2be66;
+      background: #fff8e6;
+      color: #6f4b00;
+    }
+
+    .table-pill.paid {
+      border-color: #cfd5e5;
+      background: #f4f6fb;
+      color: #3f4760;
+    }
+
     .table-note {
       margin-top: 12px;
       display: grid;
@@ -745,8 +757,18 @@
     }
 
     function clearBill() {
+      const entry = getOrCreateTableState(getCurrentTable());
       state.billItems = [];
       document.getElementById('payment-code').value = '';
+      entry.paymentStatus = 'open';
+      entry.paymentMode = 'full';
+      entry.splitMode = 'full';
+      entry.totalShares = 0;
+      entry.paidShares = 0;
+      entry.remainingShares = 0;
+      entry.originalTotal = 0;
+      entry.remainingTotal = 0;
+      entry.billTotal = 0;
       renderBill();
       syncCurrentTableState();
       setStatus(`Conto tavolo ${getCurrentTable()} svuotato`);
@@ -919,7 +941,16 @@
             normalized[String(table)] = {
               items: cloneItems(source.items),
               paymentCode: String(source.paymentCode || ''),
-              note: String(source.note || '')
+              note: String(source.note || ''),
+              paymentStatus: String(source.paymentStatus || 'open'),
+              paymentMode: String(source.paymentMode || 'full'),
+              splitMode: String(source.splitMode || source.paymentMode || 'full'),
+              totalShares: Number(source.totalShares || 0),
+              paidShares: Number(source.paidShares || 0),
+              remainingShares: Number(source.remainingShares || 0),
+              originalTotal: Number(source.originalTotal || 0),
+              remainingTotal: Number(source.remainingTotal || 0),
+              billTotal: Number(source.billTotal || 0)
             };
           });
           state.tableBills = normalized;
@@ -936,8 +967,43 @@
         .sort((a, b) => a - b)
         .filter((table) => {
           const entry = state.tableBills[String(table)];
-          return Array.isArray(entry?.items) && entry.items.length > 0;
+          const total = Number(entry?.billTotal);
+          return (Array.isArray(entry?.items) && entry.items.length > 0)
+            || (Number.isFinite(total) && total > 0);
         });
+    }
+
+    function formatPaymentState(entry) {
+      const status = String(entry?.paymentStatus || 'open').toLowerCase();
+      const billTotal = Number(entry?.billTotal);
+      const paidShares = Number.parseInt(entry?.paidShares, 10) || 0;
+      const totalShares = Number.parseInt(entry?.totalShares, 10) || 0;
+      const remainingTotal = Number(entry?.remainingTotal);
+
+      if (status === 'partial' || status === 'partially_paid') {
+        const sharesLabel = totalShares > 0 ? `${paidShares}/${totalShares}` : `${paidShares}`;
+        const residual = Number.isFinite(remainingTotal)
+          ? euro(remainingTotal)
+          : euro(Number.isFinite(billTotal) ? billTotal : 0);
+        return {
+          stateClass: 'partial',
+          label: `Parziale ${sharesLabel} • Residuo ${residual}`
+        };
+      }
+
+      if (status === 'paid') {
+        return {
+          stateClass: 'paid',
+          label: 'Saldato'
+        };
+      }
+
+      return {
+        stateClass: (Number.isFinite(billTotal) && billTotal > 0) || (Array.isArray(entry?.items) && entry.items.length > 0)
+          ? 'open'
+          : '',
+        label: status === 'open' ? 'Aperto' : 'Vuoto'
+      };
     }
 
     function renderActiveTables() {
@@ -945,20 +1011,35 @@
       const visibleTables = Array.from({ length: TABLE_COUNT }, (_, idx) => idx + 1);
       container.innerHTML = visibleTables.map((table) => {
         const entry = getOrCreateTableState(table);
-        const total = BillUtils.calculateBillTotals(entry.items || []).total || 0;
+        const calculatedTotal = BillUtils.calculateBillTotals(entry.items || []).total || 0;
+        const total = Number.isFinite(Number(entry.billTotal)) ? Number(entry.billTotal) : calculatedTotal;
+        const paymentState = formatPaymentState(entry);
         const classNames = [
           'table-pill',
           table === state.activeTable ? 'active' : '',
-          (entry.items || []).length > 0 ? 'open' : ''
+          paymentState.stateClass
         ].filter(Boolean).join(' ');
-        return `<button type="button" class="${classNames}" onclick="switchTable(${table})">Tavolo ${table} • ${euro(total)}</button>`;
+        return `<button type="button" class="${classNames}" onclick="switchTable(${table})">Tavolo ${table} • ${euro(total)}<br><small>${paymentState.label}</small></button>`;
       }).join('');
     }
 
     function getOrCreateTableState(table) {
       const key = String(table);
       if (!state.tableBills[key]) {
-        state.tableBills[key] = { items: [], paymentCode: '', note: '' };
+        state.tableBills[key] = {
+          items: [],
+          paymentCode: '',
+          note: '',
+          paymentStatus: 'open',
+          paymentMode: 'full',
+          splitMode: 'full',
+          totalShares: 0,
+          paidShares: 0,
+          remainingShares: 0,
+          originalTotal: 0,
+          remainingTotal: 0,
+          billTotal: 0
+        };
       }
       return state.tableBills[key];
     }
@@ -968,6 +1049,9 @@
       entry.items = cloneItems(state.billItems);
       entry.paymentCode = document.getElementById('payment-code').value.trim();
       entry.note = document.getElementById('table-note').value.trim();
+      if (!['partial', 'partially_paid', 'paid'].includes(String(entry.paymentStatus || '').toLowerCase())) {
+        entry.billTotal = BillUtils.calculateBillTotals(entry.items || []).total || 0;
+      }
       persistTableBills();
       renderActiveTables();
     }
@@ -1016,13 +1100,22 @@
 
     async function saveBill() {
       const table = getCurrentTable();
+      const entry = getOrCreateTableState(table);
       const paymentCode = document.getElementById('payment-code').value.trim();
       syncCurrentTableState();
       const payload = {
         tableNumber: table,
         paymentCode,
         note: document.getElementById('table-note').value.trim(),
-        items: toBackendBillItems(state.billItems)
+        items: toBackendBillItems(state.billItems),
+        paymentStatus: entry.paymentStatus || 'open',
+        paymentMode: entry.paymentMode || 'full',
+        splitMode: entry.splitMode || 'full',
+        totalShares: Number(entry.totalShares || 0),
+        paidShares: Number(entry.paidShares || 0),
+        remainingShares: Number(entry.remainingShares || 0),
+        originalTotal: Number(entry.originalTotal || 0),
+        remainingTotal: Number(entry.remainingTotal || 0)
       };
 
       try {
@@ -1042,6 +1135,15 @@
         if (typeof result.bill?.note === 'string') {
           document.getElementById('table-note').value = result.bill.note;
         }
+        entry.paymentStatus = String(result.bill?.paymentStatus || 'open');
+        entry.paymentMode = String(result.bill?.paymentMode || 'full');
+        entry.splitMode = String(result.bill?.splitMode || entry.paymentMode || 'full');
+        entry.totalShares = Number(result.bill?.totalShares || 0);
+        entry.paidShares = Number(result.bill?.paidShares || 0);
+        entry.remainingShares = Number(result.bill?.remainingShares || 0);
+        entry.originalTotal = Number(result.bill?.originalTotal || result.bill?.total || 0);
+        entry.remainingTotal = Number(result.bill?.remainingTotal || result.bill?.total || 0);
+        entry.billTotal = Number(result.bill?.total || 0);
         renderBill();
         syncCurrentTableState();
         setStatus(`Conto tavolo ${table} salvato (${euro(result.bill?.total)})`);
@@ -1067,6 +1169,16 @@
         if (typeof result.bill?.note === 'string') {
           document.getElementById('table-note').value = result.bill.note;
         }
+        const entry = getOrCreateTableState(table);
+        entry.paymentStatus = String(result.bill?.paymentStatus || (result.empty ? 'paid' : 'open'));
+        entry.paymentMode = String(result.bill?.paymentMode || 'full');
+        entry.splitMode = String(result.bill?.splitMode || entry.paymentMode || 'full');
+        entry.totalShares = Number(result.bill?.totalShares || 0);
+        entry.paidShares = Number(result.bill?.paidShares || 0);
+        entry.remainingShares = Number(result.bill?.remainingShares || 0);
+        entry.originalTotal = Number(result.bill?.originalTotal || result.bill?.total || 0);
+        entry.remainingTotal = Number(result.bill?.remainingTotal || result.bill?.total || 0);
+        entry.billTotal = Number(result.bill?.total || 0);
         renderBill();
         syncCurrentTableState();
         if (result.empty) {

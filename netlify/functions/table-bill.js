@@ -39,6 +39,11 @@ function round2(value) {
   return Math.round((value + Number.EPSILON) * 100) / 100;
 }
 
+function normalizeShares(value, fallback = 0) {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : fallback;
+}
+
 function normalizeTableNumber(input) {
   const raw = String(input ?? '').trim();
   const parsed = Number.parseInt(raw, 10);
@@ -96,11 +101,36 @@ function computeTotal(items, explicitTotal) {
 function normalizeBillShape(rawBill, tableNumber) {
   const source = rawBill && typeof rawBill === 'object' ? rawBill : {};
   const items = normalizeItems(source.items);
-  const total = computeTotal(items, source.total);
+  const rawTotal = computeTotal(items, source.total);
+  const paymentMode = source.paymentMode === 'split' ? 'split' : 'full';
+  const splitMode = source.splitMode === 'split' || paymentMode === 'split' ? 'split' : 'full';
+  const paymentStatus = ['open', 'partial', 'partially_paid', 'paid'].includes(String(source.paymentStatus || '').trim())
+    ? String(source.paymentStatus).trim()
+    : (rawTotal > 0 ? 'open' : 'paid');
+  const originalTotal = parseMoney(source.originalTotal);
+  const remainingTotal = parseMoney(source.remainingTotal);
+  const totalShares = normalizeShares(source.totalShares, paymentMode === 'split' ? 2 : 1);
+  const paidShares = normalizeShares(source.paidShares, paymentStatus === 'paid' ? totalShares : 0);
+  const remainingShares = normalizeShares(
+    source.remainingShares,
+    Math.max(0, totalShares - paidShares)
+  );
+  const total = paymentStatus === 'partial'
+    ? round2(remainingTotal ?? rawTotal)
+    : round2(rawTotal);
+
   return {
     tableNumber,
     items,
     total,
+    paymentStatus,
+    paymentMode,
+    splitMode,
+    totalShares,
+    paidShares: Math.min(totalShares, paidShares),
+    remainingShares: Math.min(totalShares, remainingShares),
+    originalTotal: round2(originalTotal ?? rawTotal),
+    remainingTotal: round2(remainingTotal ?? total),
     note: typeof source.note === 'string' ? source.note.trim() : '',
     paymentCode: typeof source.paymentCode === 'string' ? source.paymentCode.trim() : '',
     updatedAt: source.updatedAt || new Date().toISOString(),
@@ -111,6 +141,14 @@ function buildEmptyBill(tableNumber) {
   return {
     tableNumber,
     status: 'empty',
+    paymentStatus: 'paid',
+    paymentMode: 'full',
+    splitMode: 'full',
+    totalShares: 0,
+    paidShares: 0,
+    remainingShares: 0,
+    originalTotal: 0,
+    remainingTotal: 0,
     items: [],
     total: 0,
     updatedAt: null,

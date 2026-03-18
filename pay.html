@@ -237,6 +237,7 @@
           <span>Totale conto</span>
           <span id="bill-total">--</span>
         </div>
+        <div id="bill-payment-state" style="display:none;margin-top:8px;font-size:13px;"></div>
         <div id="bill-note" style="display:none;margin-top:8px;font-size:13px;"></div>
         <div id="bill-payment-code" style="display:none;margin-top:8px;font-size:13px;"></div>
         <ul id="bill-items" style="margin:10px 0 0;padding-left:18px;"></ul>
@@ -307,6 +308,7 @@
     let paymentMode = 'full';
     let splitShares = 2;
     let splitShareIndex = 1;
+    let splitLockedByBillState = false;
 
     function getPaymentReturnState() {
       const params = new URLSearchParams(window.location.search);
@@ -391,6 +393,7 @@
       const total = Number(bill?.total);
       document.getElementById('bill-total').textContent = formatCurrency(total);
       document.getElementById('bill-details').style.display = 'block';
+      applyBillPaymentState(bill);
 
       const noteEl = document.getElementById('bill-note');
       if (bill?.note) {
@@ -424,6 +427,49 @@
       }
 
       updatePayableAmount();
+    }
+
+    function syncModeInputs() {
+      const fullInput = document.querySelector('input[name="payment-mode"][value="full"]');
+      const splitInput = document.querySelector('input[name="payment-mode"][value="split"]');
+      if (fullInput) {
+        fullInput.checked = paymentMode === 'full';
+        fullInput.disabled = splitLockedByBillState;
+      }
+      if (splitInput) {
+        splitInput.checked = paymentMode === 'split';
+        splitInput.disabled = false;
+      }
+      document.getElementById('split-count').disabled = splitLockedByBillState;
+      document.getElementById('split-index').disabled = splitLockedByBillState;
+    }
+
+    function applyBillPaymentState(bill) {
+      const statusEl = document.getElementById('bill-payment-state');
+      const paymentStatus = String(bill?.paymentStatus || '').trim();
+      const remainingTotal = Number(bill?.remainingTotal);
+      const originalTotal = Number(bill?.originalTotal);
+      const paidShares = Number.parseInt(bill?.paidShares, 10) || 0;
+      const totalShares = Number.parseInt(bill?.totalShares, 10) || 0;
+      const remainingShares = Number.parseInt(bill?.remainingShares, 10) || 0;
+
+      if (paymentStatus === 'partial' || paymentStatus === 'partially_paid') {
+        splitLockedByBillState = true;
+        paymentMode = 'split';
+        splitShares = Math.max(1, remainingShares);
+        splitShareIndex = 1;
+        statusEl.style.display = 'block';
+        statusEl.textContent = `Stato pagamento: parziale • Quote pagate ${paidShares}/${totalShares} • Quote residue ${remainingShares} • Residuo ${formatCurrency(remainingTotal)} su ${formatCurrency(originalTotal)}`;
+      } else if (paymentStatus === 'paid') {
+        splitLockedByBillState = false;
+        statusEl.style.display = 'block';
+        statusEl.textContent = 'Stato pagamento: saldato';
+      } else {
+        splitLockedByBillState = false;
+        statusEl.style.display = 'none';
+      }
+
+      syncModeInputs();
     }
 
     async function loadBillForTable(table) {
@@ -477,6 +523,7 @@
       }
       splitIndexEl.value = String(currentIndex);
       splitShareIndex = currentIndex;
+      syncModeInputs();
     }
 
     function updatePayableAmount() {
@@ -517,6 +564,7 @@
       }
       splitCountEl.value = String(splitShares);
       refreshSplitShareOptions();
+      syncModeInputs();
 
       document.querySelectorAll('input[name="payment-mode"]').forEach((input) => {
         input.addEventListener('change', (event) => {
