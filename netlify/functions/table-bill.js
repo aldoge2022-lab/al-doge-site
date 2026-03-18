@@ -39,6 +39,10 @@ function round2(value) {
   return Math.round((value + Number.EPSILON) * 100) / 100;
 }
 
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
 function normalizeTableNumber(input) {
   const raw = String(input ?? '').trim();
   const parsed = Number.parseInt(raw, 10);
@@ -96,13 +100,48 @@ function computeTotal(items, explicitTotal) {
 function normalizeBillShape(rawBill, tableNumber) {
   const source = rawBill && typeof rawBill === 'object' ? rawBill : {};
   const items = normalizeItems(source.items);
-  const total = computeTotal(items, source.total);
+  const derivedTotal = computeTotal(items, source.total);
+  const originalTotal = parseMoney(source.originalTotal);
+  const remainingTotal = parseMoney(source.remainingTotal);
+  const normalizedOriginalTotal = Number.isFinite(originalTotal) && originalTotal >= 0
+    ? round2(originalTotal)
+    : round2(derivedTotal);
+  const normalizedRemainingTotal = Number.isFinite(remainingTotal) && remainingTotal >= 0
+    ? round2(remainingTotal)
+    : round2(normalizedOriginalTotal);
+  const paymentMode = source.paymentMode === 'split' ? 'split' : 'full';
+  const splitMode = source.splitMode === 'equal' ? 'equal' : 'none';
+  const totalShares = Math.max(1, Number.parseInt(source.totalShares, 10) || (paymentMode === 'split' ? 2 : 1));
+  const paidShares = clamp(Number.parseInt(source.paidShares, 10) || 0, 0, totalShares);
+  const remainingShares = clamp(
+    Number.parseInt(source.remainingShares, 10) || Math.max(0, totalShares - paidShares),
+    0,
+    totalShares
+  );
+  const paymentStatus = source.paymentStatus === 'paid'
+    ? 'paid'
+    : source.paymentStatus === 'partial'
+      ? 'partial'
+      : normalizedRemainingTotal <= 0
+        ? 'paid'
+        : paidShares > 0
+          ? 'partial'
+          : 'unpaid';
+
   return {
     tableNumber,
     items,
-    total,
+    total: round2(normalizedRemainingTotal),
     note: typeof source.note === 'string' ? source.note.trim() : '',
     paymentCode: typeof source.paymentCode === 'string' ? source.paymentCode.trim() : '',
+    paymentStatus,
+    paymentMode,
+    splitMode,
+    totalShares,
+    paidShares,
+    remainingShares,
+    originalTotal: round2(normalizedOriginalTotal),
+    remainingTotal: round2(normalizedRemainingTotal),
     updatedAt: source.updatedAt || new Date().toISOString(),
   };
 }
@@ -113,6 +152,14 @@ function buildEmptyBill(tableNumber) {
     status: 'empty',
     items: [],
     total: 0,
+    paymentStatus: 'unpaid',
+    paymentMode: 'full',
+    splitMode: 'none',
+    totalShares: 1,
+    paidShares: 0,
+    remainingShares: 0,
+    originalTotal: 0,
+    remainingTotal: 0,
     updatedAt: null,
   };
 }
