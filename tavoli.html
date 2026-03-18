@@ -257,6 +257,18 @@
       color: #1d6c38;
     }
 
+    .table-pill.partial {
+      border-color: #f0c16a;
+      background: #fff8e9;
+      color: #7f5a11;
+    }
+
+    .table-pill.paid {
+      border-color: #8fc3ff;
+      background: #eef6ff;
+      color: #1c4d8a;
+    }
+
     .table-note {
       margin-top: 12px;
       display: grid;
@@ -853,6 +865,11 @@
       return JSON.parse(JSON.stringify(Array.isArray(items) ? items : []));
     }
 
+    function toFiniteNumberOrNull(value) {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : null;
+    }
+
     function toBackendBillItems(items) {
       return (Array.isArray(items) ? items : []).map((row) => {
         const quantity = Math.max(1, Number(row?.quantity || 1));
@@ -919,7 +936,15 @@
             normalized[String(table)] = {
               items: cloneItems(source.items),
               paymentCode: String(source.paymentCode || ''),
-              note: String(source.note || '')
+              note: String(source.note || ''),
+              paymentStatus: String(source.paymentStatus || '').trim().toLowerCase(),
+              paymentMode: String(source.paymentMode || '').trim().toLowerCase(),
+              splitMode: String(source.splitMode || '').trim().toLowerCase(),
+              totalShares: Number.parseInt(source.totalShares, 10) || 0,
+              paidShares: Number.parseInt(source.paidShares, 10) || 0,
+              remainingShares: Number.parseInt(source.remainingShares, 10) || 0,
+              originalTotal: toFiniteNumberOrNull(source.originalTotal),
+              remainingTotal: toFiniteNumberOrNull(source.remainingTotal)
             };
           });
           state.tableBills = normalized;
@@ -936,7 +961,9 @@
         .sort((a, b) => a - b)
         .filter((table) => {
           const entry = state.tableBills[String(table)];
-          return Array.isArray(entry?.items) && entry.items.length > 0;
+          const hasItems = Array.isArray(entry?.items) && entry.items.length > 0;
+          const remainingTotal = Number(entry?.remainingTotal);
+          return hasItems || (Number.isFinite(remainingTotal) && remainingTotal > 0);
         });
     }
 
@@ -945,22 +972,63 @@
       const visibleTables = Array.from({ length: TABLE_COUNT }, (_, idx) => idx + 1);
       container.innerHTML = visibleTables.map((table) => {
         const entry = getOrCreateTableState(table);
-        const total = BillUtils.calculateBillTotals(entry.items || []).total || 0;
+        const calculatedTotal = BillUtils.calculateBillTotals(entry.items || []).total || 0;
+        const paymentStatus = String(entry.paymentStatus || '').trim().toLowerCase();
+        const paymentMode = String(entry.paymentMode || '').trim().toLowerCase();
+        const hasRemainingTotal = Number.isFinite(entry.remainingTotal);
+        const total = hasRemainingTotal ? Number(entry.remainingTotal) : calculatedTotal;
+        const displayStatus = paymentStatus === 'paid'
+          ? 'Paid'
+          : paymentStatus === 'partial' || (paymentMode === 'split' && Number(entry.paidShares) > 0 && total > 0)
+            ? 'Partial'
+            : total > 0
+              ? 'Open'
+              : 'Open';
         const classNames = [
           'table-pill',
           table === state.activeTable ? 'active' : '',
-          (entry.items || []).length > 0 ? 'open' : ''
+          paymentStatus === 'paid' ? 'paid' : displayStatus === 'Partial' ? 'partial' : total > 0 ? 'open' : ''
         ].filter(Boolean).join(' ');
-        return `<button type="button" class="${classNames}" onclick="switchTable(${table})">Tavolo ${table} • ${euro(total)}</button>`;
+        return `<button type="button" class="${classNames}" onclick="switchTable(${table})">Tavolo ${table} • ${displayStatus} • ${euro(total)}</button>`;
       }).join('');
     }
 
     function getOrCreateTableState(table) {
       const key = String(table);
       if (!state.tableBills[key]) {
-        state.tableBills[key] = { items: [], paymentCode: '', note: '' };
+        state.tableBills[key] = {
+          items: [],
+          paymentCode: '',
+          note: '',
+          paymentStatus: 'unpaid',
+          paymentMode: 'full',
+          splitMode: 'none',
+          totalShares: 1,
+          paidShares: 0,
+          remainingShares: 0,
+          originalTotal: null,
+          remainingTotal: null
+        };
       }
       return state.tableBills[key];
+    }
+
+    function applyBackendBillToState(table, bill) {
+      const entry = getOrCreateTableState(table);
+      entry.items = Array.isArray(bill?.items) ? fromBackendBillItems(bill.items) : [];
+      entry.paymentCode = String(bill?.paymentCode || '');
+      entry.note = typeof bill?.note === 'string' ? bill.note : entry.note;
+      entry.paymentStatus = String(bill?.paymentStatus || '').trim().toLowerCase();
+      entry.paymentMode = String(bill?.paymentMode || '').trim().toLowerCase();
+      entry.splitMode = String(bill?.splitMode || '').trim().toLowerCase();
+      entry.totalShares = Number.parseInt(bill?.totalShares, 10) || (entry.paymentMode === 'split' ? 2 : 1);
+      entry.paidShares = Number.parseInt(bill?.paidShares, 10) || 0;
+      entry.remainingShares = Number.parseInt(bill?.remainingShares, 10) || 0;
+      entry.originalTotal = toFiniteNumberOrNull(bill?.originalTotal);
+      entry.remainingTotal = toFiniteNumberOrNull(bill?.remainingTotal ?? bill?.total);
+      if (entry.paymentStatus !== 'paid' && entry.remainingTotal !== null && entry.remainingTotal > 0 && entry.paidShares > 0) {
+        entry.paymentStatus = 'partial';
+      }
     }
 
     function syncCurrentTableState(table = state.activeTable) {
@@ -1037,11 +1105,10 @@
           throw new Error(result?.error || `Errore salvataggio (HTTP ${response.status})`);
         }
 
-        state.billItems = Array.isArray(result.bill?.items) ? fromBackendBillItems(result.bill.items) : state.billItems;
+        applyBackendBillToState(table, result.bill || {});
+        state.billItems = cloneItems(getOrCreateTableState(table).items);
         document.getElementById('payment-code').value = String(result.bill?.paymentCode || paymentCode || '');
-        if (typeof result.bill?.note === 'string') {
-          document.getElementById('table-note').value = result.bill.note;
-        }
+        if (typeof result.bill?.note === 'string') document.getElementById('table-note').value = result.bill.note;
         renderBill();
         syncCurrentTableState();
         setStatus(`Conto tavolo ${table} salvato (${euro(result.bill?.total)})`);
@@ -1062,11 +1129,10 @@
           throw new Error(result?.error || `Errore caricamento (HTTP ${response.status})`);
         }
 
-        state.billItems = Array.isArray(result.bill?.items) ? fromBackendBillItems(result.bill.items) : [];
+        applyBackendBillToState(table, result.bill || {});
+        state.billItems = cloneItems(getOrCreateTableState(table).items);
         document.getElementById('payment-code').value = String(result.bill?.paymentCode || '');
-        if (typeof result.bill?.note === 'string') {
-          document.getElementById('table-note').value = result.bill.note;
-        }
+        if (typeof result.bill?.note === 'string') document.getElementById('table-note').value = result.bill.note;
         renderBill();
         syncCurrentTableState();
         if (result.empty) {

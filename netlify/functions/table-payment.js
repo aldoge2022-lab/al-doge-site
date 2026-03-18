@@ -104,8 +104,12 @@ function normalizeBillShape(rawBill, tableNumber) {
   const normalizedRemainingTotal = Number.isFinite(remainingTotal) && remainingTotal >= 0
     ? round2(remainingTotal)
     : round2(normalizedOriginalTotal);
-  const paymentMode = source.paymentMode === 'split' ? 'split' : 'full';
-  const splitMode = source.splitMode === 'equal' ? 'equal' : 'none';
+  const paymentModeRaw = String(source.paymentMode ?? '').trim().toLowerCase();
+  const paymentMode = paymentModeRaw === 'split' ? 'split' : 'full';
+  const splitModeRaw = String(source.splitMode ?? '').trim().toLowerCase();
+  const splitMode = paymentMode === 'split' && (splitModeRaw === 'split' || splitModeRaw === 'equal')
+    ? 'split'
+    : 'none';
   const totalShares = Math.max(1, Number.parseInt(source.totalShares, 10) || (paymentMode === 'split' ? SPLIT_MIN_SHARES : 1));
   const paidShares = clamp(Number.parseInt(source.paidShares, 10) || 0, 0, totalShares);
   const remainingShares = clamp(
@@ -142,7 +146,7 @@ function normalizeBillShape(rawBill, tableNumber) {
 
 function computeSplitAmount(total, splitShares, splitShareIndex) {
   const totalCents = roundToCents(total);
-  const shares = clamp(splitShares, SPLIT_MIN_SHARES, SPLIT_MAX_SHARES);
+  const shares = clamp(splitShares, 1, SPLIT_MAX_SHARES);
   const index = clamp(splitShareIndex, 1, shares);
   const baseShare = Math.floor(totalCents / shares);
   const remainder = totalCents % shares;
@@ -368,7 +372,16 @@ async function createCheckoutSession(event, payload) {
     ? clamp(bill.paidShares, 0, effectiveTotalShares)
     : 0;
   const effectiveRemainingShares = paymentMode === 'split'
-    ? Math.max(1, effectiveTotalShares - effectivePaidShares)
+    ? Math.max(
+      1,
+      bill.paymentMode === 'split'
+        ? clamp(
+          Number.parseInt(bill.remainingShares, 10) || Math.max(0, effectiveTotalShares - effectivePaidShares),
+          0,
+          effectiveTotalShares
+        )
+        : effectiveTotalShares
+    )
     : 1;
   const effectiveTotal = paymentMode === 'split'
     ? round2(Number.isFinite(bill.remainingTotal) && bill.remainingTotal > 0 ? bill.remainingTotal : bill.total)
@@ -412,6 +425,7 @@ async function createCheckoutSession(event, payload) {
       flow: 'table',
       tableNumber: String(tableNumber),
       paymentMode,
+      splitMode: paymentMode === 'split' ? 'split' : 'none',
       splitShares: String(effectiveTotalShares),
       splitShareIndex: String(clamp(normalizedShareIndex, 1, effectiveRemainingShares)),
       billTotal: effectiveTotal.toFixed(2),
@@ -482,7 +496,7 @@ async function confirmCheckoutSession(payload) {
     paymentCode: '',
     paymentStatus: 'unpaid',
     paymentMode: paymentMode === 'split' ? 'split' : 'full',
-    splitMode: paymentMode === 'split' ? 'equal' : 'none',
+    splitMode: paymentMode === 'split' ? 'split' : 'none',
     totalShares: paymentMode === 'split' ? splitShares : 1,
     paidShares: 0,
     remainingShares: paymentMode === 'split' ? splitShares : 0,
@@ -516,21 +530,33 @@ async function confirmCheckoutSession(payload) {
     if (paymentMode === 'split') {
       const currentTotalShares = clamp(bill.totalShares || splitShares, SPLIT_MIN_SHARES, SPLIT_MAX_SHARES);
       const currentPaidShares = clamp(bill.paidShares || 0, 0, currentTotalShares);
-      const nextPaidShares = clamp(currentPaidShares + 1, 0, currentTotalShares);
-      const nextRemainingShares = Math.max(0, currentTotalShares - nextPaidShares);
+      const currentRemainingShares = clamp(
+        bill.remainingShares || Math.max(0, currentTotalShares - currentPaidShares),
+        0,
+        currentTotalShares
+      );
+      const nextRemainingShares = Math.max(0, currentRemainingShares - 1);
+      const nextPaidShares = clamp(currentTotalShares - nextRemainingShares, 0, currentTotalShares);
       const nextRemainingTotal = round2(Math.max(0, currentRemainingTotal - paidAmount));
       const isPaid = nextRemainingShares === 0 || nextRemainingTotal <= 0;
 
       updatedBill = {
         ...updatedBill,
         paymentMode: 'split',
-        splitMode: 'equal',
+        splitMode: 'split',
         totalShares: currentTotalShares,
         paidShares: nextPaidShares,
         remainingShares: isPaid ? 0 : nextRemainingShares,
         remainingTotal: isPaid ? 0 : nextRemainingTotal,
         total: isPaid ? 0 : nextRemainingTotal,
         paymentStatus: isPaid ? 'paid' : 'partial',
+        ...(isPaid
+          ? {
+            items: [],
+            paymentCode: '',
+            note: '',
+          }
+          : {}),
       };
     } else {
       updatedBill = {
@@ -543,6 +569,9 @@ async function confirmCheckoutSession(payload) {
         remainingTotal: 0,
         total: 0,
         paymentStatus: 'paid',
+        items: [],
+        paymentCode: '',
+        note: '',
       };
     }
 

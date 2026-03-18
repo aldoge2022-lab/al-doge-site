@@ -295,11 +295,165 @@ test('table-payment confirm in split mode updates bill as partial and does not f
 
     const updatedBill = storeData.get('table-2');
     assert.equal(updatedBill.paymentStatus, 'partial');
+    assert.equal(updatedBill.splitMode, 'split');
     assert.equal(updatedBill.paidShares, 1);
     assert.equal(updatedBill.remainingShares, 2);
     assert.equal(updatedBill.originalTotal, 36);
     assert.equal(updatedBill.remainingTotal, 24);
     assert.equal(updatedBill.total, 24);
+  } finally {
+    restore();
+    process.env.STRIPE_SECRET_KEY = previousSecretKey;
+    process.env.TELEGRAM_BOT_TOKEN = previousBotToken;
+    process.env.TELEGRAM_CHAT_ID = previousChatId;
+  }
+});
+
+test('table-payment create in split continuation charges the real remaining quota (not half again)', async () => {
+  const previousSecretKey = process.env.STRIPE_SECRET_KEY;
+  process.env.STRIPE_SECRET_KEY = 'sk_test_table';
+
+  let capturedCreatePayload = null;
+  const stripeFactoryMock = () => ({
+    checkout: {
+      sessions: {
+        create: async (payload) => {
+          capturedCreatePayload = payload;
+          return { id: 'cs_table_cont_1', url: 'https://checkout.stripe.com/c/pay/cs_table_cont_1' };
+        },
+        retrieve: async () => {
+          throw new Error('retrieve should not be called in create flow');
+        },
+      },
+    },
+  });
+  const fetchMock = async () => ({ ok: true });
+
+  const { handler, restore } = loadTablePaymentHandler({
+    stripeFactoryMock,
+    fetchMock,
+    initialStoreData: {
+      'table-2': {
+        tableNumber: 2,
+        items: [{ name: 'Antipasto', qty: 1, price: 36 }],
+        total: 18,
+        paymentMode: 'split',
+        splitMode: 'split',
+        totalShares: 2,
+        paidShares: 1,
+        remainingShares: 1,
+        paymentStatus: 'partial',
+        originalTotal: 36,
+        remainingTotal: 18,
+      },
+    },
+  });
+
+  try {
+    const response = await handler({
+      httpMethod: 'POST',
+      headers: {
+        host: 'al-doge.it',
+        'x-forwarded-proto': 'https',
+      },
+      body: JSON.stringify({
+        tableNumber: 2,
+        paymentMode: 'split',
+        splitShares: 2,
+        splitShareIndex: 1,
+      }),
+    });
+
+    assert.equal(response.statusCode, 200);
+    const body = JSON.parse(response.body);
+    assert.equal(body.ok, true);
+    assert.equal(body.payableAmount, 18);
+    assert.equal(body.splitShares, 2);
+    assert.equal(capturedCreatePayload.metadata.remainingShares, '1');
+    assert.equal(capturedCreatePayload.line_items[0].price_data.unit_amount, 1800);
+  } finally {
+    restore();
+    process.env.STRIPE_SECRET_KEY = previousSecretKey;
+  }
+});
+
+test('table-payment confirm final split quota closes and clears table state', async () => {
+  const previousSecretKey = process.env.STRIPE_SECRET_KEY;
+  const previousBotToken = process.env.TELEGRAM_BOT_TOKEN;
+  const previousChatId = process.env.TELEGRAM_CHAT_ID;
+  process.env.STRIPE_SECRET_KEY = 'sk_test_table';
+  delete process.env.TELEGRAM_BOT_TOKEN;
+  delete process.env.TELEGRAM_CHAT_ID;
+
+  const fetchMock = async () => ({ ok: true });
+  const stripeFactoryMock = () => ({
+    checkout: {
+      sessions: {
+        create: async () => {
+          throw new Error('create should not be called in confirm flow');
+        },
+        retrieve: async () => ({
+          id: 'cs_table_paid_split_2',
+          payment_status: 'paid',
+          status: 'complete',
+          amount_total: 2400,
+          metadata: {
+            tableNumber: '2',
+            paymentMode: 'split',
+            splitShares: '2',
+            splitShareIndex: '2',
+            billTotal: '48.00',
+            payableAmount: '24.00',
+            originalTotal: '48.00',
+            paidShares: '1',
+            remainingShares: '1',
+          },
+        }),
+      },
+    },
+  });
+
+  const { handler, restore, storeData } = loadTablePaymentHandler({
+    stripeFactoryMock,
+    fetchMock,
+    initialStoreData: {
+      'table-2': {
+        tableNumber: 2,
+        items: [{ name: 'Antipasto', qty: 1, price: 48 }],
+        total: 24,
+        paymentMode: 'split',
+        splitMode: 'split',
+        totalShares: 2,
+        paidShares: 1,
+        remainingShares: 1,
+        paymentStatus: 'partial',
+        originalTotal: 48,
+        remainingTotal: 24,
+      },
+    },
+  });
+
+  try {
+    const response = await handler({
+      httpMethod: 'POST',
+      body: JSON.stringify({
+        action: 'confirm',
+        sessionId: 'cs_table_paid_split_2',
+      }),
+    });
+
+    assert.equal(response.statusCode, 200);
+    const body = JSON.parse(response.body);
+    assert.equal(body.ok, true);
+    assert.equal(body.paid, true);
+
+    const updatedBill = storeData.get('table-2');
+    assert.equal(updatedBill.paymentStatus, 'paid');
+    assert.equal(updatedBill.remainingShares, 0);
+    assert.equal(updatedBill.remainingTotal, 0);
+    assert.equal(updatedBill.total, 0);
+    assert.deepEqual(updatedBill.items, []);
+    assert.equal(updatedBill.paymentCode, '');
   } finally {
     restore();
     process.env.STRIPE_SECRET_KEY = previousSecretKey;
