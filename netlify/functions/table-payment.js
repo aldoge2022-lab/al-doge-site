@@ -11,6 +11,7 @@ const TABLE_MIN = 1;
 const TABLE_MAX = 200;
 const SPLIT_MIN_SHARES = 2;
 const SPLIT_MAX_SHARES = 12;
+const SPLIT_CONTINUATION_MIN_SHARES = 1;
 
 const HEADERS = {
   'Content-Type': 'application/json',
@@ -146,12 +147,21 @@ function normalizeBillShape(rawBill, tableNumber) {
 
 function computeSplitAmount(total, splitShares, splitShareIndex) {
   const totalCents = roundToCents(total);
-  const shares = clamp(splitShares, 1, SPLIT_MAX_SHARES);
+  const shares = clamp(splitShares, SPLIT_CONTINUATION_MIN_SHARES, SPLIT_MAX_SHARES);
   const index = clamp(splitShareIndex, 1, shares);
   const baseShare = Math.floor(totalCents / shares);
   const remainder = totalCents % shares;
   const shareCents = baseShare + (index <= remainder ? 1 : 0);
   return shareCents / 100;
+}
+
+function resolveSplitRemainingSharesForCreate({ bill, effectiveTotalShares, effectivePaidShares }) {
+  if (bill.paymentMode !== 'split') return effectiveTotalShares;
+  return clamp(
+    Number.parseInt(bill.remainingShares, 10) || Math.max(0, effectiveTotalShares - effectivePaidShares),
+    0,
+    effectiveTotalShares
+  );
 }
 
 function getBlobStore() {
@@ -372,16 +382,7 @@ async function createCheckoutSession(event, payload) {
     ? clamp(bill.paidShares, 0, effectiveTotalShares)
     : 0;
   const effectiveRemainingShares = paymentMode === 'split'
-    ? Math.max(
-      1,
-      bill.paymentMode === 'split'
-        ? clamp(
-          Number.parseInt(bill.remainingShares, 10) || Math.max(0, effectiveTotalShares - effectivePaidShares),
-          0,
-          effectiveTotalShares
-        )
-        : effectiveTotalShares
-    )
+    ? Math.max(1, resolveSplitRemainingSharesForCreate({ bill, effectiveTotalShares, effectivePaidShares }))
     : 1;
   const effectiveTotal = paymentMode === 'split'
     ? round2(Number.isFinite(bill.remainingTotal) && bill.remainingTotal > 0 ? bill.remainingTotal : bill.total)

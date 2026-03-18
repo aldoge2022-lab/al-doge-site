@@ -469,9 +469,11 @@
     }
 
     function getMinimumSplitShares() {
+      const remainingShares = Number.parseInt(currentBill?.remainingShares, 10);
       const isSplitContinuation = currentBill?.paymentMode === 'split'
         && currentBill?.paymentStatus === 'partial'
-        && Number.parseInt(currentBill?.remainingShares, 10) === 1;
+        && Number.isInteger(remainingShares)
+        && remainingShares === 1;
       return isSplitContinuation ? 1 : SPLIT_MIN_SHARES;
     }
 
@@ -544,11 +546,11 @@
       } else {
         const remainingShares = Number.parseInt(currentBill?.remainingShares, 10);
         const billSplitMode = currentBill?.paymentMode === 'split';
-        const sharesForCalculation = billSplitMode && Number.isInteger(remainingShares) && remainingShares > 0
+        const effectiveShares = billSplitMode && Number.isInteger(remainingShares) && remainingShares > 0
           ? remainingShares
           : splitShares;
-        selectedAmount = getCalculatedSplitAmount(billTotal, sharesForCalculation, splitShareIndex);
-        detail.textContent = `Pagamento diviso: quota ${splitShareIndex} di ${sharesForCalculation}`;
+        selectedAmount = getCalculatedSplitAmount(billTotal, effectiveShares, splitShareIndex);
+        detail.textContent = `Pagamento diviso: quota ${splitShareIndex} di ${effectiveShares}`;
       }
 
       document.getElementById('payable-amount').textContent = formatCurrency(selectedAmount);

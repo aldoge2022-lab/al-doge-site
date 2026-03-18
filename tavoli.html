@@ -967,28 +967,36 @@
         });
     }
 
+    function getTableDisplayStatus(entry, total) {
+      const paymentStatus = String(entry?.paymentStatus || '').trim().toLowerCase();
+      const paymentMode = String(entry?.paymentMode || '').trim().toLowerCase();
+      const paidShares = Number(entry?.paidShares || 0);
+      if (paymentStatus === 'paid') return 'Paid';
+      if (paymentStatus === 'partial') return 'Partial';
+      if (paymentMode === 'split' && paidShares > 0 && total > 0) return 'Partial';
+      if (total > 0) return 'Open';
+      return 'Open';
+    }
+
+    function getTablePillClass(entry, displayStatus, total, isActive) {
+      const paymentStatus = String(entry?.paymentStatus || '').trim().toLowerCase();
+      return [
+        'table-pill',
+        isActive ? 'active' : '',
+        paymentStatus === 'paid' ? 'paid' : displayStatus === 'Partial' ? 'partial' : total > 0 ? 'open' : ''
+      ].filter(Boolean).join(' ');
+    }
+
     function renderActiveTables() {
       const container = document.getElementById('active-table-list');
       const visibleTables = Array.from({ length: TABLE_COUNT }, (_, idx) => idx + 1);
       container.innerHTML = visibleTables.map((table) => {
         const entry = getOrCreateTableState(table);
         const calculatedTotal = BillUtils.calculateBillTotals(entry.items || []).total || 0;
-        const paymentStatus = String(entry.paymentStatus || '').trim().toLowerCase();
-        const paymentMode = String(entry.paymentMode || '').trim().toLowerCase();
         const hasRemainingTotal = Number.isFinite(entry.remainingTotal);
         const total = hasRemainingTotal ? Number(entry.remainingTotal) : calculatedTotal;
-        const displayStatus = paymentStatus === 'paid'
-          ? 'Paid'
-          : paymentStatus === 'partial' || (paymentMode === 'split' && Number(entry.paidShares) > 0 && total > 0)
-            ? 'Partial'
-            : total > 0
-              ? 'Open'
-              : 'Open';
-        const classNames = [
-          'table-pill',
-          table === state.activeTable ? 'active' : '',
-          paymentStatus === 'paid' ? 'paid' : displayStatus === 'Partial' ? 'partial' : total > 0 ? 'open' : ''
-        ].filter(Boolean).join(' ');
+        const displayStatus = getTableDisplayStatus(entry, total);
+        const classNames = getTablePillClass(entry, displayStatus, total, table === state.activeTable);
         return `<button type="button" class="${classNames}" onclick="switchTable(${table})">Tavolo ${table} • ${displayStatus} • ${euro(total)}</button>`;
       }).join('');
     }
