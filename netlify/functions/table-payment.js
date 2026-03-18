@@ -45,6 +45,22 @@ function round2(value) {
   return Math.round((value + Number.EPSILON) * 100) / 100;
 }
 
+function resolveOriginalTotal(rawOriginalTotal, fallbackTotal) {
+  const parsedOriginal = parseMoney(rawOriginalTotal);
+  if (Number.isFinite(parsedOriginal) && parsedOriginal > 0) {
+    return round2(parsedOriginal);
+  }
+
+  const parsedFallback = parseMoney(fallbackTotal);
+  if (Number.isFinite(parsedFallback) && parsedFallback > 0) {
+    return round2(parsedFallback);
+  }
+
+  if (Number.isFinite(parsedOriginal)) return round2(Math.max(0, parsedOriginal));
+  if (Number.isFinite(parsedFallback)) return round2(Math.max(0, parsedFallback));
+  return 0;
+}
+
 function roundToCents(value) {
   return Math.round((value + Number.EPSILON) * 100);
 }
@@ -113,7 +129,7 @@ function normalizeBillShape(rawBill, tableNumber) {
     totalShares,
     paidShares: Math.min(totalShares, paidShares),
     remainingShares: Math.min(totalShares, remainingShares),
-    originalTotal: round2(originalTotal ?? total),
+    originalTotal: resolveOriginalTotal(originalTotal, total),
     remainingTotal: round2(remainingTotal ?? total),
     note: typeof source.note === 'string' ? source.note.trim() : '',
     paymentCode: typeof source.paymentCode === 'string' ? source.paymentCode.trim() : '',
@@ -380,7 +396,7 @@ async function createCheckoutSession(event, payload) {
       splitShares: String(normalizedShares),
       splitShareIndex: String(normalizedShareIndex),
       billTotal: effectiveTotal.toFixed(2),
-      originalTotal: round2(bill.originalTotal || bill.total).toFixed(2),
+      originalTotal: resolveOriginalTotal(bill.originalTotal, bill.total).toFixed(2),
       priorPaidShares: String(Math.max(0, Number.parseInt(bill.paidShares, 10) || 0)),
       priorTotalShares: String(Math.max(0, Number.parseInt(bill.totalShares, 10) || 0)),
       payableAmount: payableAmount.toFixed(2),
@@ -468,21 +484,24 @@ async function confirmCheckoutSession(payload) {
       paymentMode: bill.paymentMode || paymentMode,
       splitShares: Math.max(0, Number.parseInt(bill.totalShares, 10) || splitShares),
       splitShareIndex,
-      billTotal: round2(parseMoney(bill.originalTotal) ?? bill.total),
+      billTotal: resolveOriginalTotal(bill.originalTotal, bill.total),
       payableAmount: paidAmount,
       paymentStatus: bill.paymentStatus || 'open',
       totalShares: Math.max(0, Number.parseInt(bill.totalShares, 10) || 0),
       paidShares: Math.max(0, Number.parseInt(bill.paidShares, 10) || 0),
       remainingShares: Math.max(0, Number.parseInt(bill.remainingShares, 10) || 0),
-      originalTotal: round2(parseMoney(bill.originalTotal) ?? bill.total),
+      originalTotal: resolveOriginalTotal(bill.originalTotal, bill.total),
       remainingTotal: round2(parseMoney(bill.remainingTotal) ?? bill.total),
       sessionId: session.id,
     });
   }
 
-  const baseOriginalTotal = Number.isFinite(parseMoney(bill.originalTotal))
-    ? round2(parseMoney(bill.originalTotal))
-    : round2(Number.isFinite(fallbackOriginalTotal) ? fallbackOriginalTotal : bill.total);
+  const baseOriginalTotal = resolveOriginalTotal(
+    bill.originalTotal,
+    Number.isFinite(fallbackOriginalTotal) && fallbackOriginalTotal > 0
+      ? fallbackOriginalTotal
+      : bill.total
+  );
   const currentRemainingTotal = bill.paymentStatus === 'partial'
     ? round2(bill.remainingTotal)
     : round2(bill.total);

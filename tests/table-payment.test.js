@@ -274,6 +274,7 @@ test('table-payment persists explicit partial status for split payments and clos
         tableNumber: 2,
         items: [{ name: 'Panna cotta', qty: 1, price: 4.5 }],
         total: 4.5,
+        originalTotal: 0,
         paymentStatus: 'open',
       },
     },
@@ -295,11 +296,13 @@ test('table-payment persists explicit partial status for split payments and clos
     assert.equal(firstBody.paidShares, 1);
     assert.equal(firstBody.remainingShares, 1);
     assert.equal(firstBody.remainingTotal, 2.25);
+    assert.equal(firstBody.originalTotal, 4.5);
 
     const afterFirst = storeData.get('table-2');
     assert.equal(afterFirst.paymentStatus, 'partial');
     assert.equal(afterFirst.total, 2.25);
     assert.equal(afterFirst.remainingTotal, 2.25);
+    assert.equal(afterFirst.originalTotal, 4.5);
 
     const secondResponse = await handler({
       httpMethod: 'POST',
