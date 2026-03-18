@@ -458,7 +458,7 @@
       if (payload.empty === true) {
         showBillStatus('Nessun conto aperto per questo tavolo');
         document.getElementById('pay-btn').disabled = true;
-        return;
+        return null;
       }
 
       if (!payload.bill || typeof payload.bill !== 'object') {
@@ -466,6 +466,7 @@
       }
 
       renderBill(payload.bill);
+      return payload.bill;
     }
 
     function getMinimumSplitShares() {
@@ -682,6 +683,22 @@
         showBillStatus('Verifica pagamento Stripe in corso...');
         try {
           const confirmedPayment = await verifyStripePayment(returnState.sessionId);
+          const refreshedBill = await loadBillForTable(tableNumber);
+          const isSplitPartial = refreshedBill
+            && refreshedBill.paymentMode === 'split'
+            && refreshedBill.paymentStatus === 'partial'
+            && Number(refreshedBill.remainingTotal) > 0;
+
+          if (isSplitPartial) {
+            const remaining = Number(refreshedBill.remainingTotal);
+            showBillStatus(`Prima quota completata. Residuo aggiornato: ${formatCurrency(remaining)}.`);
+            clearPaymentReturnState();
+            btn.disabled = false;
+            btn.textContent = '💳 Paga Ora';
+            updatePayableAmount();
+            return;
+          }
+
           const paidAmount = Number(confirmedPayment?.payableAmount);
           showPaymentSuccess(Number.isFinite(paidAmount) && paidAmount > 0 ? paidAmount : selectedAmount);
           clearPaymentReturnState();
