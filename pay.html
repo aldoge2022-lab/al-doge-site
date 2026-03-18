@@ -384,6 +384,19 @@
 
     function renderBill(bill) {
       currentBill = bill;
+      const billPaymentMode = String(bill?.paymentMode || '').trim().toLowerCase();
+      const billPaymentStatus = String(bill?.paymentStatus || '').trim().toLowerCase();
+      const billTotalShares = Number.parseInt(bill?.totalShares, 10);
+      const billRemainingShares = Number.parseInt(bill?.remainingShares, 10);
+      if (billPaymentMode === 'split') {
+        paymentMode = 'split';
+        if (billPaymentStatus === 'partial' && Number.isInteger(billRemainingShares) && billRemainingShares > 0) {
+          splitShares = Math.max(1, Math.min(SPLIT_MAX_SHARES, billRemainingShares));
+        } else if (Number.isInteger(billTotalShares) && billTotalShares >= SPLIT_MIN_SHARES) {
+          splitShares = Math.min(SPLIT_MAX_SHARES, billTotalShares);
+        }
+        splitShareIndex = 1;
+      }
       const safeTableNumber = bill?.tableNumber ?? tableNumber;
       tableNumber = String(safeTableNumber);
       document.getElementById('table-number').textContent = safeTableNumber;
@@ -423,6 +436,11 @@
         }).join('');
       }
 
+      rebuildSplitCountOptions();
+      refreshSplitShareOptions();
+      document.querySelectorAll('input[name="payment-mode"]').forEach((input) => {
+        input.checked = input.value === paymentMode;
+      });
       updatePayableAmount();
     }
 
@@ -450,21 +468,48 @@
       renderBill(payload.bill);
     }
 
-    function getCalculatedSplitAmount(total) {
+    function getMinimumSplitShares() {
+      const remainingShares = Number.parseInt(currentBill?.remainingShares, 10);
+      const isSplitContinuation = currentBill?.paymentMode === 'split'
+        && currentBill?.paymentStatus === 'partial'
+        && Number.isInteger(remainingShares)
+        && remainingShares === 1;
+      return isSplitContinuation ? 1 : SPLIT_MIN_SHARES;
+    }
+
+    function getCalculatedSplitAmount(total, shares, index) {
       const totalCents = roundToCents(total);
-      const shares = Math.max(SPLIT_MIN_SHARES, splitShares);
-      const index = Math.min(shares, Math.max(1, splitShareIndex));
-      const baseShare = Math.floor(totalCents / shares);
-      const remainder = totalCents % shares;
-      const shareCents = baseShare + (index <= remainder ? 1 : 0);
+      const safeShares = Math.max(getMinimumSplitShares(), Number.parseInt(shares, 10) || splitShares);
+      const safeIndex = Math.min(safeShares, Math.max(1, Number.parseInt(index, 10) || splitShareIndex));
+      const baseShare = Math.floor(totalCents / safeShares);
+      const remainder = totalCents % safeShares;
+      const shareCents = baseShare + (safeIndex <= remainder ? 1 : 0);
       return shareCents / 100;
+    }
+
+    function rebuildSplitCountOptions() {
+      const splitCountEl = document.getElementById('split-count');
+      const minShares = getMinimumSplitShares();
+      const currentValue = Math.max(minShares, Math.min(SPLIT_MAX_SHARES, Number.parseInt(splitCountEl.value, 10) || splitShares));
+      splitCountEl.innerHTML = '';
+      for (let shares = minShares; shares <= SPLIT_MAX_SHARES; shares += 1) {
+        const option = document.createElement('option');
+        option.value = String(shares);
+        option.textContent = `${shares} quote`;
+        splitCountEl.appendChild(option);
+      }
+      splitCountEl.value = String(currentValue);
+      splitShares = currentValue;
     }
 
     function refreshSplitShareOptions() {
       const splitCountEl = document.getElementById('split-count');
       const splitIndexEl = document.getElementById('split-index');
+      const minShares = getMinimumSplitShares();
       const shares = Number.parseInt(splitCountEl.value, 10);
-      splitShares = Number.isInteger(shares) ? shares : SPLIT_MIN_SHARES;
+      splitShares = Number.isInteger(shares)
+        ? Math.max(minShares, Math.min(SPLIT_MAX_SHARES, shares))
+        : minShares;
 
       const max = splitShares;
       const currentIndex = Math.min(max, Math.max(1, Number.parseInt(splitIndexEl.value, 10) || 1));
@@ -499,8 +544,13 @@
         selectedAmount = billTotal;
         detail.textContent = 'Pagamento unico: totale completo del tavolo';
       } else {
-        selectedAmount = getCalculatedSplitAmount(billTotal);
-        detail.textContent = `Pagamento diviso: quota ${splitShareIndex} di ${splitShares}`;
+        const remainingShares = Number.parseInt(currentBill?.remainingShares, 10);
+        const billSplitMode = currentBill?.paymentMode === 'split';
+        const effectiveShares = billSplitMode && Number.isInteger(remainingShares) && remainingShares > 0
+          ? remainingShares
+          : splitShares;
+        selectedAmount = getCalculatedSplitAmount(billTotal, effectiveShares, splitShareIndex);
+        detail.textContent = `Pagamento diviso: quota ${splitShareIndex} di ${effectiveShares}`;
       }
 
       document.getElementById('payable-amount').textContent = formatCurrency(selectedAmount);
@@ -509,13 +559,7 @@
 
     function setupModeControls() {
       const splitCountEl = document.getElementById('split-count');
-      for (let shares = SPLIT_MIN_SHARES; shares <= SPLIT_MAX_SHARES; shares += 1) {
-        const option = document.createElement('option');
-        option.value = String(shares);
-        option.textContent = `${shares} quote`;
-        splitCountEl.appendChild(option);
-      }
-      splitCountEl.value = String(splitShares);
+      rebuildSplitCountOptions();
       refreshSplitShareOptions();
 
       document.querySelectorAll('input[name="payment-mode"]').forEach((input) => {

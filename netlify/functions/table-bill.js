@@ -109,8 +109,12 @@ function normalizeBillShape(rawBill, tableNumber) {
   const normalizedRemainingTotal = Number.isFinite(remainingTotal) && remainingTotal >= 0
     ? round2(remainingTotal)
     : round2(normalizedOriginalTotal);
-  const paymentMode = source.paymentMode === 'split' ? 'split' : 'full';
-  const splitMode = source.splitMode === 'equal' ? 'equal' : 'none';
+  const paymentModeRaw = String(source.paymentMode ?? '').trim().toLowerCase();
+  const paymentMode = paymentModeRaw === 'split' ? 'split' : 'full';
+  const splitModeRaw = String(source.splitMode ?? '').trim().toLowerCase();
+  const splitMode = paymentMode === 'split' && (splitModeRaw === 'split' || splitModeRaw === 'equal')
+    ? 'split'
+    : 'none';
   const totalShares = Math.max(1, Number.parseInt(source.totalShares, 10) || (paymentMode === 'split' ? 2 : 1));
   const paidShares = clamp(Number.parseInt(source.paidShares, 10) || 0, 0, totalShares);
   const remainingShares = clamp(
@@ -293,13 +297,14 @@ exports.handler = async (event) => {
 
     const bill = normalizeBillShape(stored.bill || stored, tableNumber);
     const empty = bill.items.length === 0 && bill.total <= 0;
+    const keepBillShape = empty && bill.paymentStatus === 'paid';
 
     return respond(200, {
       ok: true,
       tableNumber,
       empty,
       ...(empty ? { message: 'Nessun conto aperto per questo tavolo' } : {}),
-      bill: empty ? buildEmptyBill(tableNumber) : bill,
+      bill: empty ? (keepBillShape ? bill : buildEmptyBill(tableNumber)) : bill,
     });
   } catch (error) {
     console.error('table-bill error', error);
