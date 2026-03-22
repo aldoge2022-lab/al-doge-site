@@ -14,9 +14,11 @@
 <style>
 :root{
 --gold:#d4af37;
+--gold-soft:#f1d27a;
 --dark:#0b0b0b;
 --soft:#1a1a1a;
 --text:#f5f5f5;
+--muted:rgba(245,245,245,.78);
 }
 
 body{
@@ -28,23 +30,42 @@ font-family:'Inter',sans-serif;
 
 h1{
 font-family:'Playfair Display',serif;
-color:var(--gold);
-font-size:64px;
+color:#fff4cf;
+font-size:clamp(52px,8vw,88px);
+line-height:.95;
+letter-spacing:.02em;
 margin:0;
+text-wrap:balance;
 }
 
 .hero{
 position:relative;
-height:100vh;
-background:url('hero-image.jpg') center/cover no-repeat;
+min-height:100svh;
+padding:120px 24px 72px;
+overflow:hidden;
+background:
+radial-gradient(circle at top right, rgba(212,175,55,.18), transparent 34%),
+radial-gradient(circle at left center, rgba(111,20,20,.32), transparent 38%),
+linear-gradient(135deg, #050505 0%, #101010 48%, #17120d 100%);
 display:flex;
 align-items:center;
 justify-content:center;
-text-align:center;
+}
+
+.hero::before{
+content:'';
+position:absolute;
+inset:0;
+background:
+linear-gradient(90deg, rgba(5,5,5,.88) 0%, rgba(5,5,5,.72) 38%, rgba(5,5,5,.48) 100%),
+linear-gradient(180deg, rgba(10,10,10,.1) 0%, rgba(10,10,10,.46) 100%),
+url('hero-image.jpg') center center/cover no-repeat;
+opacity:.82;
+transform:scale(1.02);
 }
 
 .overlay{
-background:rgba(0,0,0,0.65);
+background:linear-gradient(180deg, rgba(4,4,4,.22), rgba(4,4,4,.5));
 position:absolute;
 inset:0;
 }
@@ -52,26 +73,70 @@ inset:0;
 .hero-content{
 position:relative;
 z-index:2;
+width:min(760px,100%);
+text-align:left;
+}
+
+.hero-copy{
+max-width:680px;
+}
+
+.hero-kicker{
+display:inline-flex;
+align-items:center;
+gap:10px;
+padding:8px 14px;
+border-radius:999px;
+border:1px solid rgba(241,210,122,.32);
+background:rgba(16,16,16,.62);
+box-shadow:0 10px 32px rgba(0,0,0,.22);
+color:var(--gold-soft);
+font-size:12px;
+font-weight:600;
+letter-spacing:.14em;
+text-transform:uppercase;
+margin-bottom:22px;
 }
 
 .subtitle{
-margin-top:15px;
-font-size:18px;
-opacity:0.9;
+margin:18px 0 0;
+font-size:clamp(18px,2.1vw,21px);
+line-height:1.55;
+color:var(--muted);
+max-width:34ch;
+text-wrap:pretty;
+}
+
+.hero-actions{
+display:flex;
+flex-wrap:wrap;
+gap:14px;
+margin-top:28px;
 }
 
 .btn{
-display:inline-block;
-margin:15px 10px 0 10px;
-padding:14px 30px;
-border-radius:30px;
-font-weight:500;
+display:inline-flex;
+align-items:center;
+justify-content:center;
+padding:15px 30px;
+border-radius:999px;
+font-weight:600;
 text-decoration:none;
+transition:transform .25s ease, box-shadow .25s ease, background-color .25s ease;
+}
+
+.btn:hover{
+transform:translateY(-2px);
 }
 
 .btn-gold{
-background:var(--gold);
-color:black;
+background:linear-gradient(135deg, #f1d27a 0%, var(--gold) 100%);
+color:#111;
+box-shadow:0 14px 34px rgba(212,175,55,.22);
+}
+
+.btn-gold:hover{
+box-shadow:0 18px 42px rgba(212,175,55,.32);
 }
 
 .btn-white{
@@ -80,18 +145,18 @@ color:black;
 }
 
 .panini-spotlight{
-margin:28px auto 0;
-max-width:640px;
-background:linear-gradient(140deg,rgba(10,18,33,.95),rgba(27,27,27,.92));
-border:1px solid rgba(212,175,55,.5);
-border-radius:20px;
-padding:20px 22px;
-box-shadow:0 16px 36px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.06) inset;
+margin:34px 0 0;
+max-width:620px;
+background:linear-gradient(140deg,rgba(10,18,33,.88),rgba(27,27,27,.9));
+border:1px solid rgba(212,175,55,.34);
+border-radius:24px;
+padding:22px 24px;
+box-shadow:0 18px 44px rgba(0,0,0,.34),0 0 0 1px rgba(255,255,255,.05) inset;
 text-align:left;
 display:flex;
 align-items:center;
 justify-content:space-between;
-gap:16px;
+gap:18px;
 transition:transform .3s ease,box-shadow .3s ease;
 }
 
@@ -198,7 +263,31 @@ opacity:0.6;
 padding:22px 0 28px;
 }
 
+@media (max-width:980px){
+.hero{
+padding-top:112px;
+}
+}
+
 @media (max-width:768px){
+.hero{
+padding:104px 18px 56px;
+}
+
+.hero-kicker{
+font-size:11px;
+letter-spacing:.12em;
+}
+
+.hero-actions{
+flex-direction:column;
+align-items:stretch;
+}
+
+.btn{
+width:100%;
+}
+
 .panini-spotlight{
 flex-direction:column;
 align-items:flex-start;
@@ -227,23 +316,27 @@ Carrello <span id="cart-count">0</span>
 <div class="overlay"></div>
 
 <div class="hero-content">
-<h1>AL DOGE</h1>
+<div class="hero-copy">
+<div class="hero-kicker">Farla di Majano · Ordina online</div>
+<h1>Pizza tradizionale e panini gourmet firmati AL DOGE.</h1>
 <div class="subtitle">
-Ordina online. pizza tradizionale e panini gourmet.
+A Farla di Majano ordini online, ritiri in modo semplice e trovi il gusto pieno di AL DOGE.
 </div>
 
+<div class="hero-actions">
 <a href="pizze.html" class="btn btn-gold">
 🍕 Ordina Pizze
 </a>
+</div>
 
 <section class="panini-spotlight" aria-label="Spotlight panini premium">
 <div class="panini-copy">
 <h2>Panini gourmet firmati AL DOGE</h2>
-<p>Un morso, e capisci la differenza: ingredienti selezionati e gusto che resta in mente.</p>
+<p>Ingredienti scelti, abbinamenti fatti bene e un morso che si fa ricordare.</p>
 </div>
 <a href="chatbot.html" class="panini-cta">Scopri i nostri panini</a>
 </section>
-
+</div>
 </div>
 </div>
 
