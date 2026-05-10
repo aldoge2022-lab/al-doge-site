@@ -232,10 +232,41 @@
   let stripeClient = null;
   let stripeClientKey = null;
 
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", async () => {
     const summary = document.getElementById("order-summary");
     const cart = CartManager.getCart();
     const total = CartManager.getTotal();
+
+    const params = new URLSearchParams(window.location.search);
+    const paymentStatus = params.get("payment");
+
+    if (paymentStatus === "success") {
+      const pendingOrder = localStorage.getItem("al_doge_pending_order");
+
+      if (pendingOrder) {
+        try {
+          const orderData = JSON.parse(pendingOrder);
+          orderData.paymentStatus = "paid";
+          orderData.paymentMethod = "stripe";
+
+          await fetch("/.netlify/functions/telegram-notify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(orderData)
+          });
+
+          localStorage.removeItem("al_doge_pending_order");
+          CartManager.clearCart();
+
+          alert("Pagamento completato e ordine inviato correttamente.");
+
+          window.history.replaceState({}, document.title, window.location.pathname);
+        } catch (err) {
+          console.error(err);
+          alert("Pagamento ricevuto, ma errore invio notifica ordine.");
+        }
+      }
+    }
 
     // Riepilogo ordine
     summary.innerHTML = cart
@@ -267,7 +298,6 @@
       });
     });
 
-    // Imposta data minima = oggi
     const dateInput = document.getElementById("order-date");
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -276,7 +306,6 @@
     dateInput.min = `${yyyy}-${mm}-${dd}`;
     dateInput.value = `${yyyy}-${mm}-${dd}`;
 
-    // Orari (semplice: ogni 15 minuti 18:00–22:00)
     const timeSelect = document.getElementById("order-time");
     function populateTimes() {
       timeSelect.innerHTML = "";
@@ -359,7 +388,6 @@
       }
     }
 
-    // Pagamento alla consegna + invio Telegram
     confirmBtn.addEventListener("click", async (e) => {
       e.preventDefault();
       const orderData = collectOrderData();
@@ -381,11 +409,12 @@
       }
     });
 
-    // Pagamento con carta (Stripe)
     payWithCardBtn.addEventListener("click", async (e) => {
       e.preventDefault();
       const orderData = collectOrderData();
       if (!orderData) return;
+
+      localStorage.setItem("al_doge_pending_order", JSON.stringify(orderData));
 
       payWithCardBtn.disabled = true;
       payWithCardBtn.textContent = "Reindirizzamento a Stripe...";
@@ -402,6 +431,7 @@
         }
 
         const { sessionId, publishableKey } = await response.json();
+
         if (!sessionId) {
           throw new Error("sessionId Stripe mancante");
         }
