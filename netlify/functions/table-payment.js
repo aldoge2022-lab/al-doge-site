@@ -529,10 +529,14 @@ async function confirmCheckoutSession(payload) {
     };
 
     if (paymentMode === 'split') {
-      const currentTotalShares = clamp(bill.totalShares || splitShares, SPLIT_MIN_SHARES, SPLIT_MAX_SHARES);
+      const currentTotalShares = bill.paymentMode === 'split'
+        ? clamp(bill.totalShares || splitShares, SPLIT_MIN_SHARES, SPLIT_MAX_SHARES)
+        : clamp(splitShares, SPLIT_MIN_SHARES, SPLIT_MAX_SHARES);
       const currentPaidShares = clamp(bill.paidShares || 0, 0, currentTotalShares);
       const currentRemainingShares = clamp(
-        bill.remainingShares || Math.max(0, currentTotalShares - currentPaidShares),
+        bill.paymentMode === 'split'
+          ? (bill.remainingShares || Math.max(0, currentTotalShares - currentPaidShares))
+          : Math.max(0, currentTotalShares - currentPaidShares),
         0,
         currentTotalShares
       );

@@ -231,18 +231,20 @@
     .active-table-list {
       margin-top: 8px;
       display: grid;
-      grid-template-columns: repeat(5, minmax(90px, 1fr));
+      grid-template-columns: repeat(2, minmax(220px, 1fr));
       gap: 6px;
     }
 
     .table-pill {
       width: 100%;
-      padding: 8px;
-      border-radius: 10px;
-      font-size: 12px;
+      padding: 10px;
+      border-radius: 12px;
+      font-size: 13px;
       border: 1px solid var(--line);
       background: #ffffff;
-      text-align: center;
+      text-align: left;
+      display: grid;
+      gap: 5px;
     }
 
     .table-pill.active {
@@ -267,6 +269,29 @@
       border-color: #8fc3ff;
       background: #eef6ff;
       color: #1c4d8a;
+    }
+
+    .table-pill-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+    }
+
+    .table-pill-badge {
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 11px;
+      border: 1px solid currentColor;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      background: rgba(255, 255, 255, 0.55);
+    }
+
+    .table-pill-meta {
+      font-size: 12px;
+      opacity: 0.95;
     }
 
     .table-note {
@@ -967,6 +992,42 @@
         });
     }
 
+    function getTablePaymentSnapshot(entry) {
+      const originalTotalRaw = Number(entry?.originalTotal);
+      const remainingTotalRaw = Number(entry?.remainingTotal);
+      const calculatedTotal = BillUtils.calculateBillTotals(entry?.items || []).total || 0;
+      const paymentStatus = String(entry?.paymentStatus || '').trim().toLowerCase();
+      const paymentMode = String(entry?.paymentMode || '').trim().toLowerCase();
+      const totalSharesRaw = Number.parseInt(entry?.totalShares, 10);
+      const paidSharesRaw = Number.parseInt(entry?.paidShares, 10);
+      const remainingSharesRaw = Number.parseInt(entry?.remainingShares, 10);
+      const originalTotal = Number.isFinite(originalTotalRaw)
+        ? originalTotalRaw
+        : (Number.isFinite(remainingTotalRaw) ? remainingTotalRaw : calculatedTotal);
+      const remainingTotal = Number.isFinite(remainingTotalRaw) ? remainingTotalRaw : calculatedTotal;
+      const totalShares = paymentMode === 'split' && Number.isInteger(totalSharesRaw) && totalSharesRaw > 0
+        ? totalSharesRaw
+        : 1;
+      const paidShares = paymentMode === 'split'
+        ? Math.max(0, Math.min(totalShares, Number.isInteger(paidSharesRaw) ? paidSharesRaw : 0))
+        : (paymentStatus === 'paid' ? 1 : 0);
+      const remainingShares = paymentMode === 'split' && Number.isInteger(remainingSharesRaw)
+        ? Math.max(0, Math.min(totalShares, remainingSharesRaw))
+        : Math.max(0, totalShares - paidShares);
+      const completedShares = Math.max(0, Math.min(totalShares, totalShares - remainingShares));
+      const paidTotal = Math.max(0, originalTotal - remainingTotal);
+      const displayStatus = getTableDisplayStatus(entry, remainingTotal);
+
+      return {
+        originalTotal,
+        remainingTotal,
+        paidTotal,
+        totalShares,
+        completedShares,
+        displayStatus
+      };
+    }
+
     function getTableDisplayStatus(entry, total) {
       const paymentStatus = String(entry?.paymentStatus || '').trim().toLowerCase();
       const paymentMode = String(entry?.paymentMode || '').trim().toLowerCase();
@@ -992,12 +1053,20 @@
       const visibleTables = Array.from({ length: TABLE_COUNT }, (_, idx) => idx + 1);
       container.innerHTML = visibleTables.map((table) => {
         const entry = getOrCreateTableState(table);
-        const calculatedTotal = BillUtils.calculateBillTotals(entry.items || []).total || 0;
-        const hasRemainingTotal = Number.isFinite(entry.remainingTotal);
-        const total = hasRemainingTotal ? Number(entry.remainingTotal) : calculatedTotal;
-        const displayStatus = getTableDisplayStatus(entry, total);
-        const classNames = getTablePillClass(entry, displayStatus, total, table === state.activeTable);
-        return `<button type="button" class="${classNames}" onclick="switchTable(${table})">Tavolo ${table} • ${displayStatus} • ${euro(total)}</button>`;
+        const snapshot = getTablePaymentSnapshot(entry);
+        const classNames = getTablePillClass(entry, snapshot.displayStatus, snapshot.remainingTotal, table === state.activeTable);
+        const meta = snapshot.displayStatus === 'Partial'
+          ? `Totale: ${euro(snapshot.originalTotal)} • Pagato: ${euro(snapshot.paidTotal)}<br>Residuo: ${euro(snapshot.remainingTotal)} • Quote: ${snapshot.completedShares}/${snapshot.totalShares}`
+          : snapshot.displayStatus === 'Paid'
+            ? `Totale: ${euro(snapshot.originalTotal)} • Residuo: ${euro(0)}<br>Conto chiuso`
+            : `Totale da saldare: ${euro(snapshot.remainingTotal)}`;
+        return `<button type="button" class="${classNames}" onclick="switchTable(${table})">
+          <span class="table-pill-head">
+            <span>Tavolo ${table}</span>
+            <span class="table-pill-badge">${snapshot.displayStatus}</span>
+          </span>
+          <span class="table-pill-meta">${meta}</span>
+        </button>`;
       }).join('');
     }
 
@@ -1161,6 +1230,40 @@
       }
     }
 
+    async function syncKnownTablesFromBackend(tablesInput) {
+      const fallbackTables = Array.from({ length: TABLE_COUNT }, (_, idx) => idx + 1);
+      const tables = Array.from(new Set((Array.isArray(tablesInput) && tablesInput.length ? tablesInput : fallbackTables)
+        .map((table) => Number(table))
+        .filter((table) => Number.isFinite(table) && table > 0)));
+
+      if (tables.length === 0) {
+        return;
+      }
+
+      await Promise.all(tables.map(async (table) => {
+        try {
+          const response = await fetch(`/.netlify/functions/table-bill?table=${encodeURIComponent(table)}`, {
+            cache: 'no-store'
+          });
+          const result = await parseJsonSafe(response);
+          if (!response.ok || !result || !result.ok) {
+            return;
+          }
+          applyBackendBillToState(table, result.bill || {});
+        } catch (error) {
+          // Keep local snapshot when backend sync fails.
+        }
+      }));
+
+      const activeEntry = getOrCreateTableState(state.activeTable);
+      state.billItems = cloneItems(activeEntry.items);
+      document.getElementById('payment-code').value = activeEntry.paymentCode || '';
+      document.getElementById('table-note').value = activeEntry.note || '';
+      renderBill();
+      persistTableBills();
+      renderActiveTables();
+    }
+
     document.getElementById('search-input').addEventListener('input', applyCatalogFilter);
     document.getElementById('table-select').addEventListener('change', (event) => {
       switchTable(Number(event.target.value || 1));
@@ -1172,12 +1275,17 @@
       button.addEventListener('click', () => setCategory(button.dataset.category));
     });
 
-    restoreTableBills();
-    buildTableOptions();
-    loadTableState(getCurrentTable());
-    refreshCatalog();
-    renderActiveTables();
-    renderBill();
+    async function init() {
+      restoreTableBills();
+      buildTableOptions();
+      loadTableState(getCurrentTable());
+      renderActiveTables();
+      renderBill();
+      await syncKnownTablesFromBackend();
+      await refreshCatalog();
+    }
+
+    init();
   </script>
 </body>
 </html>

@@ -237,6 +237,18 @@
           <span>Totale conto</span>
           <span id="bill-total">--</span>
         </div>
+        <div style="display:flex;justify-content:space-between;gap:8px;margin-top:6px;font-size:13px;">
+          <span>Importo gia pagato</span>
+          <span id="bill-paid">--</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;gap:8px;margin-top:6px;font-size:13px;">
+          <span>Residuo da pagare</span>
+          <span id="bill-remaining">--</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;gap:8px;margin-top:6px;font-size:13px;">
+          <span>Quote completate</span>
+          <span id="bill-shares">--</span>
+        </div>
         <div id="bill-note" style="display:none;margin-top:8px;font-size:13px;"></div>
         <div id="bill-payment-code" style="display:none;margin-top:8px;font-size:13px;"></div>
         <ul id="bill-items" style="margin:10px 0 0;padding-left:18px;"></ul>
@@ -307,6 +319,7 @@
     let paymentMode = 'full';
     let splitShares = 2;
     let splitShareIndex = 1;
+    let isStripeReturnVerificationInProgress = false;
 
     function getPaymentReturnState() {
       const params = new URLSearchParams(window.location.search);
@@ -348,6 +361,56 @@
 
     function roundToCents(value) {
       return Math.round((Number(value) + Number.EPSILON) * 100);
+    }
+
+    function toFiniteNumber(value) {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : null;
+    }
+
+    function getBillPaymentSnapshot(bill) {
+      const remainingTotalCandidate = toFiniteNumber(bill?.remainingTotal);
+      const totalCandidate = toFiniteNumber(bill?.total);
+      const originalTotalCandidate = toFiniteNumber(bill?.originalTotal);
+      const remainingTotal = remainingTotalCandidate !== null
+        ? Math.max(0, remainingTotalCandidate)
+        : Math.max(0, totalCandidate ?? 0);
+      const originalTotal = originalTotalCandidate !== null
+        ? Math.max(0, originalTotalCandidate)
+        : Math.max(remainingTotal, totalCandidate ?? 0);
+      const paidTotal = Math.max(0, roundToCents(originalTotal - remainingTotal) / 100);
+
+      const paymentMode = String(bill?.paymentMode || '').trim().toLowerCase();
+      const isSplit = paymentMode === 'split';
+      const totalSharesRaw = Number.parseInt(bill?.totalShares, 10);
+      const paidSharesRaw = Number.parseInt(bill?.paidShares, 10);
+      const remainingSharesRaw = Number.parseInt(bill?.remainingShares, 10);
+      const totalShares = isSplit && Number.isInteger(totalSharesRaw) && totalSharesRaw > 0 ? totalSharesRaw : 1;
+      const paidShares = isSplit
+        ? Math.max(0, Math.min(totalShares, Number.isInteger(paidSharesRaw) ? paidSharesRaw : 0))
+        : (remainingTotal <= 0 ? 1 : 0);
+      const derivedRemainingShares = Math.max(0, totalShares - paidShares);
+      const remainingShares = isSplit && Number.isInteger(remainingSharesRaw)
+        ? Math.max(0, Math.min(totalShares, remainingSharesRaw))
+        : derivedRemainingShares;
+      const completedShares = Math.max(0, Math.min(totalShares, totalShares - remainingShares));
+      const nextShareNumber = Math.min(totalShares, completedShares + 1);
+      const paymentStatus = String(bill?.paymentStatus || '').trim().toLowerCase();
+      const hasResidualSplitPayment = isSplit
+        && paymentStatus !== 'paid'
+        && remainingTotal > 0
+        && remainingShares > 0;
+
+      return {
+        originalTotal,
+        paidTotal,
+        remainingTotal,
+        totalShares,
+        completedShares,
+        remainingShares,
+        nextShareNumber,
+        hasResidualSplitPayment
+      };
     }
 
     function showBillStatus(message) {
@@ -401,8 +464,11 @@
       tableNumber = String(safeTableNumber);
       document.getElementById('table-number').textContent = safeTableNumber;
 
-      const total = Number(bill?.total);
-      document.getElementById('bill-total').textContent = formatCurrency(total);
+      const snapshot = getBillPaymentSnapshot(bill);
+      document.getElementById('bill-total').textContent = formatCurrency(snapshot.originalTotal);
+      document.getElementById('bill-paid').textContent = formatCurrency(snapshot.paidTotal);
+      document.getElementById('bill-remaining').textContent = formatCurrency(snapshot.remainingTotal);
+      document.getElementById('bill-shares').textContent = `${snapshot.completedShares}/${snapshot.totalShares}`;
       document.getElementById('bill-details').style.display = 'block';
 
       const noteEl = document.getElementById('bill-note');
@@ -456,9 +522,10 @@
       }
 
       if (payload.empty === true) {
+        currentBill = null;
         showBillStatus('Nessun conto aperto per questo tavolo');
         document.getElementById('pay-btn').disabled = true;
-        return;
+        return payload;
       }
 
       if (!payload.bill || typeof payload.bill !== 'object') {
@@ -466,6 +533,7 @@
       }
 
       renderBill(payload.bill);
+      return payload;
     }
 
     function getMinimumSplitShares() {
@@ -529,8 +597,9 @@
       const isBillValid = Number.isFinite(billTotal) && billTotal > 0;
       const splitControls = document.getElementById('split-controls');
       const detail = document.getElementById('payable-detail');
+      const snapshot = getBillPaymentSnapshot(currentBill);
 
-      splitControls.classList.toggle('show', paymentMode === 'split');
+      splitControls.classList.toggle('show', paymentMode === 'split' && !snapshot.hasResidualSplitPayment);
 
       if (!isBillValid) {
         selectedAmount = 0;
@@ -541,16 +610,17 @@
       }
 
       if (paymentMode === 'full') {
-        selectedAmount = billTotal;
+        const remainingTotalCandidate = toFiniteNumber(currentBill?.remainingTotal);
+        selectedAmount = remainingTotalCandidate !== null ? remainingTotalCandidate : billTotal;
         detail.textContent = 'Pagamento unico: totale completo del tavolo';
       } else {
-        const remainingShares = Number.parseInt(currentBill?.remainingShares, 10);
-        const billSplitMode = currentBill?.paymentMode === 'split';
-        const effectiveShares = billSplitMode && Number.isInteger(remainingShares) && remainingShares > 0
-          ? remainingShares
-          : splitShares;
+        const effectiveShares = snapshot.remainingShares > 0 ? snapshot.remainingShares : splitShares;
         selectedAmount = getCalculatedSplitAmount(billTotal, effectiveShares, splitShareIndex);
-        detail.textContent = `Pagamento diviso: quota ${splitShareIndex} di ${effectiveShares}`;
+        if (snapshot.hasResidualSplitPayment) {
+          detail.textContent = `Pagamento diviso: quota successiva ${snapshot.nextShareNumber} di ${snapshot.totalShares}`;
+        } else {
+          detail.textContent = `Pagamento diviso: quota ${splitShareIndex} di ${effectiveShares}`;
+        }
       }
 
       document.getElementById('payable-amount').textContent = formatCurrency(selectedAmount);
@@ -586,6 +656,47 @@
       document.getElementById('success-message').classList.add('show');
     }
 
+    function isPaymentAlreadyRecorded(bill) {
+      if (!bill || typeof bill !== 'object') {
+        return false;
+      }
+      const paymentStatus = String(bill.paymentStatus || '').trim().toLowerCase();
+      return paymentStatus === 'partial' || paymentStatus === 'paid';
+    }
+
+    function applyPartialPaymentUi(snapshot) {
+      splitShareIndex = 1;
+      paymentMode = 'split';
+      rebuildSplitCountOptions();
+      refreshSplitShareOptions();
+      updatePayableAmount();
+      showBillStatus(
+        `Quota registrata con successo (${snapshot.completedShares}/${snapshot.totalShares}). `
+        + `Residuo da pagare: ${formatCurrency(snapshot.remainingTotal)}.`
+      );
+    }
+
+    async function recoverRecordedPaymentState() {
+      try {
+        const latestBillState = await loadBillForTable(tableNumber);
+        const refreshedBill = latestBillState?.bill;
+        if (latestBillState?.empty === true || !isPaymentAlreadyRecorded(refreshedBill)) {
+          return false;
+        }
+
+        const refreshedSnapshot = getBillPaymentSnapshot(refreshedBill);
+        if (refreshedSnapshot.hasResidualSplitPayment) {
+          applyPartialPaymentUi(refreshedSnapshot);
+          return true;
+        }
+
+        showPaymentSuccess(refreshedSnapshot.originalTotal > 0 ? refreshedSnapshot.originalTotal : selectedAmount);
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+
     async function verifyStripePayment(sessionId) {
       const confirmResponse = await fetch(TABLE_PAYMENT_ENDPOINT, {
         method: 'POST',
@@ -606,6 +717,11 @@
     }
 
     async function processPayment() {
+      if (isStripeReturnVerificationInProgress) {
+        showBillStatus('Verifica pagamento in corso...');
+        return;
+      }
+
       if (selectedAmount <= 0) {
         alert('Importo non disponibile');
         return;
@@ -641,7 +757,10 @@
 
       } catch (error) {
         console.error('Errore pagamento:', error);
-        alert('Errore nel processare il pagamento. Riprova.');
+        const recovered = await recoverRecordedPaymentState();
+        if (!recovered) {
+          alert('Errore nel processare il pagamento. Riprova.');
+        }
         btn.disabled = false;
         btn.textContent = '💳 Paga Ora';
       }
@@ -655,8 +774,18 @@
         return;
       }
 
+      const returnState = getPaymentReturnState();
+      isStripeReturnVerificationInProgress = returnState.paymentStatus === 'success' && Boolean(returnState.sessionId);
+
       document.getElementById('table-number').textContent = tableNumber;
       setupModeControls();
+
+      if (isStripeReturnVerificationInProgress) {
+        const btn = document.getElementById('pay-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Verifica pagamento...';
+        showBillStatus('Verifica pagamento Stripe in corso...');
+      }
 
       try {
         await loadBillForTable(tableNumber);
@@ -666,9 +795,10 @@
         return;
       }
 
-      updatePayableAmount();
+      if (!isStripeReturnVerificationInProgress) {
+        updatePayableAmount();
+      }
 
-      const returnState = getPaymentReturnState();
       if (returnState.paymentStatus === 'cancelled') {
         showBillStatus('Pagamento annullato. Nessun addebito effettuato.');
         clearPaymentReturnState();
@@ -682,14 +812,30 @@
         showBillStatus('Verifica pagamento Stripe in corso...');
         try {
           const confirmedPayment = await verifyStripePayment(returnState.sessionId);
-          const paidAmount = Number(confirmedPayment?.payableAmount);
-          showPaymentSuccess(Number.isFinite(paidAmount) && paidAmount > 0 ? paidAmount : selectedAmount);
+          const latestBillState = await loadBillForTable(tableNumber);
+          const refreshedBill = latestBillState?.bill;
+          const refreshedSnapshot = getBillPaymentSnapshot(refreshedBill);
+          const hasResidualSplitPayment = latestBillState?.empty !== true && refreshedSnapshot.hasResidualSplitPayment;
+
+          if (hasResidualSplitPayment) {
+            applyPartialPaymentUi(refreshedSnapshot);
+            btn.textContent = '💳 Paga Ora';
+            btn.disabled = selectedAmount <= 0;
+          } else {
+            const paidAmount = Number(confirmedPayment?.payableAmount);
+            showPaymentSuccess(Number.isFinite(paidAmount) && paidAmount > 0 ? paidAmount : selectedAmount);
+          }
           clearPaymentReturnState();
         } catch (error) {
           console.error('Errore verifica pagamento Stripe:', error);
-          showBillStatus('Pagamento non ancora confermato. Se l\'addebito risulta effettuato, contatta il personale.');
-          btn.disabled = false;
-          btn.textContent = '💳 Paga Ora';
+          const recovered = await recoverRecordedPaymentState();
+          if (!recovered) {
+            showBillStatus('Pagamento non ancora confermato. Se l\'addebito risulta effettuato, contatta il personale.');
+            btn.disabled = false;
+            btn.textContent = '💳 Paga Ora';
+          }
+        } finally {
+          isStripeReturnVerificationInProgress = false;
         }
       }
     }
