@@ -1,464 +1,82 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Checkout - AL DOGE</title>
-
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <script src="https://js.stripe.com/v3/"></script>
-
-  <style>
-    :root {
-      --gold: #d4af37;
-      --dark: #0b0b0b;
-      --soft: #1a1a1a;
-      --text: #f5f5f5;
-      --muted: #b3b3b3;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      background: var(--dark);
-      color: var(--text);
-      font-family: 'Inter', sans-serif;
-      padding-bottom: 100px;
-    }
-
-    header {
-      padding: 100px 20px 40px;
-      text-align: center;
-      background: linear-gradient(180deg, var(--soft) 0%, var(--dark) 100%);
-    }
-
-    h1 {
-      font-family: 'Playfair Display', serif;
-      color: var(--gold);
-      font-size: clamp(36px, 6vw, 56px);
-      margin-bottom: 10px;
-    }
-
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-
-    .section {
-      background: var(--soft);
-      border-radius: 15px;
-      padding: 30px;
-      margin-bottom: 20px;
-    }
-
-    .section h2 {
-      color: var(--gold);
-      font-size: 24px;
-      margin-bottom: 25px;
-      font-family: 'Playfair Display', serif;
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    .form-label {
-      display: block;
-      color: var(--text);
-      margin-bottom: 8px;
-      font-weight: 500;
-    }
-
-    .form-input,
-    .form-textarea,
-    .form-select {
-      width: 100%;
-      padding: 12px 15px;
-      border-radius: 8px;
-      border: 1px solid rgba(212, 175, 55, 0.3);
-      background: var(--dark);
-      color: var(--text);
-      font-size: 16px;
-      font-family: 'Inter', sans-serif;
-    }
-
-    .form-textarea {
-      min-height: 100px;
-      resize: vertical;
-    }
-
-    .radio-group {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-
-    .radio-option {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .order-summary {
-      background: var(--dark);
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-    }
-
-    .summary-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-    }
-
-    .summary-item:last-child {
-      border-bottom: none;
-      margin-top: 10px;
-      padding-top: 15px;
-      border-top: 2px solid var(--gold);
-    }
-
-    .summary-total {
-      font-size: 24px;
-      font-weight: 600;
-      color: var(--gold);
-    }
-
-    .btn {
-      width: 100%;
-      padding: 15px;
-      background: var(--gold);
-      color: black;
-      border: none;
-      border-radius: 10px;
-      font-size: 18px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 15px;
-    }
-
-    .btn.secondary {
-      background: transparent;
-      border: 1px solid var(--gold);
-      color: var(--gold);
-    }
-
-    .btn:hover {
-      background: #b8962f;
-    }
-
-    .btn.secondary:hover {
-      background: rgba(212, 175, 55, 0.1);
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout - AL DOGE</title>
+<meta name="description" content="Conferma ordine AL DOGE: dati cliente, orario di ritiro, riepilogo e pagamento.">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://js.stripe.com/v3/"></script>
+<style>
+:root{--gold:#b99c62;--gold-soft:#d2ba7c;--dark:#080706;--soft:#15130f;--soft2:#1b1712;--text:#f3ead9;--muted:#b8ad9b;--line:rgba(185,156,98,.22);--line2:rgba(185,156,98,.42);--danger:#8f2b2b}*{margin:0;padding:0;box-sizing:border-box}body{background:radial-gradient(circle at top right,rgba(185,156,98,.07),transparent 34%),linear-gradient(180deg,#050403,var(--dark));color:var(--text);font-family:Inter,sans-serif;padding-bottom:70px}a{text-decoration:none;color:inherit}.topbar{position:sticky;top:0;z-index:50;background:rgba(8,7,6,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{display:flex;align-items:center;gap:12px}.brand video{width:48px;height:48px;object-fit:cover;border:1px solid rgba(185,156,98,.32);background:#0d0b08;border-radius:12px}.brand strong{display:block;font-family:'Playfair Display',serif;color:var(--gold-soft);font-size:23px}.brand span{display:block;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.1em}.top-actions{display:flex;gap:8px;flex-wrap:wrap}.top-actions a{border:1px solid var(--line);color:var(--text);padding:9px 12px;font-size:13px;font-weight:800;border-radius:999px}.top-actions a.primary{background:var(--gold);border-color:var(--gold);color:#080706}header{max-width:960px;margin:0 auto;padding:34px 18px 18px;text-align:center}h1{font-family:'Playfair Display',serif;color:var(--gold-soft);font-size:clamp(34px,6vw,54px);line-height:1;margin-bottom:10px}.subtitle{color:var(--muted);font-size:15px;line-height:1.5}.container{max-width:960px;margin:0 auto;padding:18px;display:grid;grid-template-columns:1.08fr .92fr;gap:16px}.section{background:linear-gradient(180deg,rgba(24,22,18,.92),rgba(12,10,8,.96));border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 24px 70px rgba(0,0,0,.25);margin-bottom:16px}.section h2{font-family:'Playfair Display',serif;color:var(--gold-soft);font-size:25px;line-height:1.08;margin-bottom:16px}.form-group{margin-bottom:14px}.form-label{display:block;color:var(--text);margin-bottom:7px;font-weight:800;font-size:13px}.form-input,.form-textarea,.form-select{width:100%;padding:12px 13px;border-radius:13px;border:1px solid rgba(185,156,98,.28);background:#0e0c09;color:var(--text);font-size:15px;font-family:Inter,sans-serif;outline:none}.form-input:focus,.form-textarea:focus,.form-select:focus{border-color:var(--line2);box-shadow:0 0 0 4px rgba(185,156,98,.07)}.form-textarea{min-height:96px;resize:vertical}.radio-group{display:grid;grid-template-columns:1fr 1fr;gap:9px}.radio-option{display:flex;align-items:center;gap:8px;border:1px solid rgba(185,156,98,.22);background:rgba(0,0,0,.16);padding:12px;border-radius:14px;cursor:pointer;font-weight:800;font-size:14px}.radio-option input{accent-color:var(--gold)}.hint{color:var(--muted);font-size:12px;line-height:1.4;margin-top:6px}.order-summary{background:#0d0b08;border:1px solid rgba(185,156,98,.16);border-radius:15px;overflow:hidden}.summary-item{display:grid;grid-template-columns:1fr auto;gap:12px;padding:13px 14px;border-bottom:1px solid rgba(185,156,98,.16);align-items:start}.summary-item:last-child{border-bottom:none}.summary-name{font-weight:900;color:var(--text);font-size:14px}.summary-meta{color:var(--muted);font-size:12px;line-height:1.45;margin-top:4px}.summary-price{color:var(--gold-soft);font-size:15px;font-weight:900;white-space:nowrap}.summary-total{display:flex;justify-content:space-between;align-items:center;padding:16px 14px;border-top:2px solid var(--gold);background:rgba(185,156,98,.08)}.summary-total span{color:var(--gold-soft);font-size:20px;font-weight:900}.summary-total strong{color:var(--gold-soft);font-size:27px}.empty-warning{padding:16px;border:1px solid rgba(143,43,43,.45);background:rgba(143,43,43,.16);border-radius:14px;color:#f1d6d6;font-size:14px;line-height:1.45}.buttons{display:grid;gap:10px}.btn{width:100%;padding:14px;background:var(--gold);color:#080706;border:1px solid var(--gold);border-radius:15px;font-size:16px;font-weight:900;cursor:pointer;min-height:50px}.btn.secondary{background:transparent;color:var(--gold-soft)}.btn:hover{filter:brightness(1.05)}.btn:disabled{opacity:.55;cursor:not-allowed}.status-note{color:var(--muted);font-size:12px;line-height:1.45;margin-top:10px}.success-box{display:none;margin:16px 18px 0;padding:14px;border:1px solid rgba(185,156,98,.38);background:rgba(185,156,98,.09);border-radius:15px;color:var(--text);font-size:14px;line-height:1.45}@media(max-width:850px){.topbar{align-items:flex-start}.top-actions{justify-content:flex-end}.top-actions a{font-size:12px;padding:8px 10px}.container{grid-template-columns:1fr;padding:16px}.radio-group{grid-template-columns:1fr}.section{padding:17px}header{padding-top:28px}.summary-total strong{font-size:24px}}
+</style>
 </head>
-
 <body>
-
-<header>
-  <h1>Conferma Ordine</h1>
-</header>
-
+<div class="topbar"><a class="brand" href="index.html"><video autoplay loop muted playsinline poster="logo-al-doge.png"><source src="logo-animato.mp4" type="video/mp4"></video><div><strong>AL DOGE</strong><span>Checkout</span></div></a><div class="top-actions"><a href="carrello.html">← Carrello</a><a class="primary" href="menu-semplice.html">Menù</a></div></div>
+<header><h1>Conferma ordine</h1><p class="subtitle">Controlla i dati, scegli l'orario e conferma l'ordine.</p></header>
+<div class="success-box" id="success-box"></div>
 <div class="container">
-
-  <div class="section">
-    <h2>Dati Cliente</h2>
-
-    <div class="form-group">
-      <label class="form-label">Nome e Cognome</label>
-      <input id="customer-name" class="form-input" placeholder="Mario Rossi">
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">Telefono</label>
-      <input id="customer-phone" class="form-input" placeholder="333 1234567">
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">Modalità</label>
-      <div class="radio-group">
-        <label class="radio-option">
-          <input type="radio" name="delivery-type" value="consegna" checked>
-          <span>Consegna a domicilio</span>
-        </label>
-        <label class="radio-option">
-          <input type="radio" name="delivery-type" value="ritiro">
-          <span>Ritiro in pizzeria</span>
-        </label>
-      </div>
-    </div>
-
-    <div class="form-group" id="address-group">
-      <label class="form-label">Indirizzo (solo per consegna)</label>
-      <input id="customer-address" class="form-input" placeholder="Via Roma 10, Majano">
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">Giorno</label>
-      <input id="order-date" type="date" class="form-input">
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">Orario</label>
-      <select id="order-time" class="form-select"></select>
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">Note (opzionale)</label>
-      <textarea id="customer-notes" class="form-textarea" placeholder="Campanello, allergie, richieste..."></textarea>
-    </div>
-  </div>
-
-  <div class="section">
-    <h2>Riepilogo Ordine</h2>
-    <div id="order-summary" class="order-summary"></div>
-  </div>
-
-  <button id="pay-with-card" class="btn">Paga ora con carta</button>
-  <button id="confirm-order" class="btn secondary">Conferma ordine e paga alla consegna</button>
-
+  <main>
+    <section class="section">
+      <h2>Dati cliente</h2>
+      <div class="form-group"><label class="form-label">Nome e cognome</label><input id="customer-name" class="form-input" placeholder="Nome e cognome"></div>
+      <div class="form-group"><label class="form-label">Telefono</label><input id="customer-phone" class="form-input" placeholder="Numero di telefono" inputmode="tel"></div>
+      <div class="form-group"><label class="form-label">Modalità</label><div class="radio-group"><label class="radio-option"><input type="radio" name="delivery-type" value="ritiro" checked><span>Ritiro in pizzeria</span></label><label class="radio-option"><input type="radio" name="delivery-type" value="consegna"><span>Consegna a domicilio</span></label></div><div class="hint">Per ora il ritiro è la modalità principale. La consegna va gestita solo se disponibile.</div></div>
+      <div class="form-group" id="address-group" style="display:none"><label class="form-label">Indirizzo per consegna</label><input id="customer-address" class="form-input" placeholder="Via, numero, paese"></div>
+      <div class="form-group"><label class="form-label">Giorno</label><input id="order-date" type="date" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Orario ritiro / consegna</label><select id="order-time" class="form-select"></select><div class="hint">Gli orari sono provvisori. Il calcolatore automatico degli slot verrà impostato dopo aver definito la capacità per fascia oraria.</div></div>
+      <div class="form-group"><label class="form-label">Note</label><textarea id="customer-notes" class="form-textarea" placeholder="Allergie, richieste, campanello, indicazioni..."></textarea></div>
+    </section>
+  </main>
+  <aside>
+    <section class="section">
+      <h2>Riepilogo ordine</h2>
+      <div id="order-summary" class="order-summary"></div>
+      <div class="status-note">Verifica pizza, bibite, birre, dolci o gelati prima di confermare.</div>
+    </section>
+    <section class="section">
+      <h2>Pagamento</h2>
+      <div class="buttons"><button id="pay-with-card" class="btn">Paga ora con carta</button><button id="confirm-order" class="btn secondary">Conferma e paga al ritiro</button></div>
+      <div class="status-note">Il pagamento con carta usa Stripe. L'ordine viene inviato dopo la conferma del pagamento.</div>
+    </section>
+  </aside>
 </div>
-
 <script src="cart-utils.js"></script>
-
 <script>
-  let stripeClient = null;
-  let stripeClientKey = null;
-
-  document.addEventListener("DOMContentLoaded", async () => {
-    const summary = document.getElementById("order-summary");
-    const cart = CartManager.getCart();
-    const total = CartManager.getTotal();
-
-    const params = new URLSearchParams(window.location.search);
-    const paymentStatus = params.get("payment");
-
-    if (paymentStatus === "success") {
-      const pendingOrder = localStorage.getItem("al_doge_pending_order");
-
-      if (pendingOrder) {
-        try {
-          const orderData = JSON.parse(pendingOrder);
-          orderData.paymentStatus = "paid";
-          orderData.paymentMethod = "stripe";
-
-          await fetch("/.netlify/functions/telegram-notify", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(orderData)
-          });
-
-          localStorage.removeItem("al_doge_pending_order");
-          CartManager.clearCart();
-
-          alert("Pagamento completato e ordine inviato correttamente.");
-
-          window.history.replaceState({}, document.title, window.location.pathname);
-        } catch (err) {
-          console.error(err);
-          alert("Pagamento ricevuto, ma errore invio notifica ordine.");
-        }
-      }
-    }
-
-    // Riepilogo ordine
-    summary.innerHTML = cart
-      .map(item => `
-        <div class="summary-item">
-          <span>${item.quantity}× ${item.name}</span>
-          <span>€${(item.price * item.quantity).toFixed(2)}</span>
-        </div>
-      `)
-      .join("") +
-      `
-        <div class="summary-item">
-          <strong>Totale</strong>
-          <strong class="summary-total">€${total.toFixed(2)}</strong>
-        </div>
-      `;
-
-    const deliveryRadios = document.querySelectorAll('input[name="delivery-type"]');
-    const addressGroup = document.getElementById("address-group");
-
-    deliveryRadios.forEach(r => {
-      r.addEventListener("change", () => {
-        const mode = document.querySelector('input[name="delivery-type"]:checked').value;
-        if (mode === "ritiro") {
-          addressGroup.style.display = "none";
-        } else {
-          addressGroup.style.display = "block";
-        }
-      });
-    });
-
-    const dateInput = document.getElementById("order-date");
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, "0");
-    const dd = String(today.getDate()).padStart(2, "0");
-    dateInput.min = `${yyyy}-${mm}-${dd}`;
-    dateInput.value = `${yyyy}-${mm}-${dd}`;
-
-    const timeSelect = document.getElementById("order-time");
-    function populateTimes() {
-      timeSelect.innerHTML = "";
-      const startHour = 18;
-      const endHour = 22;
-      for (let h = startHour; h <= endHour; h++) {
-        for (let m of [0, 15, 30, 45]) {
-          const label = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-          const option = document.createElement("option");
-          option.value = label;
-          option.textContent = label;
-          timeSelect.appendChild(option);
-        }
-      }
-    }
-    populateTimes();
-
-    const confirmBtn = document.getElementById("confirm-order");
-    const payWithCardBtn = document.getElementById("pay-with-card");
-
-    function collectOrderData() {
-      const name = document.getElementById("customer-name").value.trim();
-      const phone = document.getElementById("customer-phone").value.trim();
-      const mode = document.querySelector('input[name="delivery-type"]:checked').value;
-      const address = document.getElementById("customer-address").value.trim();
-      const date = document.getElementById("order-date").value;
-      const time = document.getElementById("order-time").value;
-      const notes = document.getElementById("customer-notes").value.trim();
-
-      if (!name || !phone) {
-        alert("Compila nome e telefono.");
-        return null;
-      }
-
-      if (mode === "consegna" && !address) {
-        alert("Inserisci l'indirizzo per la consegna.");
-        return null;
-      }
-
-      if (!date || !time) {
-        alert("Seleziona giorno e orario.");
-        return null;
-      }
-
-      if (!cart.length) {
-        alert("Il carrello è vuoto.");
-        return null;
-      }
-
-      const orderType = mode === "ritiro" ? "ritiro_in_pizzeria" : "asporto";
-
-      return {
-        name,
-        phone,
-        mode,
-        orderType,
-        address: mode === "consegna" ? address : "",
-        date,
-        time,
-        pickupTime: time,
-        notes,
-        items: cart.map(i => ({
-          name: i.name,
-          qty: i.quantity,
-          price: i.price,
-          extras: Array.isArray(i.extras) ? i.extras : []
-        })),
-        total: total.toFixed(2)
-      };
-    }
-
-    async function sendToTelegram(orderData) {
-      const response = await fetch("/.netlify/functions/telegram-notify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(orderData)
-      });
-      if (!response.ok) {
-        throw new Error("Errore Telegram");
-      }
-    }
-
-    confirmBtn.addEventListener("click", async (e) => {
-      e.preventDefault();
-      const orderData = collectOrderData();
-      if (!orderData) return;
-
-      confirmBtn.disabled = true;
-      confirmBtn.textContent = "Invio...";
-
-      try {
-        await sendToTelegram(orderData);
-        alert("Ordine inviato con successo!");
-        CartManager.clearCart();
-        window.location.href = "index.html";
-      } catch (err) {
-        alert("Errore nell'invio dell'ordine.");
-      } finally {
-        confirmBtn.disabled = false;
-        confirmBtn.textContent = "Conferma ordine e paga alla consegna";
-      }
-    });
-
-    payWithCardBtn.addEventListener("click", async (e) => {
-      e.preventDefault();
-      const orderData = collectOrderData();
-      if (!orderData) return;
-
-      localStorage.setItem("al_doge_pending_order", JSON.stringify(orderData));
-
-      payWithCardBtn.disabled = true;
-      payWithCardBtn.textContent = "Reindirizzamento a Stripe...";
-
-      try {
-        const response = await fetch("/.netlify/functions/stripe-session", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(orderData)
-        });
-
-        if (!response.ok) {
-          throw new Error("Errore creazione sessione Stripe");
-        }
-
-        const { sessionId, publishableKey } = await response.json();
-
-        if (!sessionId) {
-          throw new Error("sessionId Stripe mancante");
-        }
-
-        if (!publishableKey) {
-          throw new Error("publishableKey Stripe mancante");
-        }
-
-        if (!stripeClient || stripeClientKey !== publishableKey) {
-          stripeClient = Stripe(publishableKey);
-          stripeClientKey = publishableKey;
-        }
-
-        const { error } = await stripeClient.redirectToCheckout({ sessionId });
-
-        if (error) {
-          alert("Errore nel reindirizzamento al pagamento.");
-        }
-      } catch (err) {
-        alert("Errore nella creazione del pagamento.");
-      } finally {
-        payWithCardBtn.disabled = false;
-        payWithCardBtn.textContent = "Paga ora con carta";
-      }
-    });
-  });
+let stripeClient=null;let stripeClientKey=null;
+document.addEventListener('DOMContentLoaded',async()=>{
+  const summary=document.getElementById('order-summary');
+  const cart=CartManager.getCart();
+  const total=CartManager.getTotal();
+  const params=new URLSearchParams(window.location.search);
+  const paymentStatus=params.get('payment');
+  const successBox=document.getElementById('success-box');
+  if(paymentStatus==='success'){
+    const pendingOrder=localStorage.getItem('al_doge_pending_order');
+    if(pendingOrder){try{const orderData=JSON.parse(pendingOrder);orderData.paymentStatus='paid';orderData.paymentMethod='stripe';await fetch('/.netlify/functions/telegram-notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(orderData)});localStorage.removeItem('al_doge_pending_order');CartManager.clearCart();successBox.style.display='block';successBox.textContent='Pagamento completato e ordine inviato correttamente.';window.history.replaceState({},document.title,window.location.pathname)}catch(err){console.error(err);successBox.style.display='block';successBox.textContent='Pagamento ricevuto, ma c’è stato un errore nell’invio della notifica ordine.'}}
+  }
+  function euro(value){return '€'+Number(value||0).toFixed(2).replace('.',',')}
+  function safe(value){return String(value||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+  function itemTypeLabel(item){if(item.type==='pizza')return 'Pizza';if(item.type==='drink')return 'Bibita';if(item.type==='beer')return 'Birra';if(item.type==='dessert')return 'Dolce';if(item.type==='gelato')return 'Gelato';return 'Articolo'}
+  function itemMeta(item){const parts=[];if(item.type==='pizza'){if(item.format)parts.push('Formato: '+item.format);if(item.dough)parts.push('Impasto: '+item.dough);if(Array.isArray(item.extras)&&item.extras.length)parts.push('Extra: '+item.extras.join(', '));}else if(item.note){parts.push(item.note)}return parts.join(' · ')}
+  if(!cart.length){summary.innerHTML='<div class="empty-warning">Il carrello è vuoto. Torna al menù e aggiungi almeno un prodotto.</div>';document.getElementById('pay-with-card').disabled=true;document.getElementById('confirm-order').disabled=true}else{summary.innerHTML=cart.map(item=>`<div class="summary-item"><div><div class="summary-name">${Number(item.quantity)||0}× ${safe(item.name)} <span class="summary-meta">(${itemTypeLabel(item)})</span></div>${itemMeta(item)?`<div class="summary-meta">${safe(itemMeta(item))}</div>`:''}</div><div class="summary-price">${euro((Number(item.price)||0)*(Number(item.quantity)||0))}</div></div>`).join('')+`<div class="summary-total"><span>Totale</span><strong>${euro(total)}</strong></div>`}
+  const deliveryRadios=document.querySelectorAll('input[name="delivery-type"]');
+  const addressGroup=document.getElementById('address-group');
+  deliveryRadios.forEach(r=>{r.addEventListener('change',()=>{const mode=document.querySelector('input[name="delivery-type"]:checked').value;addressGroup.style.display=mode==='consegna'?'block':'none'})});
+  const dateInput=document.getElementById('order-date');
+  const today=new Date();
+  const yyyy=today.getFullYear();const mm=String(today.getMonth()+1).padStart(2,'0');const dd=String(today.getDate()).padStart(2,'0');
+  dateInput.min=`${yyyy}-${mm}-${dd}`;dateInput.value=`${yyyy}-${mm}-${dd}`;
+  const timeSelect=document.getElementById('order-time');
+  function populateTimes(){timeSelect.innerHTML='';for(let h=18;h<=22;h++){for(let m of [0,15,30,45]){if(h===22&&m>0)continue;const label=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;const option=document.createElement('option');option.value=label;option.textContent=label;timeSelect.appendChild(option)}}}
+  populateTimes();
+  const confirmBtn=document.getElementById('confirm-order');
+  const payWithCardBtn=document.getElementById('pay-with-card');
+  function collectOrderData(){const name=document.getElementById('customer-name').value.trim();const phone=document.getElementById('customer-phone').value.trim();const mode=document.querySelector('input[name="delivery-type"]:checked').value;const address=document.getElementById('customer-address').value.trim();const date=document.getElementById('order-date').value;const time=document.getElementById('order-time').value;const notes=document.getElementById('customer-notes').value.trim();if(!name||!phone){alert('Compila nome e telefono.');return null}if(mode==='consegna'&&!address){alert("Inserisci l'indirizzo per la consegna.");return null}if(!date||!time){alert('Seleziona giorno e orario.');return null}if(!cart.length){alert('Il carrello è vuoto.');return null}const orderType=mode==='ritiro'?'ritiro_in_pizzeria':'consegna_a_domicilio';return{name,phone,mode,orderType,address:mode==='consegna'?address:'',date,time,pickupTime:time,notes,items:cart.map(i=>({type:i.type||'item',name:i.name,qty:i.quantity,price:i.price,note:i.note||'',format:i.format||'',dough:i.dough||'',extras:Array.isArray(i.extras)?i.extras:[],allergeni:Array.isArray(i.allergeni)?i.allergeni:[]})),total:total.toFixed(2)}}
+  async function sendToTelegram(orderData){const response=await fetch('/.netlify/functions/telegram-notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(orderData)});if(!response.ok)throw new Error('Errore Telegram')}
+  confirmBtn.addEventListener('click',async(e)=>{e.preventDefault();const orderData=collectOrderData();if(!orderData)return;confirmBtn.disabled=true;confirmBtn.textContent='Invio...';try{orderData.paymentStatus='unpaid';orderData.paymentMethod='cash_on_pickup';await sendToTelegram(orderData);alert('Ordine inviato con successo!');CartManager.clearCart();window.location.href='index.html'}catch(err){alert("Errore nell'invio dell'ordine.")}finally{confirmBtn.disabled=false;confirmBtn.textContent='Conferma e paga al ritiro'}});
+  payWithCardBtn.addEventListener('click',async(e)=>{e.preventDefault();const orderData=collectOrderData();if(!orderData)return;localStorage.setItem('al_doge_pending_order',JSON.stringify(orderData));payWithCardBtn.disabled=true;payWithCardBtn.textContent='Reindirizzamento a Stripe...';try{const response=await fetch('/.netlify/functions/stripe-session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(orderData)});if(!response.ok)throw new Error('Errore creazione sessione Stripe');const {sessionId,publishableKey}=await response.json();if(!sessionId)throw new Error('sessionId Stripe mancante');if(!publishableKey)throw new Error('publishableKey Stripe mancante');if(!stripeClient||stripeClientKey!==publishableKey){stripeClient=Stripe(publishableKey);stripeClientKey=publishableKey}const {error}=await stripeClient.redirectToCheckout({sessionId});if(error)alert('Errore nel reindirizzamento al pagamento.')}catch(err){alert('Errore nella creazione del pagamento.')}finally{payWithCardBtn.disabled=false;payWithCardBtn.textContent='Paga ora con carta'}});
+});
 </script>
-
 </body>
 </html>
