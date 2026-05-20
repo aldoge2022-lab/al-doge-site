@@ -9,15 +9,8 @@
 
 [[redirects]]
   from = "/panini-custom"
-  to = "/"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/panini-custom.html"
-  to = "/"
-  status = 301
-  force = true
+  to = "/panini-custom.html"
+  status = 200
 
 [[redirects]]
   from = "/home.html"
