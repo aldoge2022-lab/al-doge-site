@@ -2,6 +2,19 @@ const fetch = require("node-fetch");
 
 const clean = (value) => (typeof value === "string" ? value.trim() : "");
 
+function normalizeItalianPhone(phone) {
+  const digits = String(phone || "").replace(/\D/g, "");
+  if (!digits) return "";
+  if (digits.startsWith("00")) return digits.slice(2);
+  if (digits.startsWith("39")) return digits;
+  return `39${digits}`;
+}
+
+function whatsappUrl(phone, text) {
+  const normalizedPhone = normalizeItalianPhone(phone);
+  return `https://wa.me/${normalizedPhone}?text=${encodeURIComponent(text)}`;
+}
+
 async function supabaseRequest(path, options = {}) {
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -126,6 +139,10 @@ exports.handler = async function (event) {
       databaseStatus = "errore salvataggio";
     }
 
+    const confirmText = `Ciao ${name}, ti confermiamo la prenotazione da AL DOGE per il ${date} alle ${time} per ${people} persone. A presto.`;
+    const proposeText = `Ciao ${name}, per l'orario richiesto non abbiamo disponibilità. Possiamo proporti un altro orario. Ti va bene se ci sentiamo per confermare?`;
+    const unavailableText = `Ciao ${name}, ci dispiace ma per il ${date} alle ${time} non abbiamo disponibilità. Puoi chiamarci al 0432 1840683 per trovare un'altra soluzione.`;
+
     const message = `
 📌 *Nuova richiesta prenotazione AL DOGE*
 
@@ -140,7 +157,7 @@ exports.handler = async function (event) {
 🗂️ *Database:* ${databaseStatus}${bookingId ? `\nID: ${bookingId}` : ""}
 
 ⚠️ *Da confermare al cliente.*
-La zona indicata è una preferenza e può variare in base alla disponibilità.
+Usa i pulsanti qui sotto per aprire WhatsApp con il messaggio già pronto.
     `;
 
     const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
@@ -150,6 +167,19 @@ La zona indicata è una preferenza e può variare in base alla disponibilità.
         chat_id: chatId,
         text: message,
         parse_mode: "Markdown",
+        reply_markup: {
+          inline_keyboard: [
+            [
+              { text: "✅ Conferma su WhatsApp", url: whatsappUrl(phone, confirmText) }
+            ],
+            [
+              { text: "🕒 Proponi altro orario", url: whatsappUrl(phone, proposeText) }
+            ],
+            [
+              { text: "❌ Non disponibile", url: whatsappUrl(phone, unavailableText) }
+            ]
+          ]
+        }
       }),
     });
 
