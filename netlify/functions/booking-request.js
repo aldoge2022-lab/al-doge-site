@@ -15,81 +15,44 @@ function whatsappUrl(phone, text) {
   return `https://wa.me/${normalizedPhone}?text=${encodeURIComponent(text)}`;
 }
 
-async function supabaseRequest(path, options = {}) {
+async function saveBooking(data) {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!supabaseUrl || !serviceKey) {
+  if (!supabaseUrl || !supabaseKey) {
     return null;
   }
 
-  const response = await fetch(`${supabaseUrl}/rest/v1/${path}`, {
-    ...options,
+  const response = await fetch(`${supabaseUrl}/rest/v1/rpc/submit_booking_request`, {
+    method: "POST",
     headers: {
       "Content-Type": "application/json",
-      apikey: serviceKey,
-      Authorization: `Bearer ${serviceKey}`,
-      ...(options.headers || {}),
+      apikey: supabaseKey,
+      Authorization: `Bearer ${supabaseKey}`,
     },
+    body: JSON.stringify({
+      p_full_name: data.name,
+      p_phone: data.phone,
+      p_booking_date: data.date,
+      p_booking_time: data.time,
+      p_people: data.people,
+      p_preferred_zone: data.zone,
+      p_notes: data.notes === "-" ? null : data.notes,
+      p_contact_consent: data.contactConsent === true,
+    }),
   });
+
+  const text = await response.text();
 
   if (!response.ok) {
-    const text = await response.text();
-    throw new Error(text || `Supabase error ${response.status}`);
+    throw new Error(text || `Supabase RPC error ${response.status}`);
   }
 
-  if (response.status === 204) return null;
-  const text = await response.text();
-  return text ? JSON.parse(text) : null;
-}
-
-async function saveBooking(data) {
-  const customerRows = await supabaseRequest("customers?on_conflict=phone", {
-    method: "POST",
-    headers: { Prefer: "resolution=merge-duplicates,return=representation" },
-    body: JSON.stringify({
-      phone: data.phone,
-      full_name: data.name,
-      last_seen_at: new Date().toISOString(),
-    }),
-  });
-
-  const customer = Array.isArray(customerRows) ? customerRows[0] : null;
-  const customerId = customer ? customer.id : null;
-
-  const bookingRows = await supabaseRequest("booking_requests", {
-    method: "POST",
-    headers: { Prefer: "return=representation" },
-    body: JSON.stringify({
-      customer_id: customerId,
-      full_name: data.name,
-      phone: data.phone,
-      booking_date: data.date,
-      booking_time: data.time,
-      people: data.people,
-      preferred_zone: data.zone,
-      notes: data.notes,
-      contact_consent: data.contactConsent === true,
-      status: "da_confermare",
-      source: "sito_web",
-    }),
-  });
-
-  if (data.contactConsent === true) {
-    await supabaseRequest("customer_consents", {
-      method: "POST",
-      headers: { Prefer: "return=minimal" },
-      body: JSON.stringify({
-        customer_id: customerId,
-        phone: data.phone,
-        consent_type: "communications",
-        consent_given: true,
-        source: "sito_web",
-      }),
-    });
+  try {
+    return text ? JSON.parse(text) : null;
+  } catch {
+    return text || null;
   }
-
-  return Array.isArray(bookingRows) ? bookingRows[0] : null;
 }
 
 exports.handler = async function (event) {
@@ -129,10 +92,10 @@ exports.handler = async function (event) {
     let bookingId = "";
 
     try {
-      const savedBooking = await saveBooking({ name, phone, date, time, people, zone, notes, contactConsent });
-      if (savedBooking && savedBooking.id) {
+      const savedBookingId = await saveBooking({ name, phone, date, time, people, zone, notes, contactConsent });
+      if (savedBookingId) {
         databaseStatus = "salvato";
-        bookingId = savedBooking.id;
+        bookingId = String(savedBookingId).replace(/^"|"$/g, "");
       }
     } catch (dbError) {
       console.error("Booking database error:", dbError);
@@ -169,15 +132,9 @@ Usa i pulsanti qui sotto per aprire WhatsApp con il messaggio già pronto.
         parse_mode: "Markdown",
         reply_markup: {
           inline_keyboard: [
-            [
-              { text: "✅ Conferma su WhatsApp", url: whatsappUrl(phone, confirmText) }
-            ],
-            [
-              { text: "🕒 Proponi altro orario", url: whatsappUrl(phone, proposeText) }
-            ],
-            [
-              { text: "❌ Non disponibile", url: whatsappUrl(phone, unavailableText) }
-            ]
+            [{ text: "✅ Conferma su WhatsApp", url: whatsappUrl(phone, confirmText) }],
+            [{ text: "🕒 Proponi altro orario", url: whatsappUrl(phone, proposeText) }],
+            [{ text: "❌ Non disponibile", url: whatsappUrl(phone, unavailableText) }]
           ]
         }
       }),
