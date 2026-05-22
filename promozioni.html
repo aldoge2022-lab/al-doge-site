@@ -18,9 +18,9 @@
 </main>
 <footer>© 2026 AL DOGE – Via San Daniele 3, Farla di Majano · Tel. 0432 1840683</footer>
 <script>
-function encode(data){return Object.keys(data).map(key=>encodeURIComponent(key)+'='+encodeURIComponent(data[key])).join('&')}
+function encode(data){return Object.keys(data).map(function(key){return encodeURIComponent(key)+'='+encodeURIComponent(data[key])}).join('&')}
 const statusEl=document.getElementById('voteStatus');
-document.querySelectorAll('.vote-btn').forEach(function(button){button.addEventListener('click',async function(){const choice=button.dataset.choice;button.disabled=true;const oldText=button.textContent;button.textContent='Invio voto...';try{await fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:encode({'form-name':'promotion-vote',choice:choice,promotion:'Giovedì del Doge'})});statusEl.textContent='Voto registrato: '+choice+'. Grazie.';statusEl.classList.add('show');button.textContent='Votato';}catch(error){statusEl.textContent='Non sono riuscito a registrare il voto. Puoi chiamare il locale.';statusEl.classList.add('show');button.textContent=oldText;}finally{setTimeout(function(){button.disabled=false;if(button.textContent==='Votato'){button.textContent=oldText}},2500)}})};
+document.querySelectorAll('.vote-btn').forEach(function(button){button.addEventListener('click',async function(){const choice=button.dataset.choice;button.disabled=true;const oldText=button.textContent;button.textContent='Invio voto...';try{const response=await fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:encode({'form-name':'promotion-vote',choice:choice,promotion:'Giovedì del Doge'})});if(!response.ok){throw new Error('Netlify form response '+response.status)}statusEl.textContent='Voto registrato: '+choice+'. Grazie.';statusEl.classList.add('show');button.textContent='Votato';}catch(error){console.error(error);statusEl.textContent='Non sono riuscito a registrare il voto. Puoi chiamare il locale.';statusEl.classList.add('show');button.textContent=oldText;}finally{setTimeout(function(){button.disabled=false;if(button.textContent==='Votato'){button.textContent=oldText}},2500)}})};
 </script>
 </body>
 </html>
