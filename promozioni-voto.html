@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Novità e Promozioni - AL DOGE</title>
+<style>
+body{margin:0;background:#050403;color:#f3ead9;font-family:Arial,sans-serif}.page{max-width:980px;margin:auto;padding:24px}.card{border:1px solid rgba(210,186,124,.45);background:#11100d;border-radius:22px;padding:22px;margin:14px 0}h1,h2{color:#d2ba7c}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.pizza{border:1px solid rgba(185,156,98,.35);border-radius:18px;padding:16px;background:#090806}.price,.votes{display:block;margin-top:10px;color:#d2ba7c;font-weight:900}.vote{width:100%;margin-top:14px;border:1px solid rgba(210,186,124,.65);background:rgba(185,156,98,.18);color:#d2ba7c;border-radius:999px;padding:12px;font-weight:900;cursor:pointer}.top{display:flex;justify-content:space-between;gap:10px;align-items:center}.top a,.btn{display:inline-block;border:1px solid rgba(210,186,124,.45);border-radius:999px;padding:10px 13px;color:#d2ba7c;text-decoration:none;font-weight:900}.main{background:#b99c62;color:#080706}.msg{display:none;border:1px solid rgba(210,186,124,.45);border-radius:16px;padding:12px;margin-top:14px;color:#eadfca}.msg.show{display:block}@media(max-width:760px){.grid{grid-template-columns:1fr}.top{display:block}.top a{margin-top:8px}}
+</style>
+</head>
+<body>
+<main class="page">
+<div class="top"><div><h1>Novità e Promozioni</h1><p>AL DOGE</p></div><a href="index.html">Home</a></div>
+<section class="card">
+<h2>Scegli la Pizza del Giovedì</h2>
+<p>Tre pizze reali del nostro menù. La più richiesta diventerà la proposta del Giovedì del Doge.</p>
+<p><strong>Per chi prenota dal sito:</strong> pizza scelta + bibita in omaggio.</p>
+<div class="grid">
+<div class="pizza"><h3>Doge</h3><p>Pomodoro, mozzarella, tonno, cipolla, salsiccia, salamino piccante, peperoni, origano.</p><span class="price">€9,50</span><span class="votes">Voti: <b data-count="Doge">0</b></span><button class="vote" data-choice="Doge">Vota Doge</button></div>
+<div class="pizza"><h3>San Daniele e Burrata</h3><p>Pomodoro, mozzarella, prosciutto San Daniele, burrata, origano.</p><span class="price">€10,00</span><span class="votes">Voti: <b data-count="San Daniele e Burrata">0</b></span><button class="vote" data-choice="San Daniele e Burrata">Vota San Daniele e Burrata</button></div>
+<div class="pizza"><h3>Boscaiola</h3><p>Pomodoro, mozzarella, funghi porcini, panna, speck, ricotta affumicata, origano.</p><span class="price">€8,50</span><span class="votes">Voti: <b data-count="Boscaiola">0</b></span><button class="vote" data-choice="Boscaiola">Vota Boscaiola</button></div>
+</div>
+<div id="msg" class="msg"></div>
+<p><a class="btn main" href="prenota.html">Prenota per giovedì</a> <a class="btn" href="menu-semplice.html">Guarda il menù</a></p>
+</section>
+</main>
+<script>
+const base='/' + '.' + 'netlify' + '/functions/';
+function setCounts(c){document.querySelectorAll('[data-count]').forEach(function(e){var k=e.dataset.count;e.textContent=c&&typeof c[k]==='number'?c[k]:0})}
+function show(t){var m=document.getElementById('msg');m.textContent=t;m.classList.add('show')}
+async function counts(){try{var r=await fetch(base+'promotion-vote-counts');var j=await r.json();if(j&&j.ok)setCounts(j.counts)}catch(e){console.error(e)}}
+document.querySelectorAll('.vote').forEach(function(b){b.onclick=function(){var c=b.dataset.choice;window.location.href=base+'promotion-vote-submit?choice='+encodeURIComponent(c)}});
+if(new URLSearchParams(location.search).get('v')) show('Voto registrato. I conteggi sono aggiornati dal database.');
+counts();
+</script>
+</body>
+</html>
