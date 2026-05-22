@@ -1,7 +1,8 @@
 const crypto = require("crypto");
 const fetch = require("node-fetch");
 
-const ALLOWED_CHOICES = new Set(["Doge", "San Daniele e Burrata", "Boscaiola"]);
+const CHOICES = ["Doge", "San Daniele e Burrata", "Boscaiola"];
+const ALLOWED_CHOICES = new Set(CHOICES);
 const PROMOTION_NAME = "Giovedì del Doge";
 
 function jsonResponse(statusCode, payload) {
@@ -26,8 +27,52 @@ function hashIp(ip) {
   return crypto.createHash("sha256").update(ip).digest("hex");
 }
 
+function getSupabaseConfig() {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+  return { supabaseUrl, supabaseKey };
+}
+
+async function getVoteCounts(supabaseUrl, supabaseKey) {
+  const response = await fetch(`${supabaseUrl}/rest/v1/promotion_votes?promotion=eq.${encodeURIComponent(PROMOTION_NAME)}&select=choice`, {
+    method: "GET",
+    headers: {
+      apikey: supabaseKey,
+      Authorization: `Bearer ${supabaseKey}`,
+    },
+  });
+
+  const text = await response.text();
+
+  if (!response.ok) {
+    throw new Error(text || `Supabase vote count error ${response.status}`);
+  }
+
+  const rows = text ? JSON.parse(text) : [];
+  const counts = Object.fromEntries(CHOICES.map((choice) => [choice, 0]));
+
+  rows.forEach((row) => {
+    if (row && ALLOWED_CHOICES.has(row.choice)) {
+      counts[row.choice] += 1;
+    }
+  });
+
+  return counts;
+}
+
 exports.handler = async function (event) {
   try {
+    const { supabaseUrl, supabaseKey } = getSupabaseConfig();
+
+    if (!supabaseUrl || !supabaseKey) {
+      return jsonResponse(500, { ok: false, error: "Missing Supabase credentials" });
+    }
+
+    if (event.httpMethod === "GET") {
+      const counts = await getVoteCounts(supabaseUrl, supabaseKey);
+      return jsonResponse(200, { ok: true, promotion: PROMOTION_NAME, counts });
+    }
+
     if (event.httpMethod !== "POST") {
       return jsonResponse(405, { ok: false, error: "Method Not Allowed" });
     }
@@ -44,13 +89,6 @@ exports.handler = async function (event) {
 
     if (promotion !== PROMOTION_NAME || !ALLOWED_CHOICES.has(choice)) {
       return jsonResponse(400, { ok: false, error: "Invalid promotion vote" });
-    }
-
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
-
-    if (!supabaseUrl || !supabaseKey) {
-      return jsonResponse(500, { ok: false, error: "Missing Supabase credentials" });
     }
 
     const userAgent = clean(event.headers["user-agent"] || event.headers["User-Agent"] || "");
@@ -87,11 +125,14 @@ exports.handler = async function (event) {
       saved = null;
     }
 
+    const counts = await getVoteCounts(supabaseUrl, supabaseKey);
+
     return jsonResponse(200, {
       ok: true,
       message: "Vote saved",
       choice,
       promotion,
+      counts,
       id: Array.isArray(saved) && saved[0] ? saved[0].id : null,
     });
   } catch (error) {
