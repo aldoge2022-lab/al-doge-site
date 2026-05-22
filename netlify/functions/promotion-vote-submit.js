@@ -24,8 +24,9 @@ function html(statusCode, body) {
   };
 }
 
-function resultPage(title, message) {
-  return `<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title><style>body{margin:0;background:#050403;color:#f3ead9;font-family:Arial,sans-serif;display:grid;min-height:100vh;place-items:center}.box{max-width:520px;margin:20px;border:1px solid rgba(210,186,124,.45);border-radius:22px;padding:28px;background:#11100d}h1{color:#d2ba7c;margin:0 0 12px;font-size:30px}p{line-height:1.45;color:#e8dcc4}.btn{display:inline-block;margin-top:14px;padding:13px 18px;border-radius:999px;background:#b99c62;color:#080706;font-weight:900;text-decoration:none}</style></head><body><div class="box"><h1>${title}</h1><p>${message}</p><a class="btn" href="/promozioni.html?v=ritorno-voto">Torna alle promozioni</a></div></body></html>`;
+function resultPage(title, message, choice) {
+  const backUrl = `/promozioni-voto.html?v=voto-ok&choice=${encodeURIComponent(choice || "")}`;
+  return `<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title><style>body{margin:0;background:#050403;color:#f3ead9;font-family:Arial,sans-serif;display:grid;min-height:100vh;place-items:center}.box{max-width:520px;margin:20px;border:1px solid rgba(210,186,124,.45);border-radius:22px;padding:28px;background:#11100d}h1{color:#d2ba7c;margin:0 0 12px;font-size:30px}p{line-height:1.45;color:#e8dcc4}.btn{display:inline-block;margin-top:14px;padding:13px 18px;border-radius:999px;background:#b99c62;color:#080706;font-weight:900;text-decoration:none}.small{font-size:13px;color:#b8ad9b}</style><script>setTimeout(function(){location.href='${backUrl}'},1200)</script></head><body><div class="box"><h1>${title}</h1><p>${message}</p><p class="small">Tra un attimo torni alla pagina con i conteggi aggiornati.</p><a class="btn" href="${backUrl}">Torna alle promozioni</a></div></body></html>`;
 }
 
 function ipHash(event) {
@@ -73,13 +74,13 @@ exports.handler = async function (event) {
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
     if (!supabaseUrl || !supabaseKey) {
-      if (wantsHtml) return html(500, resultPage("Errore", "Configurazione database mancante."));
+      if (wantsHtml) return html(500, resultPage("Errore", "Configurazione database mancante.", ""));
       return json(500, { ok: false, error: "Missing Supabase credentials" });
     }
 
     const choice = readChoice(event);
     if (!ALLOWED.has(choice)) {
-      if (wantsHtml) return html(400, resultPage("Voto non valido", "La scelta indicata non è valida."));
+      if (wantsHtml) return html(400, resultPage("Voto non valido", "La scelta indicata non è valida.", ""));
       return json(400, { ok: false, error: "Invalid choice" });
     }
 
@@ -103,7 +104,7 @@ exports.handler = async function (event) {
     const insertText = await insert.text();
     if (!insert.ok) {
       console.error("promotion-vote-submit insert error", insertText);
-      if (wantsHtml) return html(500, resultPage("Errore voto", "Il voto non è stato salvato nel database."));
+      if (wantsHtml) return html(500, resultPage("Errore voto", "Il voto non è stato salvato nel database.", choice));
       return json(500, { ok: false, error: "Insert failed", details: insertText });
     }
 
@@ -112,7 +113,7 @@ exports.handler = async function (event) {
     const counts = await readCounts(supabaseUrl, supabaseKey);
 
     if (wantsHtml) {
-      return html(200, resultPage("Voto registrato", `Hai votato: <strong>${choice}</strong>. Il voto è stato salvato.`));
+      return html(200, resultPage("Voto registrato", `Hai votato: <strong>${choice}</strong>. Il voto è stato salvato.`, choice));
     }
 
     return json(200, {
@@ -123,7 +124,7 @@ exports.handler = async function (event) {
     });
   } catch (error) {
     console.error("promotion-vote-submit error", error);
-    if (wantsHtml) return html(500, resultPage("Errore", "Si è verificato un errore durante il voto."));
+    if (wantsHtml) return html(500, resultPage("Errore", "Si è verificato un errore durante il voto.", ""));
     return json(500, { ok: false, error: "Internal Server Error", message: String(error.message || error) });
   }
 };
