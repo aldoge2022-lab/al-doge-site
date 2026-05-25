@@ -71,14 +71,27 @@ function normalizeItems(rawItems) {
       if (!item || typeof item !== 'object') return null;
       const name = String(item.name ?? '').trim();
       if (!name) return null;
+
       const qty = Math.max(1, Number.parseInt(item.qty ?? item.quantity, 10) || 1);
       const price = parseMoney(item.price ?? item.unitPrice);
+      const basePrice = parseMoney(item.basePrice);
+      const additionsPrice = parseMoney(item.additionsPrice);
       const subtotal = parseMoney(item.subtotal ?? item.lineTotal ?? item.total);
+      const additions = Array.isArray(item.additions) ? item.additions : [];
+      const category = String(item.category ?? '').trim();
+      const id = String(item.id ?? item.pizzaId ?? '').trim();
+
       return {
+        ...(id ? { id } : {}),
         name,
+        ...(category ? { category } : {}),
         qty,
+        quantity: qty,
         ...(price !== null ? { price: round2(price) } : {}),
-        ...(subtotal !== null ? { subtotal: round2(subtotal) } : {}),
+        ...(basePrice !== null ? { basePrice: round2(basePrice) } : {}),
+        ...(additionsPrice !== null ? { additionsPrice: round2(additionsPrice) } : {}),
+        additions,
+        ...(subtotal !== null ? { subtotal: round2(subtotal), total: round2(subtotal) } : {}),
       };
     })
     .filter(Boolean);
@@ -91,7 +104,12 @@ function computeTotal(items, explicitTotal) {
   }
   const derived = items.reduce((sum, item) => {
     if (typeof item.subtotal === 'number') return sum + item.subtotal;
+    if (typeof item.total === 'number') return sum + item.total;
     if (typeof item.price === 'number') return sum + (item.price * item.qty);
+    if (typeof item.basePrice === 'number') {
+      const additionsPrice = typeof item.additionsPrice === 'number' ? item.additionsPrice : 0;
+      return sum + ((item.basePrice + additionsPrice) * item.qty);
+    }
     return sum;
   }, 0);
   return round2(derived);
