@@ -1,0 +1,17 @@
+{
+  "name": "doge-print-agent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local print agent for AL DOGE kitchen/bar orders.",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/index.js",
+    "test:print": "node src/index.js --test-print",
+    "test:format": "node src/index.js --test-format"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.48.0",
+    "dotenv": "^16.4.7"
+  }
+}
