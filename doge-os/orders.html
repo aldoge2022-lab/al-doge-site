@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DOGE OS - Ordini</title>
+  <style>
+    :root{--bg:#f7f4ee;--card:#fff;--ink:#1f1d1a;--muted:#6a645d;--accent:#b14a2e;--line:#e4ddd2;--ok:#2f8f4e;--warn:#9a6a12;--danger:#b13a2d}*{box-sizing:border-box}body{margin:0;font-family:Segoe UI,Trebuchet MS,sans-serif;background:var(--bg);color:var(--ink)}.wrap{max-width:1320px;margin:0 auto;padding:24px}.top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 8px 28px rgba(0,0,0,.05)}h1{margin:0;font-size:30px}.muted{color:var(--muted);font-size:13px}.grid{display:grid;grid-template-columns:1.25fr .85fr;gap:16px;margin-top:16px}.filters{display:grid;grid-template-columns:repeat(5,minmax(120px,1fr));gap:10px;margin-top:14px}input,select,button{border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit}button{cursor:pointer;font-weight:700;background:#f2ece3}.primary{background:var(--accent);border-color:var(--accent);color:#fff}.list{display:grid;gap:10px;margin-top:14px}.row{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;cursor:pointer}.row.active{outline:3px solid rgba(177,74,46,.18);border-color:var(--accent)}.row-head{display:flex;justify-content:space-between;gap:10px}.badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.badge{font-size:12px;border-radius:999px;padding:4px 8px;background:#f2ece3}.ok{background:#edf9f1;color:var(--ok)}.warn{background:#fff7e8;color:var(--warn)}.danger{background:#fff0ee;color:var(--danger)}.detail h2{margin:0 0 8px}.kv{display:grid;grid-template-columns:130px 1fr;gap:6px;font-size:14px;margin-top:10px}.items{margin-top:14px;display:grid;gap:10px}.item{border-top:1px solid var(--line);padding-top:10px}.ingredients{margin-top:6px;color:var(--muted);font-size:13px}.total{font-size:24px;font-weight:900;margin-top:16px;display:flex;justify-content:space-between}.empty{padding:18px;color:var(--muted);text-align:center}.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}@media(max-width:1000px){.grid{grid-template-columns:1fr}.filters{grid-template-columns:1fr 1fr}.top{display:block}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div><h1>DOGE OS - Ordini</h1><div class="muted">Pannello operativo per ordini, clienti, pagamenti, stampa e dati contabili.</div></div>
+      <button class="primary" onclick="loadOrders()">Aggiorna</button>
+    </div>
+    <section class="card" style="margin-top:16px">
+      <div class="filters">
+        <input id="q" placeholder="Cerca nome o telefono" oninput="renderOrders()">
+        <input id="from" type="date" onchange="loadOrders()">
+        <input id="to" type="date" onchange="loadOrders()">
+        <select id="payment" onchange="renderOrders()"><option value="">Pagamento: tutti</option><option value="paid">Pagato</option><option value="unpaid">Non pagato</option><option value="pending">In attesa</option><option value="failed">Fallito</option></select>
+        <select id="print" onchange="renderOrders()"><option value="">Stampa: tutte</option><option value="pending">Da stampare</option><option value="queued">In coda</option><option value="printed">Stampato</option><option value="error">Errore</option></select>
+      </div>
+    </section>
+    <div class="grid">
+      <section class="card"><div id="orders" class="list"><div class="empty">Caricamento ordini...</div></div></section>
+      <section class="card detail"><div id="detail" class="empty">Seleziona un ordine.</div></section>
+    </div>
+  </div>
+<script>
+const SUPABASE_URL = 'https://nrqvembxxdvltfmqsibf.supabase.co';
+const SUPABASE_ANON_KEY = 'INSERIRE_ANON_KEY';
+let orders=[]; let selected=null;
+function euro(c){return new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format((Number(c)||0)/100)}
+function badgeStatus(v,type){let cls='badge'; if(['paid','printed','completed','confirmed'].includes(v)) cls+=' ok'; if(['pending','queued','unpaid','created'].includes(v)) cls+=' warn'; if(['failed','error','cancelled'].includes(v)) cls+=' danger'; return `<span class="${cls}">${type}: ${v||'-'}</span>`}
+async function sb(path, opts={}){const r=await fetch(`${SUPABASE_URL}/rest/v1/${path}`,{...opts,headers:{apikey:SUPABASE_ANON_KEY,Authorization:`Bearer ${SUPABASE_ANON_KEY}`,'Content-Type':'application/json',Prefer:'return=representation',...(opts.headers||{})}}); if(!r.ok) throw new Error(await r.text()); return r.json()}
+async function loadOrders(){try{const from=document.getElementById('from').value; const to=document.getElementById('to').value; let path='sales_orders?select=*,sales_order_items(*,sales_order_item_ingredients(*)),sales_payments(*)&order=created_at.desc&limit=200'; if(from) path+=`&created_at=gte.${from}T00:00:00`; if(to) path+=`&created_at=lte.${to}T23:59:59`; orders=await sb(path); renderOrders();}catch(e){document.getElementById('orders').innerHTML=`<div class="empty">Errore caricamento: ${e.message}</div>`}}
+function filtered(){const q=document.getElementById('q').value.toLowerCase().trim(); const pay=document.getElementById('payment').value; const pr=document.getElementById('print').value; return orders.filter(o=>(!q||String(o.customer_name||'').toLowerCase().includes(q)||String(o.customer_phone||'').includes(q))&&(!pay||o.payment_status===pay)&&(!pr||o.print_status===pr))}
+function renderOrders(){const box=document.getElementById('orders'); const rows=filtered(); if(!rows.length){box.innerHTML='<div class="empty">Nessun ordine trovato.</div>'; return} box.innerHTML=rows.map(o=>`<div class="row ${selected&&selected.id===o.id?'active':''}" onclick="selectOrder('${o.id}')"><div class="row-head"><strong>#${o.order_number||String(o.id).slice(0,8)} - ${o.customer_name||'Cliente'}</strong><strong>${euro(o.total_cents)}</strong></div><div class="muted">${new Date(o.created_at).toLocaleString('it-IT')} · ${o.customer_phone||'-'} · ${o.order_type}</div><div class="badges">${badgeStatus(o.payment_status,'pagamento')}${badgeStatus(o.print_status,'stampa')}${badgeStatus(o.status,'ordine')}</div></div>`).join('')}
+function selectOrder(id){selected=orders.find(o=>o.id===id); renderOrders(); renderDetail();}
+function renderDetail(){const d=document.getElementById('detail'); const o=selected; if(!o){d.innerHTML='<div class="empty">Seleziona un ordine.</div>'; return} const items=o.sales_order_items||[]; d.innerHTML=`<h2>Ordine #${o.order_number||String(o.id).slice(0,8)}</h2><div class="kv"><strong>Cliente</strong><span>${o.customer_name||'-'}</span><strong>Telefono</strong><span>${o.customer_phone||'-'}</span><strong>Tipo</strong><span>${o.order_type}</span><strong>Ritiro/Tavolo</strong><span>${o.pickup_time||o.table_number||'-'}</span><strong>Pagamento</strong><span>${o.payment_status}</span><strong>Stampa</strong><span>${o.print_status}</span></div><div class="items">${items.map(i=>`<div class="item"><strong>${i.quantity}x ${i.product_name}</strong><div class="muted">${euro(i.unit_price_cents)} cad. · riga ${euro(i.line_total_cents)}</div>${(i.notes||'')?`<div class="ingredients">Note: ${i.notes}</div>`:''}<div class="ingredients">${(i.sales_order_item_ingredients||[]).map(x=>`${x.action}: ${x.ingredient_name}${x.total_price_cents?` (${euro(x.total_price_cents)})`:''}`).join('<br>')}</div></div>`).join('')}</div>${o.notes?`<div class="item"><strong>Note ordine</strong><div class="ingredients">${o.notes}</div></div>`:''}<div class="total"><span>Totale</span><span>${euro(o.total_cents)}</span></div><div class="actions"><button onclick="queueReprint()">Ristampa comanda</button><button onclick="loadOrders()">Aggiorna</button></div>`}
+async function queueReprint(){if(!selected)return; const payload={title:'COMANDA PIZZERIA',order:selected}; await sb('print_jobs',{method:'POST',body:JSON.stringify({source_type:'order',source_id:selected.id,printer_name:'EPSON BAR',status:'pending',payload})}); alert('Comanda rimessa in coda stampa.');}
+loadOrders();
+</script>
+</body>
+</html>
