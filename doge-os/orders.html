@@ -30,7 +30,7 @@
   </div>
 <script>
 const SUPABASE_URL = 'https://nrqvembxxdvltfmqsibf.supabase.co';
-const SUPABASE_ANON_KEY = 'INSERIRE_ANON_KEY';
+const SUPABASE_ANON_KEY = 'sb_publishable_kR2wdYDtvu75KXuuQxGXEg_kyflGCcz';
 let orders=[]; let selected=null;
 function euro(c){return new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format((Number(c)||0)/100)}
 function badgeStatus(v,type){let cls='badge'; if(['paid','printed','completed','confirmed'].includes(v)) cls+=' ok'; if(['pending','queued','unpaid','created'].includes(v)) cls+=' warn'; if(['failed','error','cancelled'].includes(v)) cls+=' danger'; return `<span class="${cls}">${type}: ${v||'-'}</span>`}
