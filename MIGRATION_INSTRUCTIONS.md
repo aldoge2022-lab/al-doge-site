@@ -58,3 +58,19 @@ This PR removes files that were mistakenly committed to main in the previous mer
 - Removed standalone `script.js` and `styles.css` files
 
 The repository now exactly matches copilot/create-online-order-system branch.
+
+## Supabase Security Hardening (senza impatti funzionali)
+
+Per l'hardening richiesto su Supabase production usare questi script:
+
+1. Audit pre-deploy:
+   - `supabase/audit/20260307_security_audit.sql`
+   - Verificare stato iniziale di RLS/policy/grants su `menu_items` e permessi EXECUTE su `increment_table_total`
+2. Migrazione hardening:
+   - `supabase/migrations/20260307022000_harden_menu_items_and_increment_table_total.sql`
+   - Verificare che la migrazione completi senza errori
+3. Audit post-deploy:
+   - rieseguire `supabase/audit/20260307_security_audit.sql`
+   - Verificare: `menu_items` con RLS attivo, `anon/authenticated` solo SELECT, `increment_table_total` eseguibile solo da `service_role`
+4. Rollback (solo emergenza):
+   - `supabase/migrations/20260307022000_harden_menu_items_and_increment_table_total.rollback.sql`
