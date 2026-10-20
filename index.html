@@ -14,9 +14,12 @@
 <style>
 :root{
 --gold:#d4af37;
+--gold-soft:#f1d27a;
 --dark:#0b0b0b;
 --soft:#1a1a1a;
 --text:#f5f5f5;
+--muted:rgba(245,245,245,.78);
+--glass:rgba(14,14,14,.6);
 }
 
 body{
@@ -26,25 +29,60 @@ color:var(--text);
 font-family:'Inter',sans-serif;
 }
 
+*{
+box-sizing:border-box;
+}
+
 h1{
 font-family:'Playfair Display',serif;
-color:var(--gold);
-font-size:64px;
+color:#fff4cf;
+font-size:clamp(54px,8vw,96px);
+line-height:.94;
+letter-spacing:.02em;
 margin:0;
+text-wrap:balance;
 }
 
 .hero{
 position:relative;
-height:100vh;
-background:url('hero-image.jpg') center/cover no-repeat;
+min-height:100svh;
+padding:120px 24px 72px;
+overflow:hidden;
+background:
+radial-gradient(circle at top right, rgba(212,175,55,.18), transparent 34%),
+radial-gradient(circle at left center, rgba(111,20,20,.32), transparent 38%),
+linear-gradient(135deg, #050505 0%, #101010 48%, #17120d 100%);
 display:flex;
 align-items:center;
 justify-content:center;
-text-align:center;
+}
+
+.hero::before{
+content:'';
+position:absolute;
+inset:0;
+background:
+linear-gradient(90deg, rgba(5,5,5,.9) 0%, rgba(5,5,5,.76) 42%, rgba(5,5,5,.5) 100%),
+linear-gradient(180deg, rgba(10,10,10,.12) 0%, rgba(10,10,10,.48) 100%),
+url('hero-image.jpg') center center/cover no-repeat;
+opacity:.82;
+transform:scale(1.02);
+}
+
+.hero::after{
+content:'';
+position:absolute;
+inset:auto auto 12% 10%;
+width:320px;
+height:320px;
+border-radius:50%;
+background:radial-gradient(circle, rgba(212,175,55,.18), transparent 68%);
+filter:blur(12px);
+pointer-events:none;
 }
 
 .overlay{
-background:rgba(0,0,0,0.65);
+background:linear-gradient(180deg, rgba(4,4,4,.18), rgba(4,4,4,.56));
 position:absolute;
 inset:0;
 }
@@ -52,46 +90,101 @@ inset:0;
 .hero-content{
 position:relative;
 z-index:2;
+width:min(1160px,100%);
+display:grid;
+grid-template-columns:minmax(0,700px) minmax(280px,360px);
+gap:32px;
+align-items:end;
+}
+
+.hero-copy{
+max-width:680px;
+}
+
+.hero-kicker{
+display:inline-flex;
+align-items:center;
+gap:10px;
+padding:8px 14px;
+border-radius:999px;
+border:1px solid rgba(241,210,122,.32);
+background:var(--glass);
+box-shadow:0 10px 32px rgba(0,0,0,.22);
+backdrop-filter:blur(12px);
+color:var(--gold-soft);
+font-size:12px;
+font-weight:600;
+letter-spacing:.14em;
+text-transform:uppercase;
+margin-bottom:22px;
 }
 
 .subtitle{
-margin-top:15px;
-font-size:18px;
-opacity:0.9;
+margin:18px 0 0;
+font-size:clamp(18px,2.1vw,21px);
+line-height:1.55;
+color:var(--muted);
+max-width:35ch;
+text-wrap:pretty;
+}
+
+.hero-actions{
+display:flex;
+flex-wrap:wrap;
+gap:14px;
+margin-top:30px;
 }
 
 .btn{
-display:inline-block;
-margin:15px 10px 0 10px;
+display:inline-flex;
+align-items:center;
+justify-content:center;
 padding:14px 30px;
-border-radius:30px;
-font-weight:500;
+border-radius:999px;
+font-weight:600;
 text-decoration:none;
+transition:transform .25s ease, box-shadow .25s ease, background-color .25s ease, border-color .25s ease;
+}
+
+.btn:hover{
+transform:translateY(-2px);
 }
 
 .btn-gold{
-background:var(--gold);
-color:black;
+background:linear-gradient(135deg, #f1d27a 0%, var(--gold) 100%);
+color:#111;
+box-shadow:0 14px 34px rgba(212,175,55,.22);
+}
+
+.btn-gold:hover{
+box-shadow:0 18px 42px rgba(212,175,55,.32);
 }
 
 .btn-white{
-background:white;
-color:black;
+background:rgba(255,255,255,.05);
+border:1px solid rgba(255,255,255,.18);
+color:#fff;
+backdrop-filter:blur(10px);
+}
+
+.btn-white:hover{
+background:rgba(255,255,255,.1);
+border-color:rgba(255,255,255,.28);
 }
 
 .panini-spotlight{
-margin:28px auto 0;
+margin:36px 0 0;
 max-width:640px;
-background:linear-gradient(140deg,rgba(10,18,33,.95),rgba(27,27,27,.92));
-border:1px solid rgba(212,175,55,.5);
-border-radius:20px;
-padding:20px 22px;
-box-shadow:0 16px 36px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.06) inset;
+background:linear-gradient(140deg,rgba(10,18,33,.88),rgba(27,27,27,.9));
+border:1px solid rgba(212,175,55,.34);
+border-radius:24px;
+padding:22px 24px;
+box-shadow:0 18px 44px rgba(0,0,0,.34),0 0 0 1px rgba(255,255,255,.05) inset;
 text-align:left;
 display:flex;
 align-items:center;
 justify-content:space-between;
-gap:16px;
+gap:18px;
 transition:transform .3s ease,box-shadow .3s ease;
 }
 
@@ -137,6 +230,77 @@ outline:2px solid #fff;
 outline-offset:4px;
 }
 
+.hero-sidecard{
+position:relative;
+padding:26px;
+border-radius:28px;
+border:1px solid rgba(212,175,55,.2);
+background:linear-gradient(180deg, rgba(20,20,20,.82), rgba(8,8,8,.9));
+box-shadow:0 26px 60px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.05);
+backdrop-filter:blur(14px);
+}
+
+.hero-sidecard::before{
+content:'';
+position:absolute;
+inset:1px;
+border-radius:27px;
+border:1px solid rgba(255,255,255,.04);
+pointer-events:none;
+}
+
+.sidecard-label{
+display:inline-block;
+margin-bottom:16px;
+color:var(--gold-soft);
+font-size:12px;
+font-weight:600;
+letter-spacing:.16em;
+text-transform:uppercase;
+}
+
+.sidecard-title{
+margin:0 0 10px;
+font-family:'Playfair Display',serif;
+font-size:30px;
+color:#fff;
+}
+
+.sidecard-text{
+margin:0;
+color:var(--muted);
+font-size:15px;
+line-height:1.6;
+}
+
+.hero-highlights{
+display:grid;
+grid-template-columns:repeat(3,minmax(0,1fr));
+gap:14px;
+margin-top:22px;
+}
+
+.highlight{
+padding:14px 12px;
+border-radius:18px;
+background:rgba(255,255,255,.03);
+border:1px solid rgba(255,255,255,.06);
+}
+
+.highlight strong{
+display:block;
+font-size:20px;
+color:#fff;
+margin-bottom:4px;
+}
+
+.highlight span{
+display:block;
+font-size:12px;
+line-height:1.4;
+color:var(--muted);
+}
+
 .logo-fixed{
 position:fixed;
 top:20px;
@@ -151,12 +315,13 @@ box-shadow:0 0 20px rgba(0,0,0,0.6);
 position:fixed;
 top:20px;
 right:20px;
-background:var(--gold);
+background:rgba(255,255,255,.92);
 color:black;
-padding:10px 15px;
+padding:10px 16px;
 border-radius:30px;
 font-weight:600;
 text-decoration:none;
+box-shadow:0 12px 30px rgba(0,0,0,.2);
 }
 
 
@@ -199,6 +364,30 @@ padding:22px 0 28px;
 }
 
 @media (max-width:768px){
+.hero{
+padding:104px 18px 56px;
+}
+
+.hero-content{
+grid-template-columns:1fr;
+gap:20px;
+align-items:start;
+}
+
+.hero-kicker{
+font-size:11px;
+letter-spacing:.12em;
+}
+
+.hero-actions{
+flex-direction:column;
+align-items:stretch;
+}
+
+.btn{
+width:100%;
+}
+
 .panini-spotlight{
 flex-direction:column;
 align-items:flex-start;
@@ -208,6 +397,14 @@ padding:18px;
 .panini-cta{
 width:100%;
 text-align:center;
+}
+
+.hero-highlights{
+grid-template-columns:1fr;
+}
+
+.hero-sidecard{
+padding:22px 18px;
 }
 }
 </style>
@@ -227,23 +424,46 @@ Carrello <span id="cart-count">0</span>
 <div class="overlay"></div>
 
 <div class="hero-content">
-<h1>AL DOGE</h1>
+<div class="hero-copy">
+<div class="hero-kicker">Farla di Majano · Ordina online</div>
+<h1>Pizza tradizionale e panini gourmet firmati AL DOGE.</h1>
 <div class="subtitle">
-Ordina online. pizza tradizionale e panini gourmet.
+A Farla di Majano ordini online in pochi passaggi, ritiri con semplicità e porti a casa un gusto curato in ogni dettaglio.
 </div>
 
-<a href="pizze.html" class="btn btn-gold">
-🍕 Ordina Pizze
-</a>
+<div class="hero-actions">
+<a href="pizze.html" class="btn btn-gold">🍕 Ordina Pizze</a>
+<a href="chatbot.html" class="btn btn-white">🥪 Scopri i Panini</a>
+</div>
 
 <section class="panini-spotlight" aria-label="Spotlight panini premium">
 <div class="panini-copy">
 <h2>Panini gourmet firmati AL DOGE</h2>
-<p>Un morso, e capisci la differenza: ingredienti selezionati e gusto che resta in mente.</p>
+<p>Ingredienti scelti, abbinamenti fatti bene e una firma di gusto che resta impressa dal primo morso.</p>
 </div>
 <a href="chatbot.html" class="panini-cta">Scopri i nostri panini</a>
 </section>
+</div>
 
+<aside class="hero-sidecard" aria-label="Valori distintivi AL DOGE">
+<span class="sidecard-label">Esperienza premium</span>
+<h2 class="sidecard-title">Ordina con stile, gusta con carattere.</h2>
+<p class="sidecard-text">Un ingresso più elegante, una gerarchia chiara e dettagli visivi più ricchi per dare al brand una presenza più premium fin dal primo sguardo.</p>
+<div class="hero-highlights">
+<div class="highlight">
+<strong>Tradizione</strong>
+<span>Impasto, ingredienti e gusto pensati per chi cerca qualità vera.</span>
+</div>
+<div class="highlight">
+<strong>Ritiro smart</strong>
+<span>Ordine semplice, percorso chiaro e accesso rapido al menu.</span>
+</div>
+<div class="highlight">
+<strong>Signature</strong>
+<span>Panini gourmet e pizza classica in un’identità più distintiva.</span>
+</div>
+</div>
+</aside>
 </div>
 </div>
 
